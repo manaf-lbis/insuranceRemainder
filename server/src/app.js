@@ -12,7 +12,9 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
-// Routes (Placeholders for now)
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/insurances', require('./routes/insuranceRoutes'));
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
