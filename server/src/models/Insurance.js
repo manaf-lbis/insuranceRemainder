@@ -40,6 +40,11 @@ const insuranceSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Policy expiry date is required'],
     },
+    duration: {
+        type: String,
+        enum: ['1 Year', '2 Years', '3 Years', '4 Years', 'Custom'],
+        default: '1 Year',
+    },
     remarks: {
         type: String,
         trim: true,
@@ -63,6 +68,15 @@ const insuranceSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true,
+});
+
+// Validation: Ensure expiry date is after start date
+insuranceSchema.pre('save', function (next) {
+    if (this.policyExpiryDate <= this.policyStartDate) {
+        next(new Error('Policy expiry date must be after start date'));
+    } else {
+        next();
+    }
 });
 
 module.exports = mongoose.model('Insurance', insuranceSchema);

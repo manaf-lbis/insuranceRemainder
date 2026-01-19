@@ -23,8 +23,15 @@ const createInsurance = async (req, res) => {
 // @access  Private
 const getInsurances = async (req, res) => {
     try {
-        const { status, search, page = 1, limit = 10 } = req.query;
-        const result = await insuranceService.getAllInsurances(status, search, page, limit);
+        const { status, search, from, to, expiryFrom, expiryTo } = req.query; // Support new params
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Normalize date params - check if frontend sent 'from/to' or 'expiryFrom/expiryTo'
+        const fromDate = expiryFrom || from;
+        const toDate = expiryTo || to;
+
+        const result = await insuranceService.getAllInsurances(status, search, page, limit, req.user, fromDate, toDate);
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -49,8 +56,45 @@ const deleteInsurance = async (req, res) => {
     }
 };
 
+// @desc    Update insurance
+// @route   PUT /api/insurances/:id
+// @access  Private (Admin only)
+const updateInsurance = async (req, res) => {
+    try {
+        const insurance = await insuranceService.updateInsurance(req.params.id, req.body, req.user._id, req.user.role);
+        res.status(200).json(insurance);
+    } catch (error) {
+        if (error.message === 'Insurance record not found') {
+            res.status(404).json({ message: error.message });
+        } else if (error.message === 'Only administrators can update insurance records') {
+            res.status(403).json({ message: error.message });
+        } else if (error.message.includes('must be') || error.message.includes('required')) {
+            res.status(400).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: error.message });
+        }
+    }
+};
+
+// @desc    Get insurance by ID
+// @route   GET /api/insurances/:id
+// @access  Private
+const getInsuranceById = async (req, res) => {
+    try {
+        const insurance = await insuranceService.getInsuranceById(req.params.id);
+        if (!insurance) {
+            return res.status(404).json({ message: 'Insurance record not found' });
+        }
+        res.status(200).json(insurance);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createInsurance,
     getInsurances,
     deleteInsurance,
+    updateInsurance,
+    getInsuranceById,
 };

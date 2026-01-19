@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useGetInsurancesQuery, useSendReminderMutation, useDeleteInsuranceMutation } from '../features/insurance/insuranceApiSlice'
-import { ChevronLeft, Plus, Loader, Filter, Send, X, Search, Trash2 } from 'lucide-react'
+import { ChevronLeft, Plus, Loader, Filter, Send, X, Search, Trash2, Edit2, Calendar, CheckCircle } from 'lucide-react'
 import { useToast } from '../components/ToastContext'
 import Pagination from '../components/Pagination'
 import ConfirmModal from '../components/ConfirmModal'
@@ -18,10 +18,18 @@ const InsuranceList = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('')
     const [page, setPage] = useState(1)
 
+    // Date Range State
+    const [expiryFrom, setExpiryFrom] = useState('')
+    const [expiryTo, setExpiryTo] = useState('')
+    // Staged state for manual apply
+    const [stagedFrom, setStagedFrom] = useState('')
+    const [stagedTo, setStagedTo] = useState('')
+    const [dateError, setDateError] = useState('')
+
     // Reset page when filter or search changes
     useEffect(() => {
         setPage(1)
-    }, [statusFilter, debouncedSearch])
+    }, [statusFilter, debouncedSearch, expiryFrom, expiryTo])
 
     const [selectedInsurance, setSelectedInsurance] = useState(null)
     const [insuranceToDelete, setInsuranceToDelete] = useState(null)
@@ -62,7 +70,9 @@ const InsuranceList = () => {
         status: statusFilter,
         search: debouncedSearch,
         page,
-        limit: 10
+        limit: 10,
+        expiryFrom,
+        expiryTo
     })
 
     const insurances = data?.insurances || []
@@ -103,6 +113,31 @@ const InsuranceList = () => {
         }
     }
 
+    // Date Filter Handlers
+    const handleApplyDateFilter = () => {
+        setDateError('')
+
+        if (stagedFrom && stagedTo) {
+            if (new Date(stagedFrom) > new Date(stagedTo)) {
+                setDateError('From Date cannot be after To Date')
+                return
+            }
+        }
+
+        setExpiryFrom(stagedFrom)
+        setExpiryTo(stagedTo)
+    }
+
+    const handleClearDateFilter = () => {
+        setStagedFrom('')
+        setStagedTo('')
+        setExpiryFrom('')
+        setExpiryTo('')
+        setDateError('')
+        // Optionally clear status too?
+        // setStatusFilter('') 
+    }
+
     const isEligibleForReminder = (daysRemaining) => {
         return daysRemaining >= 0 && daysRemaining <= 30
     }
@@ -127,6 +162,13 @@ const InsuranceList = () => {
     const formatStatus = (status) => {
         if (!status) return 'Unknown'
         return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+
+
+    const formatDate = (dateString) => {
+        if (!dateString) return ''
+        return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     }
 
     let content
@@ -161,8 +203,15 @@ const InsuranceList = () => {
     } else {
         content = (
             <>
-                <div className="mb-4 text-sm text-gray-600 font-medium">
-                    Showing {insurances.length} of {total} records
+                <div className="mb-4 flex justify-between items-end">
+                    <div className="text-sm text-gray-600 font-medium">
+                        Showing {insurances.length} of {total} records
+                        {(expiryFrom && expiryTo) && (
+                            <span className="ml-1 text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md text-xs">
+                                in selected range
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile View: Card Layout */}
@@ -201,6 +250,11 @@ const InsuranceList = () => {
                             <div className="text-sm text-gray-600 mb-4 border-l-2 border-blue-100 pl-3 italic">
                                 {insurance.vehicleType} • {insurance.insuranceType}
                                 <div className="text-xs text-gray-400 mt-0.5">Mob: {insurance.mobileNumber}</div>
+                                {user?.role === 'admin' && (
+                                    <div className="text-xs text-blue-600 font-semibold mt-1">
+                                        Entered by: {insurance.createdBy?.username || 'Unknown'}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex gap-2 pt-3 border-t border-gray-50">
@@ -208,8 +262,8 @@ const InsuranceList = () => {
                                     onClick={() => handleSendClick(insurance)}
                                     disabled={!isEligibleForReminder(insurance.daysRemaining)}
                                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all active:scale-95 ${isEligibleForReminder(insurance.daysRemaining)
-                                            ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                                            : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                                        : 'bg-gray-50 text-gray-300 cursor-not-allowed'
                                         }`}
                                 >
                                     <Send size={16} />
@@ -217,12 +271,22 @@ const InsuranceList = () => {
                                 </button>
 
                                 {(user?.role === 'admin' || insurance.createdBy === user?._id || insurance.createdBy?._id === user?._id) && (
-                                    <button
-                                        onClick={() => handleDeleteClick(insurance)}
-                                        className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-95"
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
+                                    <>
+                                        {user?.role === 'admin' && (
+                                            <button
+                                                onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
+                                                className="p-2.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all active:scale-95"
+                                            >
+                                                <Edit2 size={20} />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleDeleteClick(insurance)}
+                                            className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-95"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -290,13 +354,24 @@ const InsuranceList = () => {
                                             </button>
 
                                             {(user?.role === 'admin' || insurance.createdBy === user?._id || insurance.createdBy?._id === user?._id) && (
-                                                <button
-                                                    onClick={() => handleDeleteClick(insurance)}
-                                                    className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all active:scale-95 opacity-0 group-hover:opacity-100"
-                                                    title="Delete Record"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
+                                                <>
+                                                    {user?.role === 'admin' && (
+                                                        <button
+                                                            onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
+                                                            className="p-2 text-blue-600 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-all active:scale-95"
+                                                            title="Edit Record"
+                                                        >
+                                                            <Edit2 size={18} />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteClick(insurance)}
+                                                        className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all active:scale-95 opacity-0 group-hover:opacity-100"
+                                                        title="Delete Record"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                     </td>
@@ -332,8 +407,11 @@ const InsuranceList = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full sm:w-auto">
-                        <div className="relative group">
+                    {/* Compact Professional Filter Toolbar */}
+                    <div className="mb-6 flex flex-col xl:flex-row gap-4 xl:items-center bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+
+                        {/* 1. Search (Expanded on Mobile) */}
+                        <div className="relative group flex-grow md:flex-grow-0 md:w-64">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-600 transition-colors">
                                 <Search size={18} />
                             </div>
@@ -342,36 +420,100 @@ const InsuranceList = () => {
                                 placeholder="Search records..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm w-full md:w-64 transition-all"
+                                className="pl-11 pr-4 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm w-full transition-all font-medium"
                             />
                         </div>
 
-                        <div className="relative">
+                        {/* 2. Status Select */}
+                        <div className="relative min-w-[180px]">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                                 <Filter size={18} />
                             </div>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="pl-11 pr-10 py-3 bg-white border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-sm w-full md:w-48 appearance-none transition-all font-semibold text-gray-700"
+                                className="pl-11 pr-8 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm w-full appearance-none transition-all font-bold text-gray-700 cursor-pointer hover:bg-white border-hover-gray-200"
                             >
                                 <option value="">All Statuses</option>
                                 <option value="EXPIRED">Expired</option>
-                                <option value="EXPIRING_SOON">Expiring Soon (7 Days)</option>
-                                <option value="EXPIRING_WARNING">Warning (8-15 Days)</option>
-                                <option value="EXPIRING_UPCOMING">Upcoming (16-30 Days)</option>
-                                <option value="ACTIVE">Active (>30 Days)</option>
+                                <option value="EXPIRING_SOON">Expiring Soon</option>
+                                <option value="EXPIRING_WARNING">Warning (8-15 days)</option>
+                                <option value="EXPIRING_UPCOMING">Upcoming (16-30 days)</option>
+                                <option value="ACTIVE">Active (>30 days)</option>
                             </select>
                         </div>
 
+                        {/* 3. Date Range (Vertical Separator) */}
+                        <div className="hidden xl:block w-px h-8 bg-gray-200 mx-2"></div>
+
+                        {/* Date Inputs Group */}
+                        <div className="flex flex-col md:flex-row gap-2 items-center flex-grow">
+                            <div className="flex items-center gap-2 w-full md:w-auto bg-gray-50 rounded-xl p-1 border border-gray-100">
+                                <div className="relative flex-1">
+                                    <input
+                                        type="date"
+                                        value={stagedFrom}
+                                        onChange={(e) => setStagedFrom(e.target.value)}
+                                        className="py-1.5 pl-2 pr-1 bg-transparent border-none text-xs font-semibold text-gray-700 focus:ring-0 w-32 cursor-pointer"
+                                    />
+                                </div>
+                                <span className="text-gray-400 text-xs font-bold">TO</span>
+                                <div className="relative flex-1">
+                                    <input
+                                        type="date"
+                                        value={stagedTo}
+                                        onChange={(e) => setStagedTo(e.target.value)}
+                                        className="py-1.5 pl-2 pr-1 bg-transparent border-none text-xs font-semibold text-gray-700 focus:ring-0 w-32 cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleApplyDateFilter}
+                                className="w-full md:w-auto px-4 py-2 bg-gray-900 text-white hover:bg-black rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 whitespace-nowrap"
+                            >
+                                Apply
+                            </button>
+
+                            {(expiryFrom || expiryTo || stagedFrom || stagedTo) && (
+                                <button
+                                    onClick={handleClearDateFilter}
+                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                    title="Reset"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* 4. Add New Button (Pushed to end) */}
                         <button
                             onClick={() => navigate('/add-insurance')}
-                            className="flex items-center justify-center px-6 py-3 bg-blue-900 text-white rounded-2xl hover:bg-black transition-all shadow-lg shadow-blue-900/10 active:scale-95 whitespace-nowrap font-bold"
+                            className="ml-auto flex items-center justify-center px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 active:scale-95 whitespace-nowrap font-bold text-sm"
                         >
-                            <Plus size={20} className="mr-2" />
-                            Add New
+                            <Plus size={18} className="mr-2" />
+                            New Record
                         </button>
                     </div>
+
+                    {/* Active Filter Summary (Minimal) */}
+                    {(expiryFrom && expiryTo && !dateError) && (
+                        <div className="mb-6 flex items-center gap-3 bg-blue-50/50 px-4 py-2 rounded-lg border border-blue-100 inline-flex">
+                            <span className="flex w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                            <span className="text-xs font-bold text-blue-800">
+                                <span className="text-blue-500">Filtered:</span> {formatDate(expiryFrom)} - {formatDate(expiryTo)}
+                            </span>
+                            <span className="px-2 py-0.5 bg-white rounded text-[10px] font-black text-blue-900 border border-blue-100 shadow-sm">
+                                {total} Found
+                            </span>
+                        </div>
+                    )}
+
+                    {dateError && (
+                        <div className="mb-4 text-xs text-red-600 font-bold bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-fit">
+                            {dateError}
+                        </div>
+                    )}
                 </div>
 
                 {content}

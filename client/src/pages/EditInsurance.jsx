@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAddInsuranceMutation } from '../features/insurance/insuranceApiSlice'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useGetInsuranceByIdQuery, useUpdateInsuranceMutation } from '../features/insurance/insuranceApiSlice'
 import { useToast } from '../components/ToastContext'
 import Input from '../components/Input'
 import Select from '../components/Select'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Loader } from 'lucide-react'
 
 const initialFormState = {
     registrationNumber: '',
@@ -19,9 +19,13 @@ const initialFormState = {
     remarks: '',
 }
 
-const AddInsurance = () => {
+const EditInsurance = () => {
     const navigate = useNavigate()
-    const getTodayStr = () => new Date().toISOString().split('T')[0]
+    const { id } = useParams()
+    const { showToast } = useToast()
+
+    const { data: insurance, isLoading: isFetching, isError } = useGetInsuranceByIdQuery(id)
+    const [updateInsurance, { isLoading }] = useUpdateInsuranceMutation()
 
     const calculateExpiryDate = (startDate, duration) => {
         if (!startDate || !duration || duration === 'Custom') return ''
@@ -33,30 +37,27 @@ const AddInsurance = () => {
         return d.toISOString().split('T')[0]
     }
 
-    const [formData, setFormData] = useState({
-        ...initialFormState,
-        policyStartDate: getTodayStr(),
-        duration: '1 Year',
-        insuranceType: 'Third Party',
-        policyExpiryDate: calculateExpiryDate(getTodayStr(), '1 Year')
-    })
+    const [formData, setFormData] = useState(initialFormState)
     const [errors, setErrors] = useState({})
     const [serverError, setServerError] = useState('')
-    const { showToast } = useToast()
 
-    const [addInsurance, { isLoading, isSuccess }] = useAddInsuranceMutation()
-
+    // Load existing data when insurance is fetched
     useEffect(() => {
-        if (isSuccess) {
+        if (insurance) {
             setFormData({
-                ...initialFormState,
-                policyStartDate: getTodayStr(),
-                duration: '1 Year',
-                insuranceType: 'Third Party',
-                policyExpiryDate: calculateExpiryDate(getTodayStr(), '1 Year')
+                registrationNumber: insurance.registrationNumber || '',
+                customerName: insurance.customerName || '',
+                mobileNumber: insurance.mobileNumber || '',
+                alternateMobileNumber: insurance.alternateMobileNumber || '',
+                vehicleType: insurance.vehicleType || '',
+                insuranceType: insurance.insuranceType || '',
+                policyStartDate: insurance.policyStartDate ? new Date(insurance.policyStartDate).toISOString().split('T')[0] : '',
+                policyExpiryDate: insurance.policyExpiryDate ? new Date(insurance.policyExpiryDate).toISOString().split('T')[0] : '',
+                duration: insurance.duration || '1 Year',
+                remarks: insurance.remarks || '',
             })
         }
-    }, [isSuccess])
+    }, [insurance])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -115,15 +116,31 @@ const AddInsurance = () => {
         if (!validate()) return
 
         try {
-            await addInsurance(formData).unwrap()
-            showToast({ message: 'Insurance Added Successfully!', type: 'success' })
+            await updateInsurance({ id, ...formData }).unwrap()
+            showToast({ message: 'Insurance Updated Successfully!', type: 'success' })
             navigate('/insurances')
         } catch (err) {
-            console.error('Failed to save insurance:', err)
-            const errorMessage = err.data?.message || err.message || 'Failed to save insurance'
+            console.error('Failed to update insurance:', err)
+            const errorMessage = err.data?.message || err.message || 'Failed to update insurance'
             setServerError(errorMessage)
             showToast({ message: errorMessage, type: 'error' })
         }
+    }
+
+    if (isFetching) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader className="animate-spin h-8 w-8 text-blue-900" />
+            </div>
+        )
+    }
+
+    if (isError || !insurance) {
+        return (
+            <div className="text-center text-red-500 py-8">
+                Error loading insurance record
+            </div>
+        )
     }
 
     return (
@@ -133,7 +150,7 @@ const AddInsurance = () => {
                     <button onClick={() => navigate('/dashboard')} className="mr-4 text-gray-600 hover:text-gray-900">
                         <ChevronLeft size={24} />
                     </button>
-                    <h1 className="text-2xl font-bold text-gray-800">Add New Insurance</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">Edit Insurance</h1>
                 </div>
 
                 {serverError && (
@@ -267,7 +284,7 @@ const AddInsurance = () => {
                             disabled={isLoading}
                             className="px-6 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 disabled:bg-gray-400 font-medium transition-colors"
                         >
-                            {isLoading ? 'Saving...' : 'Save Insurance'}
+                            {isLoading ? 'Updating...' : 'Update Insurance'}
                         </button>
                     </div>
                 </form>
@@ -276,4 +293,4 @@ const AddInsurance = () => {
     )
 }
 
-export default AddInsurance
+export default EditInsurance

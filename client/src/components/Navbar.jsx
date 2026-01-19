@@ -49,9 +49,11 @@ const Navbar = () => {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo & Brand */}
                     <Link to="/dashboard" className="flex items-center space-x-2 group">
-                        <div className="bg-white p-1.5 rounded-full group-hover:bg-blue-100 transition-colors">
-                            <Shield className="h-6 w-6 text-blue-900" />
-                        </div>
+                        <img
+                            src="/appIcon.png"
+                            alt="CSC Logo"
+                            className="h-10 w-10 rounded-lg group-hover:scale-105 transition-transform"
+                        />
                         <span className="text-white font-bold text-lg tracking-wide">CSC Tracker</span>
                     </Link>
 

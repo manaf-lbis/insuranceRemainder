@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createInsurance, getInsurances, deleteInsurance } = require('../controllers/insuranceController');
+const { createInsurance, getInsurances, deleteInsurance, updateInsurance, getInsuranceById } = require('../controllers/insuranceController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.route('/')
@@ -8,6 +8,8 @@ router.route('/')
     .get(protect, getInsurances);
 
 router.route('/:id')
+    .get(protect, getInsuranceById)
+    .put(protect, updateInsurance)
     .delete(protect, deleteInsurance);
 
 module.exports = router;

@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import AddInsurance from './pages/AddInsurance'
+import EditInsurance from './pages/EditInsurance'
 import InsuranceList from './pages/InsuranceList'
 import StaffList from './pages/StaffList'
 import AddStaff from './pages/AddStaff'
@@ -11,10 +12,12 @@ import Layout from './components/Layout'
 import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
 import { ToastProvider } from './components/ToastContext'
+import InstallPrompt from './components/InstallPrompt'
 
 function App() {
     return (
         <ToastProvider>
+            <InstallPrompt />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<PublicInsuranceCheck />} />
@@ -25,6 +28,7 @@ function App() {
                     <Route element={<Layout />}>
                         <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/add-insurance" element={<AddInsurance />} />
+                        <Route path="/edit-insurance/:id" element={<EditInsurance />} />
                         <Route path="/insurances" element={<InsuranceList />} />
                     </Route>
 
