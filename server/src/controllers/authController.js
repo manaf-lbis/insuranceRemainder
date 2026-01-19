@@ -14,9 +14,17 @@ const loginUser = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username });
+        // Allow login with either username or mobile number
+        const user = await User.findOne({
+            $or: [{ username: username }, { mobileNumber: username }]
+        });
 
         if (user && (await user.matchPassword(password))) {
+            if (!user.isActive) {
+                res.status(401);
+                throw new Error('Account is blocked. Contact Admin.');
+            }
+
             res.json({
                 _id: user._id,
                 username: user.username,

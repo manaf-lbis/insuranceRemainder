@@ -23,14 +23,34 @@ const createInsurance = async (req, res) => {
 // @access  Private
 const getInsurances = async (req, res) => {
     try {
-        const insurances = await insuranceService.getAllInsurances();
-        res.status(200).json(insurances);
+        const { status, search, page = 1, limit = 10 } = req.query;
+        const result = await insuranceService.getAllInsurances(status, search, page, limit);
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Soft delete insurance
+// @route   DELETE /api/insurances/:id
+// @access  Private (Owner or Admin)
+const deleteInsurance = async (req, res) => {
+    try {
+        await insuranceService.softDeleteInsurance(req.params.id, req.user._id, req.user.role);
+        res.status(200).json({ message: 'Insurance record removed' });
+    } catch (error) {
+        if (error.message === 'Insurance record not found') {
+            res.status(404).json({ message: error.message });
+        } else if (error.message === 'Not authorized to delete this record') {
+            res.status(403).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: error.message });
+        }
     }
 };
 
 module.exports = {
     createInsurance,
     getInsurances,
+    deleteInsurance,
 };

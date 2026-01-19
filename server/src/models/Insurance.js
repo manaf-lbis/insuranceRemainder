@@ -6,6 +6,7 @@ const insuranceSchema = new mongoose.Schema({
         required: [true, 'Registration number is required'],
         uppercase: true,
         trim: true,
+        set: v => v.replace(/[\s-]/g, '').toUpperCase()
     },
     customerName: {
         type: String,
@@ -29,7 +30,7 @@ const insuranceSchema = new mongoose.Schema({
     insuranceType: {
         type: String,
         required: [true, 'Insurance type is required'],
-        enum: ['Third Party', 'Package', 'Standalone OD'],
+        enum: ['Third Party', 'Package (Full Cover)', 'Standalone OD'],
     },
     policyStartDate: {
         type: Date,
@@ -48,6 +49,18 @@ const insuranceSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+    deletedAt: {
+        type: Date
+    },
+    deletedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
 }, {
     timestamps: true,
 });

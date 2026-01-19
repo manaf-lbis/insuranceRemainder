@@ -18,9 +18,9 @@ const protect = async (req, res, next) => {
             // Get user from the token
             req.user = await User.findById(decoded.id).select('-password');
 
-            if (!req.user) {
+            if (!req.user || !req.user.isActive) {
                 res.status(401);
-                throw new Error('Not authorized, user not found');
+                throw new Error('Not authorized, account is blocked or not found');
             }
 
             next();
