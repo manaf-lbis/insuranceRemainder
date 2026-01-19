@@ -16,6 +16,24 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'staff'],
         default: 'staff',
     },
+    mobileNumber: {
+        type: String,
+        validate: {
+            validator: function (v) {
+                // Allow empty/null, otherwise must be 10 digits
+                return v == null || v === '' || /^[0-9]{10}$/.test(v);
+            },
+            message: 'Please add a valid 10-digit mobile number'
+        }
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 }, {
     timestamps: true,
 });
@@ -26,9 +44,9 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 // Encrypt password using bcrypt
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
     if (!this.isModified('password')) {
-        next();
+        return;
     }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
