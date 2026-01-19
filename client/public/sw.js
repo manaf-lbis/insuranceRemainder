@@ -1,9 +1,9 @@
-const CACHE_NAME = 'insurance-app-v1';
+const CACHE_NAME = 'insurance-app-v2';
 const urlsToCache = [
     '/',
     '/index.html',
-    '/src/main.jsx',
-    '/src/index.css'
+    '/manifest.json',
+    '/appIcon.png'
 ];
 
 // Install event - cache static assets
