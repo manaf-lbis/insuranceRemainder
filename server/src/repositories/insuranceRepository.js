@@ -53,11 +53,16 @@ const softDelete = async (id, userId) => {
     }, { new: true });
 };
 
+const update = async (id, data) => {
+    return await Insurance.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+};
+
 module.exports = {
     create,
     findAll,
     count,
     findOne,
     findById,
-    softDelete
+    softDelete,
+    update
 };

@@ -3,9 +3,9 @@ import { apiSlice } from '../../features/api/apiSlice';
 export const insuranceApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getInsurances: builder.query({
-            query: (params) => ({
+            query: ({ status, search, page, limit, expiryFrom, expiryTo }) => ({
                 url: '/insurances',
-                params: params,
+                params: { status, search, page, limit, expiryFrom, expiryTo },
             }),
             providesTags: ['Insurance'],
             keepUnusedDataFor: 5,
@@ -37,6 +37,18 @@ export const insuranceApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Insurance'],
         }),
+        getInsuranceById: builder.query({
+            query: (id) => `/insurances/${id}`,
+            providesTags: (result, error, id) => [{ type: 'Insurance', id }],
+        }),
+        updateInsurance: builder.mutation({
+            query: ({ id, ...data }) => ({
+                url: `/insurances/${id}`,
+                method: 'PUT',
+                body: data,
+            }),
+            invalidatesTags: ['Insurance'],
+        }),
     }),
 });
 
@@ -46,4 +58,6 @@ export const {
     useGetDashboardStatsQuery,
     useSendReminderMutation,
     useDeleteInsuranceMutation,
+    useGetInsuranceByIdQuery,
+    useUpdateInsuranceMutation,
 } = insuranceApiSlice;

@@ -39,7 +39,7 @@ const addInsurance = async (data, userId) => {
     return await insuranceRepository.create(insuranceData);
 };
 
-const getAllInsurances = async (statusFilter, searchQuery, page = 1, limit = 10) => {
+const getAllInsurances = async (statusFilter, searchQuery, page = 1, limit = 10, user, expiryFrom, expiryTo) => {
     let filter = {};
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -55,7 +55,36 @@ const getAllInsurances = async (statusFilter, searchQuery, page = 1, limit = 10)
         ];
     }
 
-    // Filter Logic based on status
+    // Date Range Filter
+    if (expiryFrom && expiryTo) {
+        const fromDate = new Date(expiryFrom);
+        fromDate.setHours(0, 0, 0, 0); // Start of day
+
+        const toDate = new Date(expiryTo);
+        toDate.setHours(23, 59, 59, 999); // End of day
+
+        // If status filter also exists, we need to be careful not to overwrite policyExpiryDate criteria
+        // Status filters (ACTIVE, EXPIRED etc) also use policyExpiryDate
+        // So we combine them using $and if needed
+
+        const dateRangeQuery = { $gte: fromDate, $lte: toDate };
+
+        if (filter.policyExpiryDate) {
+            // Combine existing status status date query with new range query
+            // e.g. status=EXPIRED (< today) AND range=Jan 1 to Jan 31
+            // MongoDB works better with explicit $and for same field collisions usually, 
+            // but for simple ranges we can try to merge or use $and.
+            // Using $and is safer to avoid overwriting keys.
+            if (!filter.$and) filter.$and = [];
+            filter.$and.push({ policyExpiryDate: dateRangeQuery });
+            filter.$and.push({ policyExpiryDate: filter.policyExpiryDate });
+            delete filter.policyExpiryDate; // Move original to $and
+        } else {
+            filter.policyExpiryDate = dateRangeQuery;
+        }
+    }
+
+    // Status Logic (Existing)
     if (statusFilter) {
         // Helper to add days to today
         const addDays = (days) => {
@@ -64,16 +93,36 @@ const getAllInsurances = async (statusFilter, searchQuery, page = 1, limit = 10)
             return date;
         };
 
+        let statusQuery = {};
         if (statusFilter === 'EXPIRED') {
-            filter.policyExpiryDate = { $lt: today };
+            statusQuery = { $lt: today };
         } else if (statusFilter === 'EXPIRING_SOON') {
-            filter.policyExpiryDate = { $gte: today, $lte: addDays(7) };
+            statusQuery = { $gte: today, $lte: addDays(7) };
         } else if (statusFilter === 'EXPIRING_WARNING') {
-            filter.policyExpiryDate = { $gt: addDays(7), $lte: addDays(15) };
+            statusQuery = { $gt: addDays(7), $lte: addDays(15) };
         } else if (statusFilter === 'EXPIRING_UPCOMING') {
-            filter.policyExpiryDate = { $gt: addDays(15), $lte: addDays(30) };
+            statusQuery = { $gt: addDays(15), $lte: addDays(30) };
         } else if (statusFilter === 'ACTIVE') {
-            filter.policyExpiryDate = { $gt: addDays(30) };
+            statusQuery = { $gt: addDays(30) };
+        }
+
+        // Apply status query
+        if (filter.policyExpiryDate) {
+            // If we already have a date range query (from above block), combine them
+            if (!filter.$and) {
+                filter.$and = [];
+                filter.$and.push({ policyExpiryDate: filter.policyExpiryDate });
+                delete filter.policyExpiryDate;
+            }
+            filter.$and.push({ policyExpiryDate: statusQuery });
+        } else {
+            // No existing date query in root
+            if (filter.$and) {
+                // $and exists (maybe from search?), just push
+                filter.$and.push({ policyExpiryDate: statusQuery });
+            } else {
+                filter.policyExpiryDate = statusQuery;
+            }
         }
     }
 
@@ -148,9 +197,36 @@ const softDeleteInsurance = async (id, userId, userRole) => {
     return await insuranceRepository.softDelete(id, userId);
 };
 
+const updateInsurance = async (id, data, userId, userRole) => {
+    // Only admin can update insurance records
+    if (userRole !== 'admin') {
+        throw new Error('Only administrators can update insurance records');
+    }
+
+    const insurance = await insuranceRepository.findById(id);
+    if (!insurance) {
+        throw new Error('Insurance record not found');
+    }
+
+    // Validate dates if they are being updated
+    if (data.policyStartDate && data.policyExpiryDate) {
+        if (new Date(data.policyStartDate) >= new Date(data.policyExpiryDate)) {
+            throw new Error('Policy start date must be before expiry date');
+        }
+    }
+
+    return await insuranceRepository.update(id, data);
+};
+
+const getInsuranceById = async (id) => {
+    return await insuranceRepository.findById(id);
+};
+
 module.exports = {
     addInsurance,
     getAllInsurances,
     getDashboardStatistics,
     softDeleteInsurance,
+    updateInsurance,
+    getInsuranceById,
 };

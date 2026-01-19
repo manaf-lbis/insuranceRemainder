@@ -49,6 +49,13 @@ const LoginPage = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border-t-4 border-primary">
                 <div className="text-center mb-8">
+                    <div className="flex justify-center mb-4">
+                        <img
+                            src="/appIcon.png"
+                            alt="CSC Logo"
+                            className="h-20 w-20 rounded-xl"
+                        />
+                    </div>
                     <h1 className="text-2xl font-bold text-gray-800">CSC Insurance Tracker</h1>
                     <p className="text-gray-500 text-sm mt-1">Staff Access Only</p>
                 </div>
