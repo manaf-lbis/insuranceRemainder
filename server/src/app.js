@@ -21,9 +21,21 @@ app.use('/api/reminders', require('./routes/reminderRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
 
-app.get('/', (req, res) => {
-    res.send('API is running...');
-});
+const path = require('path');
+
+// Serve static assets in production
+// Since this file is in server/src, we need to go up two levels to reach root, then into client/dist
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../../client/dist')));
+
+    app.get('*', (req, res) =>
+        res.sendFile(path.resolve(__dirname, '../../client', 'dist', 'index.html'))
+    );
+} else {
+    app.get('/', (req, res) => {
+        res.send('API is running...');
+    });
+}
 
 // Error Middleware
 app.use(errorHandler);
