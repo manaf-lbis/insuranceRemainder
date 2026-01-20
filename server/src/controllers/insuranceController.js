@@ -13,6 +13,7 @@ const createInsurance = async (req, res) => {
         if (error.message.includes('required') || error.message.includes('valid') || error.message.includes('must be')) {
             res.status(400).json({ message: error.message });
         } else {
+            console.error('Create Insurance Error:', error); // DEBUG LOG
             res.status(500).json({ message: error.message });
         }
     }

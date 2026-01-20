@@ -1,10 +1,9 @@
+// Load env vars FIRST before any other imports
+require('dotenv').config();
+
 const path = require('path');
-const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
 const app = require('./src/app');
-
-// Load env vars
-dotenv.config();
 
 // Connect to database
 connectDB();

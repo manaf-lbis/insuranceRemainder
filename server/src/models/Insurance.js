@@ -72,6 +72,12 @@ const insuranceSchema = new mongoose.Schema({
 
 // Validation: Ensure expiry date is after start date
 insuranceSchema.pre('save', function (next) {
+    console.log('Pre-save hook triggered. next type:', typeof next); // DEBUG LOG
+    if (typeof next !== 'function') {
+        console.error('CRITICAL: next is NOT a function in pre-save hook!');
+        return; // Avoid crashing
+    }
+
     if (this.policyExpiryDate <= this.policyStartDate) {
         next(new Error('Policy expiry date must be after start date'));
     } else {
