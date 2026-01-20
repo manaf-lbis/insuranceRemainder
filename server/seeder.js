@@ -12,8 +12,8 @@ const importData = async () => {
         await User.deleteMany();
 
         const createdUser = await User.create({
-            username: 'admin',
-            password: 'password123',
+            username: process.env.ADMIN_USERNAME,
+            password: process.env.ADMIN_PASSWORD,
             role: 'admin',
         });
 
