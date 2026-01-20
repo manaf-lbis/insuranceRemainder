@@ -25,7 +25,7 @@ export const checkInsuranceStatus = async (searchType, searchValue) => {
             requestBody.mobileNumber = searchValue;
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/public/check-insurance`, {
+        const response = await fetch(`${API_BASE_URL}/public/check-insurance`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

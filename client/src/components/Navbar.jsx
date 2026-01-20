@@ -44,49 +44,54 @@ const Navbar = () => {
     ]
 
     return (
-        <nav className="bg-blue-900 border-b border-blue-800 shadow-lg sticky top-0 z-50">
+        <nav className="bg-blue-900/95 backdrop-blur-md border-b border-blue-800 shadow-xl shadow-blue-900/10 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+                <div className="flex items-center justify-between h-14 md:h-16">
                     {/* Logo & Brand */}
-                    <Link to="/dashboard" className="flex items-center space-x-2 group">
-                        <img
-                            src="/appIcon.png"
-                            alt="CSC Logo"
-                            className="h-10 w-10 rounded-lg group-hover:scale-105 transition-transform"
-                        />
-                        <span className="text-white font-bold text-lg tracking-wide">CSC Tracker</span>
-                    </Link>
+                    <div className="flex items-center">
+                        <Link to="/dashboard" className="flex items-center space-x-3 group">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-blue-400 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                                <img
+                                    src="/appIcon.png"
+                                    alt="CSC Logo"
+                                    className="relative h-9 w-9 md:h-10 md:w-10 rounded-lg shadow-sm group-hover:scale-105 transition-transform duration-300"
+                                />
+                            </div>
+                            <span className="text-white font-bold text-lg tracking-wide font-poppins text-shadow-sm">CSC Tracker</span>
+                        </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive(link.path)
-                                        ? 'bg-blue-800 text-white shadow-md'
-                                        : 'text-blue-100 hover:bg-blue-700 hover:text-white'
-                                        }`}
-                                >
-                                    <link.icon className="w-4 h-4 mr-2" />
-                                    {link.label}
-                                </Link>
-                            ))}
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:block ml-10">
+                            <div className="flex items-baseline space-x-2">
+                                {navLinks.map((link) => (
+                                    <Link
+                                        key={link.path}
+                                        to={link.path}
+                                        className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive(link.path)
+                                            ? 'bg-blue-700/80 text-white shadow-inner shadow-blue-900/50 border border-blue-600/50'
+                                            : 'text-blue-100 hover:bg-blue-800/50 hover:text-white hover:shadow-sm'
+                                            }`}
+                                    >
+                                        <link.icon className={`w-4 h-4 mr-2 ${isActive(link.path) ? 'text-blue-200' : 'text-blue-300'}`} />
+                                        {link.label}
+                                    </Link>
+                                ))}
 
-                            {/* Admin Only Link */}
-                            {user?.role === 'admin' && (
-                                <Link
-                                    to="/admin/staff"
-                                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive('/admin/staff')
-                                        ? 'bg-purple-800 text-white shadow-md'
-                                        : 'text-blue-100 hover:bg-purple-700 hover:text-white'
-                                        }`}
-                                >
-                                    <Users className="w-4 h-4 mr-2" />
-                                    Users
-                                </Link>
-                            )}
+                                {/* Admin Only Link */}
+                                {user?.role === 'admin' && (
+                                    <Link
+                                        to="/admin/staff"
+                                        className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive('/admin/staff')
+                                            ? 'bg-purple-800/80 text-white shadow-inner shadow-purple-900/50 border border-purple-600/50'
+                                            : 'text-blue-100 hover:bg-purple-800/50 hover:text-white hover:shadow-sm'
+                                            }`}
+                                    >
+                                        <Users className="w-4 h-4 mr-2" />
+                                        Users
+                                    </Link>
+                                )}
+                            </div>
                         </div>
                     </div>
 

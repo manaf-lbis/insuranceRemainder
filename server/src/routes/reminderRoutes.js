@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { sendManualReminder } = require('../controllers/reminderController');
+const { sendReminder, getReminderLogs } = require('../controllers/reminderController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.post('/:id/send', protect, sendManualReminder);
+// Note: These routes are deprecated. Use /api/insurances/:id/remind instead
+router.post('/:id/send', protect, sendReminder);
+router.get('/:id/logs', protect, getReminderLogs);
 
 module.exports = router;

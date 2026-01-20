@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useGetInsurancesQuery, useSendReminderMutation, useDeleteInsuranceMutation } from '../features/insurance/insuranceApiSlice'
-import { ChevronLeft, Plus, Loader, Filter, Send, X, Search, Trash2, Edit2, Calendar, CheckCircle } from 'lucide-react'
+import { ChevronLeft, Plus, Loader, Filter, Send, X, Search, Trash2, Edit2, Calendar, CheckCircle, SlidersHorizontal, ArrowUp } from 'lucide-react'
 import { useToast } from '../components/ToastContext'
 import Pagination from '../components/Pagination'
 import ConfirmModal from '../components/ConfirmModal'
+import BottomSheet from '../components/BottomSheet'
 
 const InsuranceList = () => {
     const navigate = useNavigate()
@@ -17,6 +18,10 @@ const InsuranceList = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [debouncedSearch, setDebouncedSearch] = useState('')
     const [page, setPage] = useState(1)
+
+    // Mobile specific state
+    const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+    const [showSearchInput, setShowSearchInput] = useState(false)
 
     // Date Range State
     const [expiryFrom, setExpiryFrom] = useState('')
@@ -57,14 +62,6 @@ const InsuranceList = () => {
         }
         setSearchParams(params, { replace: true });
     }, [statusFilter])
-
-    // Sync URL param if it changes (e.g. browser back button)
-    useEffect(() => {
-        const currentStatus = searchParams.get('status') || ''
-        if (currentStatus !== statusFilter) {
-            setStatusFilter(currentStatus)
-        }
-    }, [searchParams])
 
     const { data, isLoading, isError, error } = useGetInsurancesQuery({
         status: statusFilter,
@@ -126,6 +123,7 @@ const InsuranceList = () => {
 
         setExpiryFrom(stagedFrom)
         setExpiryTo(stagedTo)
+        setIsFilterSheetOpen(false) // Close sheet on mobile apply
     }
 
     const handleClearDateFilter = () => {
@@ -134,8 +132,6 @@ const InsuranceList = () => {
         setExpiryFrom('')
         setExpiryTo('')
         setDateError('')
-        // Optionally clear status too?
-        // setStatusFilter('') 
     }
 
     const isEligibleForReminder = (daysRemaining) => {
@@ -145,17 +141,17 @@ const InsuranceList = () => {
     const getStatusStyle = (status) => {
         switch (status) {
             case 'EXPIRED':
-                return 'bg-red-100 text-red-800 border-red-200'
+                return 'bg-red-50 text-red-700 border border-red-200'
             case 'EXPIRING_SOON':
-                return 'bg-orange-100 text-orange-800 border-orange-200'
+                return 'bg-order-orange-50 text-orange-700 border border-orange-200'
             case 'EXPIRING_WARNING':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                return 'bg-amber-50 text-amber-700 border border-amber-200'
             case 'EXPIRING_UPCOMING':
-                return 'bg-blue-100 text-blue-800 border-blue-200'
+                return 'bg-blue-50 text-blue-700 border border-blue-200'
             case 'ACTIVE':
-                return 'bg-green-100 text-green-800 border-green-200'
+                return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
             default:
-                return 'bg-gray-100 text-gray-800 border-gray-200'
+                return 'bg-gray-100 text-gray-700 border border-gray-200'
         }
     }
 
@@ -164,12 +160,12 @@ const InsuranceList = () => {
         return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
     }
 
-
-
-    const formatDate = (dateString) => {
-        if (!dateString) return ''
-        return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    }
+    const chipFilters = [
+        { label: 'All', value: '' },
+        { label: 'Active', value: 'ACTIVE' },
+        { label: 'Expiring', value: 'EXPIRING_SOON' },
+        { label: 'Expired', value: 'EXPIRED' },
+    ]
 
     let content
 
@@ -181,193 +177,189 @@ const InsuranceList = () => {
         )
     } else if (isError) {
         content = (
-            <div className="text-center text-red-500 py-8">
-                Error loading data: {error?.data?.message || error.message}
+            <div className="text-center text-red-500 py-8 bg-white rounded-2xl shadow-sm border border-red-100 p-8 mx-4 md:mx-0">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Failed to load data</h3>
+                <p className="text-gray-500">{error?.data?.message || error.message}</p>
             </div>
         )
     } else if (insurances?.length === 0) {
         content = (
-            <div className="text-center text-gray-500 py-12 bg-white rounded-lg shadow">
-                <p className="text-lg">No insurance records found for this filter.</p>
+            <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center mx-4 md:mx-0">
+                <div className="bg-blue-50 p-6 rounded-full mb-6">
+                    <Search className="w-12 h-12 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2 font-poppins">No records found</h3>
+                <p className="text-gray-500 max-w-sm mx-auto mb-8 px-4">
+                    Try adjusting your filters or add a new record to get started.
+                </p>
                 <button
-                    onClick={() => {
-                        setStatusFilter('')
-                        navigate('/add-insurance')
-                    }}
-                    className="mt-4 px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+                    onClick={() => navigate('/add-insurance')}
+                    className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-95 flex items-center"
                 >
-                    {statusFilter ? 'Clear Filter' : 'Add First Record'}
+                    <Plus size={18} className="mr-2" />
+                    Add First Insurance
                 </button>
             </div>
         )
     } else {
         content = (
             <>
-                <div className="mb-4 flex justify-between items-end">
-                    <div className="text-sm text-gray-600 font-medium">
-                        Showing {insurances.length} of {total} records
-                        {(expiryFrom && expiryTo) && (
-                            <span className="ml-1 text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md text-xs">
-                                in selected range
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Mobile View: Card Layout */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
+                {/* Mobile View: Modern Card Layout */}
+                <div className="grid grid-cols-1 gap-4 md:hidden pb-20 px-4">
                     {insurances.map((insurance) => (
-                        <div key={insurance._id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div className="flex justify-between items-start mb-3">
+                        <div
+                            key={insurance._id}
+                            onClick={(e) => {
+                                // Prevent navigation if clicking buttons
+                                if (e.target.closest('button')) return;
+                                // Optional: Navigate to detail view if exists, for now just no-op or maybe expand
+                            }}
+                            className="bg-white p-5 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] border border-gray-50 active:scale-[0.99] transition-transform duration-200"
+                        >
+                            <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                                        {insurance.registrationNumber}
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded uppercase tracking-wider">
+                                            {insurance.registrationNumber}
+                                        </div>
                                     </div>
-                                    <div className="text-lg font-bold text-gray-900 leading-tight">
+                                    <div className="text-lg font-bold text-gray-900 leading-tight font-poppins">
                                         {insurance.customerName}
                                     </div>
                                 </div>
-                                <span className={`px-2.5 py-1 text-xs font-bold rounded-full border shadow-sm ${getStatusStyle(insurance.expiryStatus)}`}>
+                                <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide ${getStatusStyle(insurance.expiryStatus)}`}>
                                     {formatStatus(insurance.expiryStatus)}
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                                    <div className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Expires On</div>
-                                    <div className="text-sm font-semibold text-gray-700">
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+                                    <div className="text-[10px] text-gray-400 uppercase font-bold mb-1">Expires On</div>
+                                    <div className="text-sm font-bold text-gray-800 flex items-center gap-1">
+                                        <Calendar size={14} className="text-gray-400" />
                                         {new Date(insurance.policyExpiryDate).toLocaleDateString()}
                                     </div>
                                 </div>
-                                <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                                    <div className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Remaining</div>
-                                    <div className="text-sm font-semibold text-gray-700">
+                                <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+                                    <div className="text-[10px] text-gray-400 uppercase font-bold mb-1">Time Left</div>
+                                    <div className={`text-sm font-black ${insurance.daysRemaining <= 30 ? 'text-red-600' : 'text-emerald-600'}`}>
                                         {insurance.daysRemaining} Days
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="text-sm text-gray-600 mb-4 border-l-2 border-blue-100 pl-3 italic">
-                                {insurance.vehicleType} • {insurance.insuranceType}
-                                <div className="text-xs text-gray-400 mt-0.5">Mob: {insurance.mobileNumber}</div>
-                                {user?.role === 'admin' && (
-                                    <div className="text-xs text-blue-600 font-semibold mt-1">
-                                        Entered by: {insurance.createdBy?.username || 'Unknown'}
-                                    </div>
-                                )}
+                            <div className="text-xs text-gray-500 flex items-center justify-between pt-3 border-t border-gray-50 mb-4">
+                                <span className="font-medium">{insurance.vehicleType} • {insurance.insuranceType}</span>
                             </div>
 
-                            <div className="flex gap-2 pt-3 border-t border-gray-50">
+                            <div className="flex gap-3">
                                 <button
                                     onClick={() => handleSendClick(insurance)}
                                     disabled={!isEligibleForReminder(insurance.daysRemaining)}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all active:scale-95 ${isEligibleForReminder(insurance.daysRemaining)
-                                        ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                                        : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 ${isEligibleForReminder(insurance.daysRemaining)
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         }`}
                                 >
                                     <Send size={16} />
                                     <span>Remind</span>
                                 </button>
 
-                                {(user?.role === 'admin' || insurance.createdBy === user?._id || insurance.createdBy?._id === user?._id) && (
-                                    <>
-                                        {user?.role === 'admin' && (
-                                            <button
-                                                onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
-                                                className="p-2.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all active:scale-95"
-                                            >
-                                                <Edit2 size={20} />
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() => handleDeleteClick(insurance)}
-                                            className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-95"
-                                        >
-                                            <Trash2 size={20} />
-                                        </button>
-                                    </>
+                                {user?.role === 'admin' && (
+                                    <button
+                                        onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
+                                        className="p-2.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all active:scale-95 border border-blue-100"
+                                    >
+                                        <Edit2 size={18} />
+                                    </button>
                                 )}
                             </div>
                         </div>
                     ))}
+                    <div className="mt-4 pb-20">
+                        <Pagination
+                            currentPage={page}
+                            totalPages={pages}
+                            onPageChange={(newPage) => setPage(newPage)}
+                        />
+                    </div>
                 </div>
 
-                {/* Desktop View: Table Layout */}
-                <div className="hidden md:block bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Reg No</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Expiry</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vehicle Info</th>
-                                {user?.role === 'admin' && (
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Entered By</th>
-                                )}
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                {/* Desktop View: Premium Table Layout */}
+                <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-100">
+                        <thead>
+                            <tr className="bg-gray-50/50">
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider font-inter">Status</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider font-inter">Policy Holder</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider font-inter">Registration</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider font-inter">Expiry Date</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider font-inter">Vehicle</th>
+                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider font-inter">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 bg-white">
                             {insurances.map((insurance) => (
                                 <tr key={insurance._id} className="hover:bg-blue-50/30 transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-full border shadow-sm ${getStatusStyle(insurance.expiryStatus)}`}>
-                                            {formatStatus(insurance.expiryStatus)}
-                                        </span>
-                                        <div className="text-[10px] uppercase font-bold text-gray-400 mt-1.5 ml-1">
-                                            {insurance.daysRemaining} days left
+                                        <div className="flex flex-col items-start gap-1">
+                                            <span className={`px-2.5 py-1 inline-flex text-[10px] font-bold rounded-full uppercase tracking-wide ${getStatusStyle(insurance.expiryStatus)}`}>
+                                                {formatStatus(insurance.expiryStatus)}
+                                            </span>
+                                            <span className="text-xs font-semibold text-gray-400 ml-1">{insurance.daysRemaining} days left</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                        {insurance.registrationNumber}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-gray-900">{insurance.customerName}</span>
+                                            <span className="text-xs text-gray-500">{insurance.mobileNumber}</span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        <div className="font-bold text-gray-900">{insurance.customerName}</div>
-                                        <div className="text-xs text-gray-500 font-medium">{insurance.mobileNumber}</div>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="text-sm font-mono font-bold text-gray-700 bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                                            {insurance.registrationNumber}
+                                        </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-bold">
-                                        {new Date(insurance.policyExpiryDate).toLocaleDateString()}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center text-sm font-medium text-gray-700">
+                                            <Calendar size={14} className="mr-2 text-gray-400" />
+                                            {new Date(insurance.policyExpiryDate).toLocaleDateString()}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div className="font-bold text-gray-800">{insurance.vehicleType}</div>
-                                        <div className="text-[10px] uppercase font-bold text-gray-400">{insurance.insuranceType}</div>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-900">{insurance.vehicleType}</span>
+                                            <span className="text-[10px] uppercase font-bold text-gray-400">{insurance.insuranceType}</span>
+                                        </div>
                                     </td>
-                                    {user?.role === 'admin' && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
-                                            {insurance.createdBy?.username || 'Unknown'}
-                                        </td>
-                                    )}
                                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                                        <div className="flex items-center justify-center gap-2">
+                                        <div className="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => handleSendClick(insurance)}
                                                 disabled={!isEligibleForReminder(insurance.daysRemaining)}
                                                 className={`p-2 rounded-lg transition-all ${isEligibleForReminder(insurance.daysRemaining)
-                                                    ? 'text-blue-600 hover:bg-blue-100 cursor-pointer active:scale-95'
-                                                    : 'text-gray-300 cursor-not-allowed opacity-50'
+                                                    ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer active:scale-95'
+                                                    : 'text-gray-300 cursor-not-allowed'
                                                     }`}
-                                                title={isEligibleForReminder(insurance.daysRemaining) ? "Send Reminder" : "Unavailable"}
+                                                title={isEligibleForReminder(insurance.daysRemaining) ? "Send Reminder" : "Unavailable (Too early/expired)"}
                                             >
                                                 <Send size={18} />
                                             </button>
 
                                             {(user?.role === 'admin' || insurance.createdBy === user?._id || insurance.createdBy?._id === user?._id) && (
                                                 <>
-                                                    {user?.role === 'admin' && (
-                                                        <button
-                                                            onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
-                                                            className="p-2 text-blue-600 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-all active:scale-95"
-                                                            title="Edit Record"
-                                                        >
-                                                            <Edit2 size={18} />
-                                                        </button>
-                                                    )}
+                                                    <button
+                                                        onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
+                                                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all active:scale-95"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit2 size={18} />
+                                                    </button>
                                                     <button
                                                         onClick={() => handleDeleteClick(insurance)}
-                                                        className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-lg transition-all active:scale-95 opacity-0 group-hover:opacity-100"
-                                                        title="Delete Record"
+                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-95"
+                                                        title="Delete"
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
@@ -379,144 +371,262 @@ const InsuranceList = () => {
                             ))}
                         </tbody>
                     </table>
+                    <div className="mt-6 px-6 pb-6">
+                        <Pagination
+                            currentPage={page}
+                            totalPages={pages}
+                            onPageChange={(newPage) => setPage(newPage)}
+                        />
+                    </div>
                 </div>
-
-                <Pagination
-                    currentPage={page}
-                    totalPages={pages}
-                    onPageChange={(newPage) => setPage(newPage)}
-                />
             </>
         )
     }
 
     return (
-        <div className="pb-8">
-            <div className="max-w-6xl mx-auto px-4 sm:px-0">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-6">
-                    <div className="flex items-center">
-                        <button
-                            onClick={() => navigate('/dashboard')}
-                            className="mr-4 p-2 bg-white rounded-xl shadow-sm border border-gray-100 text-gray-600 hover:text-blue-900 hover:border-blue-100 transition-all active:scale-95"
-                        >
+        <div className="md:pb-20">
+            {/* Mobile Header */}
+            <div className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
+                <div className="px-4 py-3 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => navigate('/dashboard')} className="p-1 -ml-1 text-gray-500">
                             <ChevronLeft size={24} />
                         </button>
-                        <div>
-                            <h1 className="text-3xl font-black text-gray-900 leading-none">Insurances</h1>
-                            <p className="text-gray-500 text-sm font-medium mt-1">Manage all policy records</p>
+                        <h1 className="text-lg font-bold text-gray-900 font-poppins">Insurances</h1>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowSearchInput(!showSearchInput)}
+                            className={`p-2 rounded-full transition-colors ${showSearchInput ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
+                        >
+                            <Search size={20} />
+                        </button>
+                        <button
+                            onClick={() => setIsFilterSheetOpen(true)}
+                            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full relative"
+                        >
+                            <SlidersHorizontal size={20} />
+                            {(expiryFrom || expiryTo || (statusFilter && !chipFilters.some(c => c.value === statusFilter))) && (
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full border border-white"></span>
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Mobile Search Bar Expansion */}
+                {showSearchInput && (
+                    <div className="px-4 pb-3 animate-in slide-in-from-top-2 duration-200">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search policies..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                                autoFocus
+                            />
+                            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                         </div>
                     </div>
+                )}
 
-                    {/* Compact Professional Filter Toolbar */}
-                    <div className="mb-6 flex flex-col xl:flex-row gap-4 xl:items-center bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+                {/* Mobile Status Chips */}
+                <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar mask-linear-fade">
+                    {chipFilters.map((chip) => (
+                        <button
+                            key={chip.label}
+                            onClick={() => setStatusFilter(chip.value === statusFilter ? '' : chip.value)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${statusFilter === chip.value
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                }`}
+                        >
+                            {chip.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
-                        {/* 1. Search (Expanded on Mobile) */}
-                        <div className="relative group flex-grow md:flex-grow-0 md:w-64">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-600 transition-colors">
+            <div className="max-w-7xl mx-auto md:px-6 lg:px-8">
+                {/* Desktop Header */}
+                <div className="hidden md:flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-8">
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-poppins tracking-tight">Insurances</h1>
+                        <p className="text-gray-500 mt-1 flex items-center gap-2">
+                            Manage and track all policies
+                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                            <span className="font-semibold text-gray-700">{total} Total Records</span>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Desktop Navbar/Filters (Hidden on Mobile) */}
+                <div className="hidden md:block sticky top-20 z-30 bg-white rounded-2xl shadow-xl shadow-blue-900/5 border border-gray-100 p-2 mb-8 transition-all duration-300">
+                    <div className="flex flex-col lg:flex-row gap-2">
+                        {/* Search */}
+                        <div className="relative flex-grow lg:flex-grow-[2]">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <Search size={18} />
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search records..."
+                                placeholder="Search by name, reg no, or mobile..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-11 pr-4 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm w-full transition-all font-medium"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all placeholder-gray-400"
                             />
                         </div>
 
-                        {/* 2. Status Select */}
-                        <div className="relative min-w-[180px]">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                        <div className="w-px bg-gray-100 hidden lg:block my-2"></div>
+
+                        {/* Status Filter */}
+                        <div className="relative flex-grow lg:flex-grow-0 lg:w-48">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <Filter size={18} />
                             </div>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="pl-11 pr-8 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm w-full appearance-none transition-all font-bold text-gray-700 cursor-pointer hover:bg-white border-hover-gray-200"
+                                className="w-full pl-10 pr-8 py-3 bg-gray-50 border-none rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-blue-500/20 focus:bg-white cursor-pointer appearance-none"
                             >
                                 <option value="">All Statuses</option>
+                                <option value="ACTIVE">Active Policies</option>
+                                <option value="EXPIRING_UPCOMING">Upcoming (&gt;15 Days)</option>
+                                <option value="EXPIRING_WARNING">Warning (8-15 Days)</option>
+                                <option value="EXPIRING_SOON">Expiring Soon (&lt;7 Days)</option>
                                 <option value="EXPIRED">Expired</option>
-                                <option value="EXPIRING_SOON">Expiring Soon</option>
-                                <option value="EXPIRING_WARNING">Warning (8-15 days)</option>
-                                <option value="EXPIRING_UPCOMING">Upcoming (16-30 days)</option>
-                                <option value="ACTIVE">Active (>30 days)</option>
                             </select>
                         </div>
 
-                        {/* 3. Date Range (Vertical Separator) */}
-                        <div className="hidden xl:block w-px h-8 bg-gray-200 mx-2"></div>
+                        <div className="w-px bg-gray-100 hidden lg:block my-2"></div>
 
-                        {/* Date Inputs Group */}
-                        <div className="flex flex-col md:flex-row gap-2 items-center flex-grow">
-                            <div className="flex items-center gap-2 w-full md:w-auto bg-gray-50 rounded-xl p-1 border border-gray-100">
-                                <div className="relative flex-1">
+                        {/* Date Range */}
+                        <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-1 flex-grow lg:flex-grow-0">
+                            <input
+                                type="date"
+                                value={stagedFrom}
+                                onChange={(e) => setStagedFrom(e.target.value)}
+                                className="bg-transparent border-none text-xs font-semibold text-gray-700 focus:ring-0 w-full lg:w-32 py-2"
+                            />
+                            <span className="text-gray-300 text-[10px]">TO</span>
+                            <input
+                                type="date"
+                                value={stagedTo}
+                                onChange={(e) => setStagedTo(e.target.value)}
+                                className="bg-transparent border-none text-xs font-semibold text-gray-700 focus:ring-0 w-full lg:w-32 py-2"
+                            />
+                            <button
+                                onClick={handleApplyDateFilter}
+                                className="bg-white hover:bg-gray-100 text-gray-900 p-2 rounded-lg shadow-sm border border-gray-200 transition-all active:scale-95"
+                                title="Apply Date Filter"
+                            >
+                                <CheckCircle size={16} />
+                            </button>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-2 lg:ml-auto">
+                            {(expiryFrom || expiryTo || statusFilter || searchQuery) && (
+                                <button
+                                    onClick={() => {
+                                        setStatusFilter('')
+                                        setSearchQuery('')
+                                        handleClearDateFilter()
+                                    }}
+                                    className="px-4 py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center"
+                                >
+                                    Reset
+                                </button>
+                            )}
+                            <button
+                                onClick={() => navigate('/add-insurance')}
+                                className="flex-1 lg:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-95 flex items-center justify-center whitespace-nowrap"
+                            >
+                                <Plus size={20} className="mr-2" />
+                                New Insurance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {content}
+
+                {/* FAB (Mobile Only) */}
+                <button
+                    onClick={() => navigate('/add-insurance')}
+                    className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-gradient-to-tr from-blue-700 to-blue-500 text-white rounded-full shadow-lg shadow-blue-600/40 flex items-center justify-center z-40 active:scale-90 transition-transform"
+                >
+                    <Plus size={28} />
+                </button>
+
+                {/* Mobile Filter Bottom Sheet */}
+                <BottomSheet
+                    isOpen={isFilterSheetOpen}
+                    onClose={() => setIsFilterSheetOpen(false)}
+                    title="Filter Policies"
+                >
+                    <div className="space-y-6">
+                        {/* Status Filter in Sheet */}
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 mb-2 block">Status</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['ACTIVE', 'EXPIRING_SOON', 'EXPIRING_WARNING', 'EXPIRED'].map(status => (
+                                    <button
+                                        key={status}
+                                        onClick={() => setStatusFilter(status === statusFilter ? '' : status)}
+                                        className={`py-2 px-3 rounded-xl border text-sm font-bold transition-all ${statusFilter === status
+                                            ? 'bg-blue-50 border-blue-500 text-blue-700'
+                                            : 'bg-white border-gray-200 text-gray-600'
+                                            }`}
+                                    >
+                                        {formatStatus(status)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Date Filter in Sheet */}
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 mb-2 block">Expiry Date Range</label>
+                            <div className="flex gap-3">
+                                <div className="flex-1">
+                                    <span className="text-xs text-gray-400 font-semibold mb-1 block">From</span>
                                     <input
                                         type="date"
                                         value={stagedFrom}
                                         onChange={(e) => setStagedFrom(e.target.value)}
-                                        className="py-1.5 pl-2 pr-1 bg-transparent border-none text-xs font-semibold text-gray-700 focus:ring-0 w-32 cursor-pointer"
+                                        className="w-full bg-gray-50 border-gray-200 rounded-xl text-sm font-bold focus:ring-blue-500"
                                     />
                                 </div>
-                                <span className="text-gray-400 text-xs font-bold">TO</span>
-                                <div className="relative flex-1">
+                                <div className="flex-1">
+                                    <span className="text-xs text-gray-400 font-semibold mb-1 block">To</span>
                                     <input
                                         type="date"
                                         value={stagedTo}
                                         onChange={(e) => setStagedTo(e.target.value)}
-                                        className="py-1.5 pl-2 pr-1 bg-transparent border-none text-xs font-semibold text-gray-700 focus:ring-0 w-32 cursor-pointer"
+                                        className="w-full bg-gray-50 border-gray-200 rounded-xl text-sm font-bold focus:ring-blue-500"
                                     />
                                 </div>
                             </div>
+                            {dateError && <p className="text-red-500 text-xs mt-2 font-bold">{dateError}</p>}
+                        </div>
 
+                        <div className="pt-4 flex gap-3">
+                            <button
+                                onClick={handleClearDateFilter}
+                                className="flex-1 py-3 text-gray-600 font-bold bg-gray-100 rounded-xl"
+                            >
+                                Reset
+                            </button>
                             <button
                                 onClick={handleApplyDateFilter}
-                                className="w-full md:w-auto px-4 py-2 bg-gray-900 text-white hover:bg-black rounded-lg text-xs font-bold shadow-md transition-all active:scale-95 whitespace-nowrap"
+                                className="flex-[2] py-3 text-white font-bold bg-blue-600 rounded-xl shadow-lg shadow-blue-600/20"
                             >
-                                Apply
+                                Apply Filters
                             </button>
-
-                            {(expiryFrom || expiryTo || stagedFrom || stagedTo) && (
-                                <button
-                                    onClick={handleClearDateFilter}
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                    title="Reset"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
                         </div>
-
-                        {/* 4. Add New Button (Pushed to end) */}
-                        <button
-                            onClick={() => navigate('/add-insurance')}
-                            className="ml-auto flex items-center justify-center px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 active:scale-95 whitespace-nowrap font-bold text-sm"
-                        >
-                            <Plus size={18} className="mr-2" />
-                            New Record
-                        </button>
                     </div>
-
-                    {/* Active Filter Summary (Minimal) */}
-                    {(expiryFrom && expiryTo && !dateError) && (
-                        <div className="mb-6 flex items-center gap-3 bg-blue-50/50 px-4 py-2 rounded-lg border border-blue-100 inline-flex">
-                            <span className="flex w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                            <span className="text-xs font-bold text-blue-800">
-                                <span className="text-blue-500">Filtered:</span> {formatDate(expiryFrom)} - {formatDate(expiryTo)}
-                            </span>
-                            <span className="px-2 py-0.5 bg-white rounded text-[10px] font-black text-blue-900 border border-blue-100 shadow-sm">
-                                {total} Found
-                            </span>
-                        </div>
-                    )}
-
-                    {dateError && (
-                        <div className="mb-4 text-xs text-red-600 font-bold bg-red-50 px-3 py-2 rounded-lg border border-red-100 w-fit">
-                            {dateError}
-                        </div>
-                    )}
-                </div>
-
-                {content}
+                </BottomSheet>
 
                 {/* Send Reminder Confirmation Modal */}
                 {selectedInsurance && (
@@ -532,7 +642,7 @@ const InsuranceList = () => {
                             </div>
 
                             <div className="mb-8">
-                                <h3 className="text-2xl font-black text-gray-900 mb-2">Send Reminder?</h3>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2 font-poppins">Send Reminder?</h3>
                                 <p className="text-gray-500 font-medium mb-6">You are about to send a WhatsApp reminder for this policy.</p>
 
                                 <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-3">
