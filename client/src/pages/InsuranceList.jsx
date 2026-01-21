@@ -206,78 +206,78 @@ const InsuranceList = () => {
         content = (
             <>
                 {/* Mobile View: Modern Card Layout */}
-                <div className="grid grid-cols-1 gap-4 md:hidden pb-20 px-4">
+                <div className="md:hidden space-y-4 pb-20 px-4 mt-4">
                     {insurances.map((insurance) => (
                         <div
                             key={insurance._id}
-                            onClick={(e) => {
-                                // Prevent navigation if clicking buttons
-                                if (e.target.closest('button')) return;
-                                // Optional: Navigate to detail view if exists, for now just no-op or maybe expand
-                            }}
-                            className="bg-white p-5 rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] border border-gray-50 active:scale-[0.99] transition-transform duration-200"
+                            className="bg-white rounded-[20px] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden"
                         >
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <div className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded uppercase tracking-wider">
-                                            {insurance.registrationNumber}
-                                        </div>
-                                    </div>
-                                    <div className="text-lg font-bold text-gray-900 leading-tight font-poppins">
-                                        {insurance.customerName}
-                                    </div>
+                            {/* Card Top: Reg & Status */}
+                            <div className="px-5 pt-5 flex justify-between items-center mb-4">
+                                <div className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                    {insurance.registrationNumber}
                                 </div>
-                                <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide ${getStatusStyle(insurance.expiryStatus)}`}>
+                                <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${getStatusStyle(insurance.expiryStatus)}`}>
                                     {formatStatus(insurance.expiryStatus)}
-                                </span>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
-                                    <div className="text-[10px] text-gray-400 uppercase font-bold mb-1">Expires On</div>
-                                    <div className="text-sm font-bold text-gray-800 flex items-center gap-1">
-                                        <Calendar size={14} className="text-gray-400" />
-                                        {new Date(insurance.policyExpiryDate).toLocaleDateString()}
+                            {/* Card Main: Name */}
+                            <div className="px-5 mb-5">
+                                <h3 className="text-xl font-black text-gray-900 leading-tight">
+                                    {insurance.customerName}
+                                </h3>
+                            </div>
+
+                            {/* Card Info Grid */}
+                            <div className="px-5 grid grid-cols-2 gap-4 mb-6">
+                                <div className="space-y-1">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Expires On</span>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                                        <Calendar size={12} className="text-blue-500" />
+                                        {new Date(insurance.policyExpiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     </div>
                                 </div>
-                                <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100">
-                                    <div className="text-[10px] text-gray-400 uppercase font-bold mb-1">Time Left</div>
-                                    <div className={`text-sm font-black ${insurance.daysRemaining <= 30 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                <div className="space-y-1 text-right">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Time Left</span>
+                                    <div className={`text-xs font-black ${insurance.daysRemaining <= 30 ? 'text-red-600' : 'text-emerald-600'}`}>
                                         {insurance.daysRemaining} Days
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="text-xs text-gray-500 flex items-center justify-between pt-3 border-t border-gray-50 mb-4">
-                                <span className="font-medium">{insurance.vehicleType} • {insurance.insuranceType}</span>
-                            </div>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => handleSendClick(insurance)}
-                                    disabled={!isEligibleForReminder(insurance.daysRemaining)}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 ${isEligibleForReminder(insurance.daysRemaining)
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        }`}
-                                >
-                                    <Send size={16} />
-                                    <span>Remind</span>
-                                </button>
-
-                                {user?.role === 'admin' && (
+                            {/* Card Footer: Metadata & Actions */}
+                            <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100 flex justify-between items-center">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                                        {insurance.vehicleType} • {insurance.insuranceType}
+                                    </span>
+                                </div>
+                                <div className="flex gap-2">
                                     <button
-                                        onClick={() => navigate(`/edit-insurance/${insurance._id}`)}
-                                        className="p-2.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all active:scale-95 border border-blue-100"
+                                        onClick={(e) => { e.stopPropagation(); handleSendClick(insurance); }}
+                                        disabled={!isEligibleForReminder(insurance.daysRemaining)}
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-sm ${isEligibleForReminder(insurance.daysRemaining)
+                                            ? 'bg-blue-600 text-white shadow-blue-200'
+                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                            }`}
                                     >
-                                        <Edit2 size={18} />
+                                        <Send size={18} />
                                     </button>
-                                )}
+
+                                    {user?.role === 'admin' && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); navigate(`/edit-insurance/${insurance._id}`); }}
+                                            className="w-10 h-10 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center transition-all active:scale-90 shadow-sm"
+                                        >
+                                            <Edit2 size={18} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}
-                    <div className="mt-4 pb-20">
+                    <div className="mt-8">
                         <Pagination
                             currentPage={page}
                             totalPages={pages}
@@ -385,66 +385,63 @@ const InsuranceList = () => {
 
     return (
         <div className="md:pb-20">
-            {/* Mobile Header */}
-            <div className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all">
-                <div className="px-4 py-3 flex justify-between items-center">
+            {/* Mobile Header: Sticky & Compact */}
+            <div className="md:hidden sticky top-0 z-50 bg-white shadow-sm ring-1 ring-slate-200">
+                <div className="px-5 h-16 flex items-center justify-between">
+                    <h1 className="text-xl font-black text-slate-900 font-poppins">Insurances</h1>
                     <div className="flex items-center gap-2">
-                        <button onClick={() => navigate('/dashboard')} className="p-1 -ml-1 text-gray-500">
-                            <ChevronLeft size={24} />
-                        </button>
-                        <h1 className="text-lg font-bold text-gray-900 font-poppins">Insurances</h1>
-                    </div>
-                    <div className="flex gap-2">
                         <button
                             onClick={() => setShowSearchInput(!showSearchInput)}
-                            className={`p-2 rounded-full transition-colors ${showSearchInput ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
+                            className={`p-2 rounded-full transition-all ${showSearchInput ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-500'}`}
                         >
                             <Search size={20} />
                         </button>
                         <button
                             onClick={() => setIsFilterSheetOpen(true)}
-                            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full relative"
+                            className="p-2 bg-slate-50 text-slate-500 rounded-full relative"
                         >
                             <SlidersHorizontal size={20} />
                             {(expiryFrom || expiryTo || (statusFilter && !chipFilters.some(c => c.value === statusFilter))) && (
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full border border-white"></span>
+                                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white"></span>
                             )}
                         </button>
                     </div>
                 </div>
 
-                {/* Mobile Search Bar Expansion */}
+                {/* Segmented Filter Control */}
+                <div className="px-5 pb-4">
+                    <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto no-scrollbar">
+                        {chipFilters.map((chip) => (
+                            <button
+                                key={chip.label}
+                                onClick={() => setStatusFilter(chip.value)}
+                                className={`flex-1 min-w-[70px] py-2 px-3 rounded-lg text-xs font-black transition-all whitespace-nowrap ${statusFilter === chip.value
+                                    ? 'bg-white text-blue-600 shadow-sm scale-[1.02]'
+                                    : 'text-slate-500'
+                                    }`}
+                            >
+                                {chip.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Expanded Search */}
                 {showSearchInput && (
-                    <div className="px-4 pb-3 animate-in slide-in-from-top-2 duration-200">
-                        <div className="relative">
+                    <div className="px-5 pb-4 animate-in slide-in-from-top-4 duration-300">
+                        <div className="relative group">
                             <input
                                 type="text"
-                                placeholder="Search policies..."
+                                placeholder="Search Name, Reg No..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-gray-100 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-600/20 focus:bg-white transition-all shadow-inner"
                                 autoFocus
                             />
-                            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                            <Search className="absolute left-3 top-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
                         </div>
                     </div>
                 )}
-
-                {/* Mobile Status Chips */}
-                <div className="px-4 pb-3 flex gap-2 overflow-x-auto no-scrollbar mask-linear-fade">
-                    {chipFilters.map((chip) => (
-                        <button
-                            key={chip.label}
-                            onClick={() => setStatusFilter(chip.value === statusFilter ? '' : chip.value)}
-                            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${statusFilter === chip.value
-                                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                                }`}
-                        >
-                            {chip.label}
-                        </button>
-                    ))}
-                </div>
             </div>
 
             <div className="max-w-7xl mx-auto md:px-6 lg:px-8">

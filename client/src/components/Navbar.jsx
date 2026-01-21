@@ -53,12 +53,12 @@ const Navbar = () => {
                             <div className="relative">
                                 <div className="absolute inset-0 bg-blue-400 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
                                 <img
-                                    src="/appIcon.png"
-                                    alt="CSC Logo"
+                                    src="/appIcon.jpg"
+                                    alt="Notify CSC Logo"
                                     className="relative h-9 w-9 md:h-10 md:w-10 rounded-lg shadow-sm group-hover:scale-105 transition-transform duration-300"
                                 />
                             </div>
-                            <span className="text-white font-bold text-lg tracking-wide font-poppins text-shadow-sm">CSC Tracker</span>
+                            <span className="text-white font-bold text-lg tracking-wide font-poppins text-shadow-sm">Notify CSC</span>
                         </Link>
 
                         {/* Desktop Navigation */}
