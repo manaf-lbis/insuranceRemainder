@@ -41,105 +41,7 @@ const PublicInsuranceCheck = () => {
         }
     };
 
-    /**
-     * Modernized Result Card
-     * Clean, polished, and professional look
-     */
-    const ResultCard = ({ vehicle }) => {
-        const days = vehicle.daysToExpiry !== null && vehicle.daysToExpiry !== undefined ? vehicle.daysToExpiry : 0;
-        const isExpired = vehicle.insuranceStatus === 'EXPIRED';
-        const isExpiring = vehicle.insuranceStatus === 'EXPIRING';
 
-        // Status Configuration
-        let config = {
-            gradient: 'from-emerald-500 to-teal-500',
-            bg: 'bg-emerald-50/50',
-            text: 'text-emerald-700',
-            border: 'border-emerald-100',
-            icon: CheckCircle,
-            label: 'Active Policy',
-            statusColor: 'text-emerald-600'
-        };
-
-        if (isExpired) {
-            config = {
-                gradient: 'from-rose-500 to-red-600',
-                bg: 'bg-rose-50/50',
-                text: 'text-rose-700',
-                border: 'border-rose-100',
-                icon: ShieldAlert,
-                label: 'Policy Expired',
-                statusColor: 'text-rose-600'
-            };
-        } else if (isExpiring) {
-            config = {
-                gradient: 'from-amber-400 to-orange-500',
-                bg: 'bg-amber-50/50',
-                text: 'text-amber-800',
-                border: 'border-amber-100',
-                icon: AlertTriangle,
-                label: 'Expiring Soon',
-                statusColor: 'text-amber-600'
-            };
-        }
-
-        const Icon = config.icon;
-
-        return (
-            <div className={`group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border ${config.border} overflow-hidden`}>
-                {/* Decorative Top Line */}
-                <div className={`h-1.5 w-full bg-gradient-to-r ${config.gradient}`}></div>
-
-                <div className="p-6">
-                    {/* Header: Vehicle & Status */}
-                    <div className="flex justify-between items-start mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2.5 rounded-xl ${config.bg} ${config.statusColor}`}>
-                                <Car className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Vehicle Number</p>
-                                <h3 className="text-xl font-bold text-gray-900 font-mono tracking-tight">
-                                    {vehicle.maskedVehicleNumber?.toUpperCase()}
-                                </h3>
-                            </div>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-bold border ${config.border} ${config.bg} ${config.text} uppercase tracking-wide`}>
-                            {config.label}
-                        </div>
-                    </div>
-
-                    {/* Hero Metric: Days */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <div>
-                            <div className="flex items-baseline gap-1">
-                                <span className={`text-4xl md:text-5xl font-extrabold ${config.statusColor} tracking-tight`}>
-                                    {Math.abs(days)}
-                                </span>
-                                <span className={`text-sm font-semibold uppercase tracking-wide ${config.text} opacity-80`}>
-                                    {isExpired ? 'Days Ago' : 'Days Left'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer: Details */}
-                <div className="bg-gray-50/80 p-4 border-t border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-600">
-                            Valid until: <span className="text-gray-900 font-semibold">{new Date(vehicle.policyExpiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                        </span>
-                    </div>
-                    {/* Optional: Add an action arrow or icon */}
-                    <div className={`w-8 h-8 rounded-full ${config.bg} flex items-center justify-center ${config.statusColor} opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1`}>
-                        <Icon className="w-4 h-4" />
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-gray-900">
@@ -298,6 +200,106 @@ const PublicInsuranceCheck = () => {
                     </p>
                 </div>
             </footer>
+        </div>
+    );
+};
+
+/**
+ * Modernized Result Card
+ * Clean, polished, and professional look
+ */
+const ResultCard = ({ vehicle }) => {
+    const days = vehicle.daysToExpiry !== null && vehicle.daysToExpiry !== undefined ? vehicle.daysToExpiry : 0;
+    const isExpired = vehicle.insuranceStatus === 'EXPIRED';
+    const isExpiring = vehicle.insuranceStatus === 'EXPIRING';
+
+    // Status Configuration
+    let config = {
+        gradient: 'from-emerald-500 to-teal-500',
+        bg: 'bg-emerald-50/50',
+        text: 'text-emerald-700',
+        border: 'border-emerald-100',
+        icon: CheckCircle,
+        label: 'Active Policy',
+        statusColor: 'text-emerald-600'
+    };
+
+    if (isExpired) {
+        config = {
+            gradient: 'from-rose-500 to-red-600',
+            bg: 'bg-rose-50/50',
+            text: 'text-rose-700',
+            border: 'border-rose-100',
+            icon: ShieldAlert,
+            label: 'Policy Expired',
+            statusColor: 'text-rose-600'
+        };
+    } else if (isExpiring) {
+        config = {
+            gradient: 'from-amber-400 to-orange-500',
+            bg: 'bg-amber-50/50',
+            text: 'text-amber-800',
+            border: 'border-amber-100',
+            icon: AlertTriangle,
+            label: 'Expiring Soon',
+            statusColor: 'text-amber-600'
+        };
+    }
+
+    const Icon = config.icon;
+
+    return (
+        <div className={`group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border ${config.border} overflow-hidden`}>
+            {/* Decorative Top Line */}
+            <div className={`h-1.5 w-full bg-gradient-to-r ${config.gradient}`}></div>
+
+            <div className="p-6">
+                {/* Header: Vehicle & Status */}
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl ${config.bg} ${config.statusColor}`}>
+                            <Car className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Vehicle Number</p>
+                            <h3 className="text-xl font-bold text-gray-900 font-mono tracking-tight">
+                                {vehicle.maskedVehicleNumber?.toUpperCase()}
+                            </h3>
+                        </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-bold border ${config.border} ${config.bg} ${config.text} uppercase tracking-wide`}>
+                        {config.label}
+                    </div>
+                </div>
+
+                {/* Hero Metric: Days */}
+                <div className="flex items-center gap-4 mb-6">
+                    <div>
+                        <div className="flex items-baseline gap-1">
+                            <span className={`text-4xl md:text-5xl font-extrabold ${config.statusColor} tracking-tight`}>
+                                {Math.abs(days)}
+                            </span>
+                            <span className={`text-sm font-semibold uppercase tracking-wide ${config.text} opacity-80`}>
+                                {isExpired ? 'Days Ago' : 'Days Left'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Footer: Details */}
+            <div className="bg-gray-50/80 p-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm font-medium text-gray-600">
+                        Valid until: <span className="text-gray-900 font-semibold">{new Date(vehicle.policyExpiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    </span>
+                </div>
+                {/* Optional: Add an action arrow or icon */}
+                <div className={`w-8 h-8 rounded-full ${config.bg} flex items-center justify-center ${config.statusColor} opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1`}>
+                    <Icon className="w-4 h-4" />
+                </div>
+            </div>
         </div>
     );
 };
