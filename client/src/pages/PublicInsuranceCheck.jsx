@@ -181,75 +181,104 @@ const PublicInsuranceCheck = () => {
                                 </div>
                             </div>
                         ) : hasSearched ? (
-                            /* EMPATHETIC EMPTY STATE (Search Performed but No Results) */
-                            <div className="animate-in fade-in zoom-in-95 duration-500">
-                                <div className="bg-white rounded-2xl shadow-xl shadow-blue-900/5 border border-blue-100 overflow-hidden relative">
+                            /* EMPATHETIC EMPTY STATE (Refined Conversion Funnel) */
+                            <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
+                                {/* 1. PRIMARY EMPTY STATE: Help-oriented message */}
+                                <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/10 border border-blue-50 overflow-hidden">
                                     <div className="p-8 md:p-10 flex flex-col items-center text-center">
-                                        <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6 ring-8 ring-blue-50/50">
-                                            <HelpCircle className="w-10 h-10 text-blue-600" />
+                                        <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+                                            <HelpCircle className="w-8 h-8 text-blue-600" />
                                         </div>
 
-                                        <h3 className="text-2xl font-black text-gray-900 mb-3 font-poppins">
-                                            Not finding your records?
+                                        <h3 className="text-2xl font-black text-slate-900 mb-2 font-poppins">
+                                            Insurance Records Not Found
                                         </h3>
-                                        <p className="text-gray-500 max-w-md mx-auto mb-8 leading-relaxed font-medium">
-                                            Records for new policies or policies purchased from other agencies might not reflect here instantly. Don't worry, we can help you verify this manually.
+                                        <p className="text-slate-500 max-w-md mx-auto mb-8 font-medium leading-relaxed">
+                                            Don't worry! This usually happens if your policy is recently renewed or bought offline. We can verify it for you manually.
                                         </p>
 
-                                        {/* Conversion Cards */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                                            <a
-                                                href="tel:9633565414"
-                                                className="group flex items-center gap-4 p-5 bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
-                                            >
-                                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white shrink-0">
-                                                    <Phone size={24} />
+                                        {/* Primary Conversion Card */}
+                                        <div className="w-full bg-blue-50/50 rounded-2xl border border-blue-100 p-6 mb-8 text-left">
+                                            <div className="flex flex-col md:flex-row gap-6 justify-between items-center text-center md:text-left">
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center gap-3 justify-center md:justify-start">
+                                                        <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                                                            <Phone size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Call Now</p>
+                                                            <p className="text-xl font-black text-slate-900 leading-tight">9633565414</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 justify-center md:justify-start">
+                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                                            <MapPin size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Visit Us</p>
+                                                            <p className="text-base font-bold text-slate-800 leading-tight">Ammaveedu Jn, Kerala</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="text-left">
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-100">Call Support</p>
-                                                    <p className="text-lg font-black text-white leading-tight">9633565414</p>
-                                                </div>
-                                                <ArrowRight className="ml-auto text-blue-100 group-hover:translate-x-1 transition-transform" size={20} />
-                                            </a>
-
-                                            <a
-                                                href="https://wa.me/919633565414?text=Hi%20I%20need%20help%20with%20insurance"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="group flex items-center gap-4 p-5 bg-emerald-500 hover:bg-emerald-600 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
-                                            >
-                                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white shrink-0">
-                                                    <MessageCircle size={24} />
-                                                </div>
-                                                <div className="text-left">
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-50">WhatsApp Us</p>
-                                                    <p className="text-lg font-black text-white leading-tight">Chat Now</p>
-                                                </div>
-                                                <ArrowRight className="ml-auto text-emerald-50 group-hover:translate-x-1 transition-transform" size={20} />
-                                            </a>
+                                                <a
+                                                    href="tel:9633565414"
+                                                    className="w-full md:w-auto px-8 py-4 bg-blue-900 text-white rounded-xl font-black text-sm tracking-wide shadow-lg shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                                >
+                                                    Get Insurance Help from CSC
+                                                </a>
+                                            </div>
                                         </div>
 
-                                        {/* Physical Office Option */}
-                                        <div className="mt-8 pt-8 border-t border-gray-100 w-full">
-                                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-gray-500 font-medium">
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin size={16} className="text-blue-500" />
-                                                    <span>Visit Common Service Centre, Ammaveedu Jn</span>
+                                        {/* 2. SECONDARY CONVERSION: For Hesitant Users */}
+                                        <div className="pt-6 border-t border-slate-100 w-full">
+                                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                                <div className="text-left">
+                                                    <p className="text-sm font-black text-slate-900">Not sure about your status?</p>
+                                                    <p className="text-xs font-medium text-slate-500">Records may be missing or expired. Bring your vehicle details to our office.</p>
                                                 </div>
-                                                <span className="hidden md:block w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                <div className="flex items-center gap-2 text-blue-600 font-bold">
-                                                    Open 9 AM - 6 PM
-                                                </div>
+                                                <a
+                                                    href="https://wa.me/919633565414?text=Hi%20I%20want%20to%20verify%20my%20insurance%20at%20CSC"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest hover:gap-3 transition-all"
+                                                >
+                                                    Verify Insurance at CSC Office
+                                                    <ArrowRight size={16} />
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Urgency Banner */}
-                                <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200 flex items-center gap-3">
-                                    <ShieldAlert className="text-amber-600 shrink-0" size={20} />
-                                    <p className="text-sm font-bold text-amber-900 leading-tight">
-                                        Driving without valid insurance is a legal offense. Let us help you fix this today.
+                                {/* 4. TRUST-BUILDING MICRO SECTION */}
+                                <div className="bg-slate-900 rounded-[32px] p-8 md:p-10 text-white overflow-hidden relative">
+                                    <div className="relative z-10">
+                                        <h4 className="text-xl font-black mb-6 font-poppins">Why Notify CSC?</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {[
+                                                { text: "Government-approved CSC", icon: Shield },
+                                                { text: "Vehicle & health insurance support", icon: Car },
+                                                { text: "Renewal reminders", icon: Clock },
+                                                { text: "Local office, real assistance", icon: Users }
+                                            ].map((item, i) => (
+                                                <div key={i} className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
+                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                                        <ClipboardCheck size={20} />
+                                                    </div>
+                                                    <span className="text-sm font-bold tracking-tight">{item.text}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {/* Abstract background element */}
+                                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px]"></div>
+                                </div>
+
+                                {/* Urgency Banner - Soft Warning */}
+                                <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex items-start gap-3">
+                                    <ShieldAlert className="text-orange-500 shrink-0 mt-0.5" size={18} />
+                                    <p className="text-xs font-bold text-orange-900 leading-relaxed md:text-sm">
+                                        Driving without valid insurance may lead to heavy penalties and legal trouble. Our CSC can help you fix this today.
                                     </p>
                                 </div>
                             </div>
