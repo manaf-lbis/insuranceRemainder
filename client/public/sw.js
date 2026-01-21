@@ -1,7 +1,7 @@
 const CACHE_NAME = 'notify-csc-v5';
 const urlsToCache = [
     '/manifest.json',
-    '/appIcon.png'
+    '/appIcon.jpg'
 ];
 
 // Install event - cache static assets
