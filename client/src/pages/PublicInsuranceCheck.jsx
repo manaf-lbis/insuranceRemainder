@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { checkInsuranceStatus } from '../features/publicInsurance/publicInsuranceAPI';
-import { Shield, Search, CheckCircle, Clock, AlertTriangle, ShieldAlert, Car, Phone, MessageCircle, MapPin, ExternalLink, HelpCircle, Users, ClipboardCheck, ArrowRight } from 'lucide-react';
+import { Shield, Search, CheckCircle, Clock, AlertTriangle, ShieldAlert, Car, Phone, MessageCircle, MapPin, ExternalLink, HelpCircle, Users, ClipboardCheck, ArrowRight, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const PublicInsuranceCheck = () => {
     const [searchType, setSearchType] = useState('vehicle');
@@ -11,6 +12,7 @@ const PublicInsuranceCheck = () => {
     const [error, setError] = useState('');
 
     const [hasSearched, setHasSearched] = useState(false);
+    const { user } = useSelector((state) => state.auth);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,7 +52,7 @@ const PublicInsuranceCheck = () => {
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-gray-900">
             {/* 1. Header (Match AdminDashboard Style) */}
-            <header className="bg-blue-900 shadow-md">
+            <header className="bg-blue-900 shadow-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                         <div className="bg-white/10 p-1.5 rounded-lg">
@@ -60,12 +62,28 @@ const PublicInsuranceCheck = () => {
                             Notify CSC
                         </span>
                     </div>
-                    <a
-                        href="/login"
-                        className="text-sm font-medium text-blue-100 hover:text-white transition-colors px-3 py-1.5 hover:bg-white/10 rounded-md"
-                    >
-                        Staff Login
-                    </a>
+
+                    {user ? (
+                        <div className="flex items-center gap-4">
+                            <span className="hidden md:block text-sm text-blue-100">
+                                Welcome, <span className="font-semibold text-white">{user.username}</span>
+                            </span>
+                            <Link
+                                to="/dashboard"
+                                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium border border-white/10"
+                            >
+                                <LayoutDashboard size={16} />
+                                Dashboard
+                            </Link>
+                        </div>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="text-sm font-medium text-blue-100 hover:text-white transition-colors px-4 py-2 hover:bg-white/10 rounded-lg"
+                        >
+                            Staff Login
+                        </Link>
+                    )}
                 </div>
             </header>
 
@@ -84,7 +102,7 @@ const PublicInsuranceCheck = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* 3. Search Card (Left Column) */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
                             <div className="p-6 border-b border-gray-50 bg-gray-50/50">
                                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                                     <div className="w-1 h-5 bg-blue-600 rounded-full"></div>
@@ -155,7 +173,7 @@ const PublicInsuranceCheck = () => {
                                     </button>
 
                                     {error && (
-                                        <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-start gap-2">
+                                        <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-start gap-2 animate-in fade-in slide-in-from-top-1">
                                             <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
                                             {error}
                                         </div>
@@ -184,102 +202,87 @@ const PublicInsuranceCheck = () => {
                             /* EMPATHETIC EMPTY STATE (Refined Conversion Funnel) */
                             <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
                                 {/* 1. PRIMARY EMPTY STATE: Help-oriented message */}
-                                <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/10 border border-blue-50 overflow-hidden">
-                                    <div className="p-8 md:p-10 flex flex-col items-center text-center">
-                                        <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                                            <HelpCircle className="w-8 h-8 text-blue-600" />
+                                <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/10 border border-blue-50 overflow-hidden relative group">
+                                    {/* Decorative background blur */}
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full filter blur-[80px] opacity-50 -z-10 transition-opacity group-hover:opacity-75"></div>
+
+                                    <div className="p-8 md:p-10 flex flex-col items-center text-center relative z-10">
+                                        <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-inner border border-white">
+                                            <HelpCircle className="w-10 h-10 text-blue-600" />
                                         </div>
 
-                                        <h3 className="text-2xl font-black text-slate-900 mb-2 font-poppins">
-                                            Insurance Records Not Found
+                                        <h3 className="text-2xl font-black text-slate-800 mb-2 font-poppins">
+                                            No Insurance Records Found
                                         </h3>
-                                        <p className="text-slate-500 max-w-md mx-auto mb-8 font-medium leading-relaxed">
-                                            Don't worry! This usually happens if your policy is recently renewed or bought offline. We can verify it for you manually.
+                                        <p className="text-slate-500 max-w-lg mx-auto mb-10 font-medium leading-relaxed">
+                                            We couldn't find a record for this number. This might happen if your policy was recently renewed or is not yet updated in our system.
                                         </p>
 
                                         {/* Primary Conversion Card */}
-                                        <div className="w-full bg-blue-50/50 rounded-2xl border border-blue-100 p-6 mb-8 text-left">
-                                            <div className="flex flex-col md:flex-row gap-6 justify-between items-center text-center md:text-left">
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center gap-3 justify-center md:justify-start">
-                                                        <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white">
-                                                            <Phone size={20} />
+                                        <div className="w-full bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg shadow-blue-900/20 p-1 mb-8 overflow-hidden">
+                                            <div className="bg-white rounded-xl p-6 md:p-8">
+                                                <div className="flex flex-col md:flex-row gap-8 justify-between items-center">
+
+                                                    {/* Contact Details */}
+                                                    <div className="space-y-6 text-left w-full md:w-auto">
+                                                        <div className="flex items-center gap-4 group/item">
+                                                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white transition-colors duration-300">
+                                                                <Phone size={24} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Call Support</p>
+                                                                <a href="tel:9633565414" className="text-xl md:text-2xl font-black text-gray-900 hover:text-blue-700 transition-colors">
+                                                                    9633565414
+                                                                </a>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Call Now</p>
-                                                            <p className="text-xl font-black text-slate-900 leading-tight">9633565414</p>
+
+                                                        <div className="flex items-center gap-4 group/item">
+                                                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white transition-colors duration-300">
+                                                                <MapPin size={24} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Visit Today</p>
+                                                                <p className="text-base font-bold text-gray-900">CSC, Ammaveedu Jn</p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3 justify-center md:justify-start">
-                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                                            <MapPin size={20} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Visit Us</p>
-                                                            <p className="text-base font-bold text-slate-800 leading-tight">Ammaveedu Jn, Kerala</p>
-                                                        </div>
+
+                                                    {/* CTA Button */}
+                                                    <div className="w-full md:w-auto flex flex-col gap-3">
+                                                        <a
+                                                            href="tel:9633565414"
+                                                            className="w-full md:w-auto px-8 py-4 bg-blue-900 hover:bg-blue-800 text-white rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-blue-900/20 active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                                                        >
+                                                            <Phone size={18} />
+                                                            Get Insurance Help Now
+                                                        </a>
+                                                        <p className="text-[10px] text-center text-gray-400 font-medium">Wait time: &lt; 1 min</p>
                                                     </div>
                                                 </div>
-                                                <a
-                                                    href="tel:9633565414"
-                                                    className="w-full md:w-auto px-8 py-4 bg-blue-900 text-white rounded-xl font-black text-sm tracking-wide shadow-lg shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                                                >
-                                                    Get Insurance Help from CSC
-                                                </a>
                                             </div>
                                         </div>
 
                                         {/* 2. SECONDARY CONVERSION: For Hesitant Users */}
-                                        <div className="pt-6 border-t border-slate-100 w-full">
-                                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                                                <div className="text-left">
-                                                    <p className="text-sm font-black text-slate-900">Not sure about your status?</p>
-                                                    <p className="text-xs font-medium text-slate-500">Records may be missing or expired. Bring your vehicle details to our office.</p>
+                                        <div className="w-full pt-8 border-t border-gray-100">
+                                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                                                <div className="text-center md:text-left">
+                                                    <p className="text-base font-bold text-gray-900 mb-1">Unsure about your status?</p>
+                                                    <p className="text-sm text-gray-500">Bring your vehicle documents to our office for a free check.</p>
                                                 </div>
                                                 <a
                                                     href="https://wa.me/919633565414?text=Hi%20I%20want%20to%20verify%20my%20insurance%20at%20CSC"
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest hover:gap-3 transition-all"
+                                                    className="inline-flex items-center gap-2 text-blue-700 font-bold text-sm hover:gap-3 transition-all bg-white px-5 py-2.5 rounded-lg border border-blue-200 shadow-sm hover:shadow-md hover:border-blue-300"
                                                 >
-                                                    Verify Insurance at CSC Office
+                                                    <MessageCircle size={18} />
+                                                    Ask on WhatsApp
                                                     <ArrowRight size={16} />
                                                 </a>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* 4. TRUST-BUILDING MICRO SECTION */}
-                                <div className="bg-slate-900 rounded-[32px] p-8 md:p-10 text-white overflow-hidden relative">
-                                    <div className="relative z-10">
-                                        <h4 className="text-xl font-black mb-6 font-poppins">Why Notify CSC?</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {[
-                                                { text: "Government-approved CSC", icon: Shield },
-                                                { text: "Vehicle & health insurance support", icon: Car },
-                                                { text: "Renewal reminders", icon: Clock },
-                                                { text: "Local office, real assistance", icon: Users }
-                                            ].map((item, i) => (
-                                                <div key={i} className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
-                                                        <ClipboardCheck size={20} />
-                                                    </div>
-                                                    <span className="text-sm font-bold tracking-tight">{item.text}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    {/* Abstract background element */}
-                                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px]"></div>
-                                </div>
-
-                                {/* Urgency Banner - Soft Warning */}
-                                <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex items-start gap-3">
-                                    <ShieldAlert className="text-orange-500 shrink-0 mt-0.5" size={18} />
-                                    <p className="text-xs font-bold text-orange-900 leading-relaxed md:text-sm">
-                                        Driving without valid insurance may lead to heavy penalties and legal trouble. Our CSC can help you fix this today.
-                                    </p>
                                 </div>
                             </div>
                         ) : (
