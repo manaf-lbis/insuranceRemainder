@@ -4,8 +4,8 @@
  * NO AUTHENTICATION REQUIRED
  */
 
-// Use environment variable for API URL (defaults to proxy if not set)
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Use environment variable for API URL (defaults to proxy /api if not set)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Check insurance status by vehicle number or mobile number
