@@ -66,8 +66,8 @@ const LoginPage = () => {
                         <div className="flex justify-center mb-4">
                             <div className="p-3 bg-primary/5 rounded-2xl border border-primary/10 shadow-sm relative">
                                 <img
-                                    src="/appIcon.png"
-                                    alt="CSC Logo"
+                                    src="/appIcon.jpg"
+                                    alt="Notify CSC Logo"
                                     className="h-16 w-16 rounded-xl object-contain"
                                     onError={(e) => {
                                         e.target.onerror = null;
@@ -79,7 +79,7 @@ const LoginPage = () => {
                                 </div>
                             </div>
                         </div>
-                        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Staff Portal</h1>
+                        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Administrator</h1>
                         <p className="text-gray-500 text-sm mt-2 font-medium">Please sign in to your account</p>
                     </div>
 
