@@ -1,4 +1,4 @@
-const CACHE_NAME = 'insurance-app-v3';
+const CACHE_NAME = 'notify-csc-v4';
 const urlsToCache = [
     '/',
     '/index.html',
