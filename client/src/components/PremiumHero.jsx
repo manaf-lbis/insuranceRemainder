@@ -18,6 +18,30 @@ const PremiumHero = () => {
         return () => clearInterval(timer);
     }, [posters, currentIndex]);
 
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+    const minSwipeDistance = 50;
+
+    const handleTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            handleNext();
+        } else if (isRightSwipe) {
+            handlePrev();
+        }
+    };
+
     const handleNext = () => {
         if (isAnimating || !posters) return;
         setIsAnimating(true);
@@ -73,7 +97,12 @@ const PremiumHero = () => {
     const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageTemplate || 'Hello, I would like to apply for insurance.')}`;
 
     return (
-        <section className="relative w-full overflow-hidden bg-slate-950 h-auto md:h-[750px] min-h-[550px]">
+        <section
+            className="relative w-full overflow-hidden bg-slate-950 h-auto md:h-[750px] min-h-[550px]"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
 
             {/* Unified Blurred Background System */}
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
