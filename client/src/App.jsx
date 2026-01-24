@@ -22,43 +22,46 @@ import AdminRoute from './components/AdminRoute'
 import { ToastProvider } from './components/ToastContext'
 import InstallPrompt from './components/InstallPrompt'
 import WhatsAppButton from './components/WhatsAppButton'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
     return (
-        <ToastProvider>
-            <InstallPrompt />
-            <WhatsAppButton />
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/check-insurance" element={<CheckInsurancePage />} />
-                <Route path="/services" element={<ServicesPage />} />
-                <Route path="/news" element={<NewsPage />} />
-                <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
-                <Route path="/login" element={<LoginPage />} />
+        <ErrorBoundary>
+            <ToastProvider>
+                <InstallPrompt />
+                <WhatsAppButton />
+                <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/check-insurance" element={<CheckInsurancePage />} />
+                    <Route path="/services" element={<ServicesPage />} />
+                    <Route path="/news" element={<NewsPage />} />
+                    <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+                    <Route path="/login" element={<LoginPage />} />
 
-                {/* Protected Routes */}
-                <Route element={<PrivateRoute />}>
-                    <Route element={<AdminLayout />}>
-                        {/* Common Protected Routes (Staff & Admin) */}
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        <Route path="/add-insurance" element={<AddInsurance />} />
-                        <Route path="/edit-insurance/:id" element={<EditInsurance />} />
-                        <Route path="/insurances" element={<InsuranceList />} />
+                    {/* Protected Routes */}
+                    <Route element={<PrivateRoute />}>
+                        <Route element={<AdminLayout />}>
+                            {/* Common Protected Routes (Staff & Admin) */}
+                            <Route path="/dashboard" element={<DashboardPage />} />
+                            <Route path="/add-insurance" element={<AddInsurance />} />
+                            <Route path="/edit-insurance/:id" element={<EditInsurance />} />
+                            <Route path="/insurances" element={<InsuranceList />} />
 
-                        {/* Admin Only Routes */}
-                        <Route element={<AdminRoute />}>
-                            <Route path="/admin/staff" element={<StaffList />} />
-                            <Route path="/admin/add-staff" element={<AddStaff />} />
-                            <Route path="/admin/posters" element={<ManagePosters />} />
-                            <Route path="/admin/announcements" element={<AnnouncementList />} />
-                            <Route path="/admin/announcements/new" element={<ManageAnnouncement />} />
-                            <Route path="/admin/announcements/edit/:id" element={<ManageAnnouncement />} />
+                            {/* Admin Only Routes */}
+                            <Route element={<AdminRoute />}>
+                                <Route path="/admin/staff" element={<StaffList />} />
+                                <Route path="/admin/add-staff" element={<AddStaff />} />
+                                <Route path="/admin/posters" element={<ManagePosters />} />
+                                <Route path="/admin/announcements" element={<AnnouncementList />} />
+                                <Route path="/admin/announcements/new" element={<ManageAnnouncement />} />
+                                <Route path="/admin/announcements/edit/:id" element={<ManageAnnouncement />} />
+                            </Route>
                         </Route>
                     </Route>
-                </Route>
-            </Routes>
-        </ToastProvider>
+                </Routes>
+            </ToastProvider>
+        </ErrorBoundary>
     )
 }
 

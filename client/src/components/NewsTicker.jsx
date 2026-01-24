@@ -3,10 +3,11 @@ import { Bell } from 'lucide-react';
 import { useGetTickerAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
 
 const NewsTicker = () => {
-    const { data: announcements, isLoading } = useGetTickerAnnouncementsQuery();
+    const { data: announcements, isLoading, error } = useGetTickerAnnouncementsQuery();
 
-    if (isLoading || !announcements || announcements.length === 0) {
-        return null; // Don't show ticker if no items
+    // Don't show ticker if loading, error, or no items
+    if (isLoading || error || !announcements || announcements.length === 0) {
+        return null;
     }
 
     return (
