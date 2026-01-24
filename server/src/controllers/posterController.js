@@ -22,9 +22,11 @@ const getActivePosters = async (req, res) => {
  */
 const uploadPoster = async (req, res) => {
     try {
-        // req.file is provided by multer middleware in route
-        const { title } = req.body;
-        const poster = await posterService.uploadPoster(req.file, req.user._id, title);
+        const poster = await posterService.uploadPoster({
+            file: req.file,
+            userId: req.user._id,
+            metadata: req.body
+        });
         res.status(201).json(poster);
     } catch (error) {
         console.error('Error uploading poster:', error);

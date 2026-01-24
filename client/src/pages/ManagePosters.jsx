@@ -1,295 +1,357 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUploadPosterMutation, useGetAllPostersQuery, useTogglePosterStatusMutation, useDeletePosterMutation } from '../features/posters/postersApiSlice';
-import { Upload, Check, Trash2, Loader, Image as ImageIcon, AlertCircle, X, Crop as CropIcon, Eye, EyeOff } from 'lucide-react';
+import { Upload, Loader, Image as ImageIcon, Shield, Monitor, Smartphone, CheckCircle2, Trash2, ArrowRight, MessageCircle } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
-import Cropper from 'react-easy-crop';
-import { getCroppedImg } from '../utils/cropUtils';
 
 const ManagePosters = () => {
-    // Upload State
+    // Form State
     const [selectedFile, setSelectedFile] = useState(null);
-    const [title, setTitle] = useState('');
     const [previewUrl, setPreviewUrl] = useState(null);
 
-    // Cropper State
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
-    const [zoom, setZoom] = useState(1);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-    const [isCropping, setIsCropping] = useState(false);
+    const [headline, setHeadline] = useState('');
+    const [description, setDescription] = useState('');
+    const [showButton, setShowButton] = useState(true);
+    const [buttonText, setButtonText] = useState('Quick Apply');
+    const [whatsappNumber, setWhatsappNumber] = useState('9633565414');
+    const [messageTemplate, setMessageTemplate] = useState('Hello, I would like to apply for insurance.');
+    const [isActive, setIsActive] = useState(false);
+
+    // View State
+    const [previewMode, setPreviewMode] = useState('desktop');
 
     // API Hooks
     const { data: posters, isLoading, refetch } = useGetAllPostersQuery();
     const [uploadPoster, { isLoading: isUploading }] = useUploadPosterMutation();
-    const [togglePoster, { isLoading: isToggling }] = useTogglePosterStatusMutation();
+    const [toggleStatus, { isLoading: isToggling }] = useTogglePosterStatusMutation();
     const [deletePoster, { isLoading: isDeleting }] = useDeletePosterMutation();
 
     const { showToast } = useToast();
-
-    const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-        setCroppedAreaPixels(croppedAreaPixels);
-    }, []);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
-            setIsCropping(true); // Open cropper immediately
         }
-    };
-
-    const handleCropSave = async () => {
-        try {
-            const croppedImageBlob = await getCroppedImg(previewUrl, croppedAreaPixels);
-            const file = new File([croppedImageBlob], "cropped-poster.jpg", { type: "image/jpeg" });
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // Update preview to cropped version
-            setIsCropping(false);
-            showToast({ message: 'Image cropped successfully', type: 'success' });
-        } catch (e) {
-            console.error(e);
-            showToast({ message: 'Failed to crop image', type: 'error' });
-        }
-    };
-
-    const handleCropCancel = () => {
-        setIsCropping(false);
-        setSelectedFile(null);
-        setPreviewUrl(null);
-        // Reset file input value if needed (using ref) or just rely on state
     };
 
     const handleUpload = async (e) => {
         e.preventDefault();
-        if (!selectedFile) return;
+        if (!selectedFile) {
+            showToast({ message: 'Select your poster design first', type: 'error' });
+            return;
+        }
 
         const formData = new FormData();
         formData.append('image', selectedFile);
-        formData.append('title', title);
+        formData.append('headline', headline);
+        formData.append('description', description);
+        formData.append('showButton', showButton);
+        formData.append('buttonText', buttonText);
+        formData.append('whatsappNumber', whatsappNumber);
+        formData.append('messageTemplate', messageTemplate);
+        formData.append('isActive', isActive);
 
         try {
             await uploadPoster(formData).unwrap();
-            showToast({ message: 'Poster uploaded successfully', type: 'success' });
-            setSelectedFile(null);
-            setTitle('');
-            setPreviewUrl(null);
+            showToast({ message: 'Universal Hero Published!', type: 'success' });
+            resetForm();
             refetch();
         } catch (err) {
-            showToast({ message: 'Failed to upload poster: ' + (err.data?.message || err.message), type: 'error' });
+            showToast({ message: err.data?.message || 'Upload failed', type: 'error' });
         }
     };
 
-    const handleToggleStatus = async (id, currentStatus) => {
+    const resetForm = () => {
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        setHeadline('');
+        setDescription('');
+        setIsActive(false);
+    };
+
+    const handleToggle = async (id) => {
         try {
-            await togglePoster(id).unwrap();
-            showToast({ message: currentStatus ? 'Poster deactivated' : 'Poster activated', type: 'success' });
+            await toggleStatus(id).unwrap();
+            showToast({ message: 'Visibility updated', type: 'success' });
             refetch();
         } catch (err) {
-            showToast({ message: 'Failed to update poster status', type: 'error' });
+            showToast({ message: 'Toggle failed', type: 'error' });
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this poster?')) return;
+        if (!window.confirm('Permanently delete this hero poster?')) return;
         try {
             await deletePoster(id).unwrap();
-            showToast({ message: 'Poster deleted', type: 'success' });
+            showToast({ message: 'Removed successfully', type: 'success' });
             refetch();
         } catch (err) {
-            showToast({ message: 'Failed to delete poster', type: 'error' });
+            showToast({ message: 'Delete failed', type: 'error' });
         }
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6 font-poppins">Manage Posters</h1>
+        <div className="max-w-[1600px] mx-auto py-8 px-6 min-h-screen bg-slate-50/50">
+            <header className="mb-10 flex justify-between items-end">
+                <div>
+                    <h1 className="text-4xl font-black text-slate-900 font-poppins tracking-tight">Hero Engine</h1>
+                    <p className="text-slate-500 mt-1 font-medium italic underline decoration-blue-500/30 underline-offset-4">Universal Poster-Safe Architecture</p>
+                </div>
+                <div className="flex bg-white rounded-2xl shadow-sm border border-slate-200 p-1">
+                    <button
+                        onClick={() => setPreviewMode('desktop')}
+                        className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all ${previewMode === 'desktop' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >
+                        <Monitor size={18} />
+                        <span className="text-xs font-black uppercase">Desktop View</span>
+                    </button>
+                    <button
+                        onClick={() => setPreviewMode('mobile')}
+                        className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-all ${previewMode === 'mobile' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                    >
+                        <Smartphone size={18} />
+                        <span className="text-xs font-black uppercase">Mobile View</span>
+                    </button>
+                </div>
+            </header>
 
-            {/* Upload Section */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
-                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <Upload size={20} className="text-blue-600" />
-                    Upload New Poster
-                </h2>
-                <form onSubmit={handleUpload} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Poster Title (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="e.g., Summer Promo"
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* 1. ARCHITECT PANEL */}
+                <div className="lg:col-span-4 space-y-6">
+                    <form onSubmit={handleUpload} className="bg-white rounded-[32px] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden sticky top-8">
+                        <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-white">
+                            <h2 className="font-black text-slate-900 flex items-center gap-2 text-xl">
+                                <Shield size={24} className="text-blue-600" />
+                                Architect
+                            </h2>
+                            <button type="button" onClick={resetForm} className="text-[10px] font-black uppercase text-slate-300 hover:text-slate-600">Reset</button>
+                        </div>
+
+                        <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+
+                            {/* Group: Core Asset */}
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                                    The Poster Asset
+                                </label>
+                                <div
+                                    className={`relative aspect-video rounded-3xl border-2 border-dashed transition-all flex flex-col items-center justify-center p-6 text-center cursor-pointer group overflow-hidden ${previewUrl ? 'border-blue-200 bg-blue-50/20' : 'border-slate-200 hover:border-blue-500 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer z-20" />
+                                    {previewUrl ? (
+                                        <div className="relative w-full h-full flex items-center justify-center">
+                                            <img src={previewUrl} className="max-w-full max-h-full object-contain" alt="Preview" />
+                                            <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                                <span className="text-xs font-black text-slate-900 bg-white px-4 py-2 rounded-full shadow-lg">Change Design</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Upload className="text-slate-200 group-hover:text-blue-500 transition-colors" size={40} />
+                                            <p className="text-sm font-bold text-slate-400 mt-2">Any aspect ratio supported</p>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative group">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    onClick={(e) => { e.target.value = null }} // clear checks
-                                />
-                                <ImageIcon size={32} className="text-gray-400 mb-2 group-hover:text-blue-500 transition-colors" />
-                                <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">Click to upload image</span>
-                                <span className="text-xs text-gray-400 mt-1">JPG, PNG, WebP, AVIF</span>
+
+                            {/* Group: Messaging */}
+                            <div className="space-y-5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                                    The Messaging
+                                </label>
+                                <div className="space-y-4">
+                                    <input
+                                        type="text"
+                                        value={headline}
+                                        onChange={(e) => setHeadline(e.target.value)}
+                                        placeholder="Catching Headline (Max 2 lines)..."
+                                        className="w-full bg-slate-50/50 px-5 py-4 rounded-2xl border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none font-bold text-slate-800"
+                                    />
+                                    <textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        rows={2}
+                                        placeholder="Short description..."
+                                        className="w-full bg-slate-50/50 px-5 py-4 rounded-2xl border border-slate-100 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none font-medium text-slate-800 resize-none"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Group: Call to Action */}
+                            <div className="space-y-5 p-6 bg-slate-50 rounded-[28px] border border-slate-100">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Action Button</label>
+                                    <div className="relative">
+                                        <input type="checkbox" checked={showButton} onChange={(e) => setShowButton(e.target.checked)} className="sr-only" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowButton(!showButton)}
+                                            className={`w-10 h-5 rounded-full transition-all border ${showButton ? 'bg-blue-600 border-blue-500' : 'bg-slate-200 border-slate-300'}`}
+                                        >
+                                            <div className={`w-3 h-3 bg-white rounded-full transition-transform ${showButton ? 'translate-x-6' : 'translate-x-1'}`}></div>
+                                        </button>
+                                    </div>
+                                </div>
+                                {showButton && (
+                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <input
+                                            type="text"
+                                            value={buttonText}
+                                            onChange={(e) => setButtonText(e.target.value)}
+                                            className="w-full bg-white border border-slate-200 px-4 py-3 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                                            placeholder="Button Text..."
+                                        />
+                                        <div className="grid grid-cols-1 gap-2">
+                                            <input
+                                                type="text"
+                                                value={whatsappNumber}
+                                                onChange={(e) => setWhatsappNumber(e.target.value)}
+                                                className="w-full bg-white/50 border border-slate-100 px-4 py-2 rounded-lg text-slate-600 font-mono text-[10px]"
+                                                placeholder="Support Number"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Group: Status */}
+                            <div className="flex items-center justify-between p-4 bg-slate-900 rounded-2xl">
+                                <span className="text-[10px] font-black text-white/50 uppercase">Go Live Status</span>
+                                <label className="relative cursor-pointer">
+                                    <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="sr-only" />
+                                    <div className={`w-8 h-4 rounded-full transition-colors ${isActive ? 'bg-emerald-500' : 'bg-white/10'}`}></div>
+                                    <div className={`absolute top-1 left-1 bg-white w-2 h-2 rounded-full transition-transform ${isActive ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                                </label>
                             </div>
                         </div>
 
-                        {/* Preview */}
-                        <div className="bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center h-48 md:h-auto border border-gray-200 relative">
+                        <div className="p-8 bg-white border-t border-slate-50">
+                            <button
+                                type="submit"
+                                disabled={isUploading || !selectedFile}
+                                className="w-full py-5 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-500/30 hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                            >
+                                {isUploading ? <Loader size={24} className="animate-spin text-white" /> : <CheckCircle2 size={24} />}
+                                <span className="uppercase tracking-widest text-sm">Deploy Universal Hero</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* 2. SIMULATION PANEL */}
+                <div className="lg:col-span-8 space-y-10">
+                    <div className="relative bg-black rounded-[48px] shadow-2xl overflow-hidden min-h-[600px] flex items-center justify-center border border-white/5">
+
+                        {/* THE ENGINE SIMULATOR (Matches PremiumHero Logic) */}
+
+                        {/* Universal Blurred Background */}
+                        <div className="absolute inset-0 z-0">
                             {previewUrl ? (
                                 <>
-                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" />
-                                    {/* Obscure if cropping? No, cropping is modal */}
+                                    <img src={previewUrl} className="w-full h-full object-cover blur-[50px] scale-[1.3] opacity-50" alt="" />
+                                    <div className="absolute inset-0 bg-black/60"></div>
                                 </>
                             ) : (
-                                <span className="text-gray-400 text-sm">Image Preview</span>
+                                <div className="w-full h-full bg-slate-900"></div>
+                            )}
+                        </div>
+
+                        {/* Layout Layers */}
+                        <div className={`relative z-10 w-full flex ${previewMode === 'mobile' ? 'flex-col p-6' : 'flex-row'}`}>
+
+                            {/* --- Desktop Preview Area --- */}
+                            {previewMode === 'desktop' && (
+                                <div className="flex w-full min-h-[500px]">
+                                    <div className="w-[55%] flex flex-col justify-center px-16 text-left">
+                                        <div className="w-2 h-12 bg-white/20 mb-6 rounded-full"></div>
+                                        <h3 className="text-4xl lg:text-5xl font-black text-white mb-6 font-poppins leading-tight">
+                                            {headline || 'Headline Preview'}
+                                        </h3>
+                                        <p className="text-white/60 mb-10 text-lg max-w-sm line-clamp-2">
+                                            {description || 'Description will naturally wrap and clamp after two lines.'}
+                                        </p>
+                                        {showButton && (
+                                            <div className="px-10 h-[56px] rounded-full bg-white text-slate-950 font-black text-lg flex items-center gap-3 w-fit shadow-2xl">
+                                                <MessageCircle size={20} className="text-emerald-500" />
+                                                {buttonText}
+                                                <ArrowRight size={20} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 flex items-center justify-center p-12">
+                                        {previewUrl ? (
+                                            <img src={previewUrl} className="max-w-full max-h-full object-contain shadow-2xl rounded-2xl" alt="" />
+                                        ) : (
+                                            <div className="w-32 h-48 border-2 border-dashed border-white/20 rounded-2xl" />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* --- Mobile Preview Area --- */}
+                            {previewMode === 'mobile' && (
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="w-full h-[280px] flex items-center justify-center mb-8">
+                                        {previewUrl ? (
+                                            <img src={previewUrl} className="w-[80%] h-auto max-h-full object-contain shadow-2xl rounded-xl border border-white/10" alt="" />
+                                        ) : (
+                                            <div className="w-32 h-48 border-2 border-dashed border-white/20 rounded-xl" />
+                                        )}
+                                    </div>
+                                    <div className="space-y-3 mb-8">
+                                        <h3 className="text-[18px] font-bold text-white font-poppins leading-tight px-4">
+                                            {headline || 'Mobile Headline'}
+                                        </h3>
+                                        <p className="text-[13px] text-white/70 font-medium px-6">
+                                            {description || 'Tight mobile app-like description preview.'}
+                                        </p>
+                                    </div>
+                                    {showButton && (
+                                        <div className="px-8 h-[40px] rounded-full bg-white text-slate-950 font-black text-sm shadow-xl flex items-center gap-2">
+                                            <MessageCircle size={16} className="text-emerald-500" />
+                                            {buttonText}
+                                            <ArrowRight size={16} />
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            disabled={!selectedFile || isUploading}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            {isUploading ? <Loader className="animate-spin" size={18} /> : <Upload size={18} />}
-                            Upload Poster
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            {/* List Section */}
-            <div className="space-y-4">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Existing Posters</h2>
-
-                {isLoading ? (
-                    <div className="text-center py-8"><Loader className="animate-spin h-8 w-8 text-blue-500 mx-auto" /></div>
-                ) : posters?.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-100 p-8">No posters found. Upload one to get started.</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {posters.map((poster) => (
-                            <div key={poster._id} className={`bg-white rounded-xl shadow-sm border overflow-hidden relative group transition-all duration-300 ${poster.isActive ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-gray-200 opacity-90 hover:opacity-100'}`}>
-                                {poster.isActive && (
-                                    <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 flex items-center gap-1 animate-in fade-in zoom-in">
-                                        <Check size={12} /> Live
+                    {/* Active Deployment Stack */}
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4">Deployment Infrastructure</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {posters?.map(p => (
+                                <div key={p._id} className="bg-white p-4 rounded-[24px] border border-slate-100 flex items-center gap-4 shadow-sm hover:shadow-xl transition-all group">
+                                    <div className="w-12 h-12 rounded-xl bg-slate-50 overflow-hidden border border-slate-100 flex-shrink-0">
+                                        <img src={p.imageUrl} className="w-full h-full object-cover" alt="" />
                                     </div>
-                                )}
-
-                                <div className="h-40 bg-gray-100 relative overflow-hidden">
-                                    <img src={poster.imageUrl} alt={poster.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                </div>
-
-                                <div className="p-4">
-                                    <h3 className="font-bold text-gray-900 truncate">{poster.title}</h3>
-                                    <p className="text-xs text-gray-500 mt-1">Uploaded by {poster.uploadedBy?.username} on {new Date(poster.createdAt).toLocaleDateString()}</p>
-
-                                    <div className="mt-4 flex gap-2 justify-between items-center bg-gray-50 p-2 rounded-lg">
-                                        <button
-                                            onClick={() => handleToggleStatus(poster._id, poster.isActive)}
-                                            disabled={isToggling}
-                                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${poster.isActive
-                                                    ? 'bg-white border border-gray-200 text-gray-600 hover:text-red-500 hover:bg-red-50'
-                                                    : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'
-                                                }`}
-                                        >
-                                            {isToggling ? (
-                                                <Loader size={12} className="animate-spin" />
-                                            ) : poster.isActive ? (
-                                                <>
-                                                    <EyeOff size={14} /> Deactivate
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Eye size={14} /> Set Active
-                                                </>
-                                            )}
-                                        </button>
-
-                                        <div className="w-px h-6 bg-gray-200 mx-1"></div>
-
-                                        <button
-                                            onClick={() => handleDelete(poster._id)}
-                                            disabled={isDeleting}
-                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
-                                            title="Delete"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-slate-900 truncate text-[11px]">{p.headline || p.title}</h4>
+                                        <div className="flex items-center gap-2 mt-1.5">
+                                            <button
+                                                onClick={() => handleToggle(p._id)}
+                                                className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${p.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'
+                                                    }`}
+                                            >
+                                                {p.isActive ? 'LIVE' : 'IDLE'}
+                                            </button>
+                                            <button onClick={() => handleDelete(p._id)} className="p-1 text-slate-200 hover:text-red-500 transition-colors">
+                                                <Trash2 size={12} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Cropping Modal */}
-            {isCropping && previewUrl && (
-                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                <CropIcon size={20} className="text-blue-600" />
-                                Crop Poster
-                            </h3>
-                            <button onClick={handleCropCancel} className="p-2 hover:bg-gray-100 rounded-full text-gray-500">
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="relative flex-1 bg-gray-900">
-                            <Cropper
-                                image={previewUrl}
-                                crop={crop}
-                                zoom={zoom}
-                                aspect={16 / 9}
-                                onCropChange={setCrop}
-                                onCropComplete={onCropComplete}
-                                onZoomChange={setZoom}
-                                showGrid={true}
-                            />
-                        </div>
-
-                        <div className="p-4 border-t border-gray-100 bg-white">
-                            <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
-                                <div className="flex items-center gap-2 w-full md:w-auto">
-                                    <span className="text-xs font-bold text-gray-500 uppercase">Zoom</span>
-                                    <input
-                                        type="range"
-                                        value={zoom}
-                                        min={1}
-                                        max={3}
-                                        step={0.1}
-                                        aria-labelledby="Zoom"
-                                        onChange={(e) => setZoom(e.target.value)}
-                                        className="w-full md:w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                    />
-                                </div>
-                                <div className="flex gap-3 w-full md:w-auto">
-                                    <button
-                                        onClick={handleCropCancel}
-                                        className="flex-1 md:flex-none px-6 py-2.5 text-gray-700 font-bold bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleCropSave}
-                                        className="flex-1 md:flex-none px-8 py-2.5 text-white font-bold bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95"
-                                    >
-                                        Crop & Save
-                                    </button>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

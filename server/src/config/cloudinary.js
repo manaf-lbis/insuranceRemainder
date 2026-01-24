@@ -17,9 +17,29 @@ const storage = new CloudinaryStorage({
     },
 });
 
+const originalStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'insurance-app/posters/original',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'avif'],
+    },
+});
+
+const croppedStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'insurance-app/posters/cropped',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'avif'],
+    },
+});
+
 const upload = multer({ storage: storage });
+const uploadOriginal = multer({ storage: originalStorage });
+const uploadCropped = multer({ storage: croppedStorage });
 
 module.exports = {
     cloudinary,
-    upload
+    upload,
+    uploadOriginal,
+    uploadCropped
 };
