@@ -14,13 +14,7 @@ export const insuranceApiSlice = apiSlice.injectEndpoints({
             query: () => '/dashboard/stats',
             keepUnusedDataFor: 5,
         }),
-        sendReminder: builder.mutation({
-            query: (insuranceId) => ({
-                url: `/insurances/${insuranceId}/remind`,
-                method: 'POST',
-            }),
-            invalidatesTags: ['Insurance'],
-        }),
+
         addInsurance: builder.mutation({
             query: (initialInsuranceData) => ({
                 url: '/insurances',
@@ -57,7 +51,7 @@ export const {
     useGetInsurancesQuery,
     useAddInsuranceMutation,
     useGetDashboardStatsQuery,
-    useSendReminderMutation,
+
     useDeleteInsuranceMutation,
     useGetInsuranceByIdQuery,
     useUpdateInsuranceMutation,

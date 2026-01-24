@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { logOut } from '../features/auth/authSlice'
 import { useUpdateUserProfileMutation } from '../features/users/usersApiSlice'
-import { Menu, X, Shield, PlusCircle, List, LayoutDashboard, LogOut, Users, Key } from 'lucide-react'
+import { Menu, X, Shield, PlusCircle, List, LayoutDashboard, LogOut, Users, Key, Image as ImageIcon } from 'lucide-react'
 
 const Navbar = () => {
     const dispatch = useDispatch()
@@ -49,7 +49,7 @@ const Navbar = () => {
                 <div className="flex items-center justify-between h-14 md:h-16">
                     {/* Logo & Brand */}
                     <div className="flex items-center">
-                        <Link to="/dashboard" className="flex items-center space-x-3 group">
+                        <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-blue-400 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
                                 <img
@@ -80,16 +80,28 @@ const Navbar = () => {
 
                                 {/* Admin Only Link */}
                                 {user?.role === 'admin' && (
-                                    <Link
-                                        to="/admin/staff"
-                                        className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive('/admin/staff')
-                                            ? 'bg-purple-800/80 text-white shadow-inner shadow-purple-900/50 border border-purple-600/50'
-                                            : 'text-blue-100 hover:bg-purple-800/50 hover:text-white hover:shadow-sm'
-                                            }`}
-                                    >
-                                        <Users className="w-4 h-4 mr-2" />
-                                        Users
-                                    </Link>
+                                    <>
+                                        <Link
+                                            to="/admin/staff"
+                                            className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive('/admin/staff')
+                                                ? 'bg-purple-800/80 text-white shadow-inner shadow-purple-900/50 border border-purple-600/50'
+                                                : 'text-blue-100 hover:bg-purple-800/50 hover:text-white hover:shadow-sm'
+                                                }`}
+                                        >
+                                            <Users className="w-4 h-4 mr-2" />
+                                            Users
+                                        </Link>
+                                        <Link
+                                            to="/admin/posters"
+                                            className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isActive('/admin/posters')
+                                                ? 'bg-purple-800/80 text-white shadow-inner shadow-purple-900/50 border border-purple-600/50'
+                                                : 'text-blue-100 hover:bg-purple-800/50 hover:text-white hover:shadow-sm'
+                                                }`}
+                                        >
+                                            <ImageIcon className="w-4 h-4 mr-2" />
+                                            Posters
+                                        </Link>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -155,17 +167,30 @@ const Navbar = () => {
 
                         {/* Admin Only Link Mobile */}
                         {user?.role === 'admin' && (
-                            <Link
-                                to="/admin/staff"
-                                onClick={() => setIsOpen(false)}
-                                className={`flex items-center px-3 py-2 rounded-md text-base font-medium block ${isActive('/admin/staff')
-                                    ? 'bg-purple-800 text-white'
-                                    : 'text-blue-100 hover:bg-purple-700 hover:text-white'
-                                    }`}
-                            >
-                                <Users className="w-5 h-5 mr-3" />
-                                Users
-                            </Link>
+                            <>
+                                <Link
+                                    to="/admin/staff"
+                                    onClick={() => setIsOpen(false)}
+                                    className={`flex items-center px-3 py-2 rounded-md text-base font-medium block ${isActive('/admin/staff')
+                                        ? 'bg-purple-800 text-white'
+                                        : 'text-blue-100 hover:bg-purple-700 hover:text-white'
+                                        }`}
+                                >
+                                    <Users className="w-5 h-5 mr-3" />
+                                    Users
+                                </Link>
+                                <Link
+                                    to="/admin/posters"
+                                    onClick={() => setIsOpen(false)}
+                                    className={`flex items-center px-3 py-2 rounded-md text-base font-medium block ${isActive('/admin/posters')
+                                        ? 'bg-purple-800 text-white'
+                                        : 'text-blue-100 hover:bg-purple-700 hover:text-white'
+                                        }`}
+                                >
+                                    <ImageIcon className="w-5 h-5 mr-3" />
+                                    Posters
+                                </Link>
+                            </>
                         )}
                     </div>
                     <div className="pt-4 pb-4 border-t border-blue-800">
