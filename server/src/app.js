@@ -54,7 +54,7 @@ app.use('/api/announcements', require('./routes/announcementRoutes'));
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
     // Handle SPA routing: serve index.html for any non-API route
-    app.get('/:any*', (req, res) => {
+    app.use((req, res, next) => {
         if (!req.path.startsWith('/api')) {
             res.sendFile(path.join(publicPath, 'index.html'));
         } else {
