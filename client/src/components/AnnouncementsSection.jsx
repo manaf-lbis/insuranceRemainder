@@ -1,51 +1,57 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useGetPublicAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
-import { Calendar, ArrowRight } from 'lucide-react';
-import DOMPurify from 'dompurify';
+import { ArrowRight } from 'lucide-react';
+import { extractFirstImage } from '../utils/stringUtils';
 
 const AnnouncementCard = ({ announcement }) => {
-    const excerpt = DOMPurify.sanitize(announcement.content, { ALLOWED_TAGS: [] }).substring(0, 100) + '...';
+    const firstImage = extractFirstImage(announcement.content);
+
+    const timeAgo = (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " years ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " months ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " days ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " hr ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " min ago";
+        return Math.floor(seconds) + " sec ago";
+    };
 
     return (
-        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
-            {/* Thumbnail */}
-            <div className="h-32 sm:h-48 bg-gray-100 relative overflow-hidden">
-                {announcement.thumbnailUrl ? (
-                    <img
-                        src={announcement.thumbnailUrl}
-                        alt=""
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="w-full h-full bg-slate-50 flex items-center justify-center">
-                        <span className="text-slate-300 font-bold text-sm sm:text-lg">No Image</span>
+        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 block p-4 h-full">
+            <div className="flex gap-4 h-full">
+                <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NEWS</span>
+                            <span className="text-[10px] font-black text-slate-300">|</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CSC</span>
+                        </div>
+
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
+                            {announcement.title}
+                        </h3>
+                    </div>
+
+                    <div className="flex items-center text-xs text-slate-400 font-medium">
+                        {timeAgo(announcement.createdAt)}
+                    </div>
+                </div>
+
+                {firstImage && (
+                    <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 self-start">
+                        <img
+                            src={firstImage}
+                            alt={announcement.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
                     </div>
                 )}
-                <div className="absolute top-0 right-0 p-2 sm:p-3">
-                    <span className="bg-white/90 backdrop-blur text-blue-900 text-xs font-bold px-2 py-1 rounded-md shadow-sm">
-                        News
-                    </span>
-                </div>
-            </div>
-
-            <div className="p-3 sm:p-5 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 text-xs text-slate-500 mb-2 font-medium">
-                    <Calendar size={12} className="text-emerald-500" />
-                    {new Date(announcement.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2 font-poppins line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
-                    {announcement.title}
-                </h3>
-
-                <p className="text-slate-500 text-xs sm:text-sm line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4 flex-1 leading-relaxed">
-                    {excerpt}
-                </p>
-
-                <div className="mt-auto flex items-center text-xs sm:text-sm font-bold text-blue-600 group-hover:text-blue-700">
-                    Read More <ArrowRight size={14} className="ml-1 transition-transform group-hover:translate-x-1" />
-                </div>
             </div>
         </Link>
     );

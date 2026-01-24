@@ -1,9 +1,10 @@
 import React from 'react';
 import { useGetActivePostersQuery } from '../features/posters/postersApiSlice';
-import { Search, Info, ArrowRight, ShieldCheck, FileCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AnnouncementsSection from '../components/AnnouncementsSection';
 import NewsTicker from '../components/NewsTicker';
+import QuickLinks from '../components/QuickLinks';
 
 const HeroPoster = () => {
     const { data: posters, isLoading, isError } = useGetActivePostersQuery();
@@ -123,37 +124,7 @@ const HeroPoster = () => {
     );
 };
 
-const ActionCard = ({ title, description, icon: Icon, to, color = "blue" }) => {
-    const colorClasses = {
-        blue: "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white",
-        emerald: "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white"
-    };
 
-    return (
-        <Link to={to} className="group relative bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 flex flex-col items-start h-full overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-150 duration-500">
-                <Icon size={120} />
-            </div>
-
-            <div className={`w-16 h-16 rounded-2xl ${colorClasses[color]} flex items-center justify-center mb-6 transition-colors duration-300 shadow-inner`}>
-                <Icon size={32} />
-            </div>
-
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 font-poppins relative z-10">
-                {title}
-            </h3>
-
-            <p className="text-gray-500 mb-6 leading-relaxed relative z-10 group-hover:text-gray-600">
-                {description}
-            </p>
-
-            <div className="mt-auto flex items-center gap-2 font-bold text-sm uppercase tracking-wide transition-colors group-hover:underline underline-offset-4 decoration-2">
-                <span className={color === 'emerald' ? 'text-emerald-600' : 'text-blue-600'}>Proceed</span>
-                <ArrowRight size={16} className={color === 'emerald' ? 'text-emerald-600' : 'text-blue-600'} />
-            </div>
-        </Link>
-    );
-};
 
 const HomePage = () => {
     return (
@@ -197,28 +168,11 @@ const HomePage = () => {
                 {/* Hero Section */}
                 <HeroPoster />
 
+                {/* Quick Links Section */}
+                <QuickLinks />
+
                 {/* Announcements Section */}
                 <AnnouncementsSection limit={4} />
-
-                {/* Action Section */}
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 -mt-8 md:-mt-20 relative z-20">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                        <ActionCard
-                            to="/check-insurance"
-                            title="Check Insurance Validity"
-                            description="Instantly verify your vehicle insurance status using your registration number or mobile number."
-                            icon={Search}
-                            color="emerald"
-                        />
-                        <ActionCard
-                            to="/services"
-                            title="Our Services"
-                            description="Explore our comprehensive range of insurance services, renewals, and vehicle related solutions."
-                            icon={FileCheck}
-                            color="blue"
-                        />
-                    </div>
-                </section>
             </main>
 
             <footer className="bg-white border-t border-gray-200 py-8">

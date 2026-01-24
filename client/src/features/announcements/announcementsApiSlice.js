@@ -44,6 +44,13 @@ export const announcementsApiSlice = apiSlice.injectEndpoints({
         getTickerAnnouncements: builder.query({
             query: () => '/announcements/ticker',
         }),
+        uploadImage: builder.mutation({
+            query: (formData) => ({
+                url: '/upload/image',
+                method: 'POST',
+                body: formData,
+            }),
+        }),
     }),
 });
 
@@ -56,4 +63,5 @@ export const {
     useUpdateAnnouncementMutation,
     useDeleteAnnouncementMutation,
     useGetTickerAnnouncementsQuery,
+    useUploadImageMutation,
 } = announcementsApiSlice;

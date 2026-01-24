@@ -1,18 +1,8 @@
 const announcementRepository = require('../repositories/announcementRepository');
 
-// Helper to extract first image URL from HTML content
-const extractThumbnail = (htmlContent) => {
-    if (!htmlContent) return null;
-    const match = htmlContent.match(/<img[^>]+src="([^">]+)"/);
-    return match ? match[1] : null;
-};
-
 const createAnnouncement = async (data, userId) => {
-    const thumbnail = extractThumbnail(data.content);
-
     const announcementData = {
         ...data,
-        thumbnailUrl: thumbnail,
         author: userId
     };
 
@@ -20,13 +10,7 @@ const createAnnouncement = async (data, userId) => {
 };
 
 const updateAnnouncement = async (id, data) => {
-    // If content is being updated, re-evaluate thumbnail
-    let updates = { ...data };
-    if (data.content) {
-        updates.thumbnailUrl = extractThumbnail(data.content);
-    }
-
-    return await announcementRepository.update(id, updates);
+    return await announcementRepository.update(id, data);
 };
 
 const getPublicAnnouncements = async () => {
