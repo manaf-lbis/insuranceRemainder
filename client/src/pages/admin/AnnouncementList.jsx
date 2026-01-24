@@ -62,12 +62,7 @@ const AnnouncementList = () => {
                             announcements?.map((item) => (
                                 <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            {item.thumbnailUrl && (
-                                                <img src={item.thumbnailUrl} alt="" className="w-10 h-10 rounded object-cover border border-gray-200" />
-                                            )}
-                                            <span className="font-medium text-gray-900">{item.title}</span>
-                                        </div>
+                                        <span className="font-medium text-gray-900">{item.title}</span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold capitalize ${item.status === 'published'

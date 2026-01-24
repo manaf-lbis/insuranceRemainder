@@ -5,7 +5,7 @@ import {
     useUpdateAnnouncementMutation,
     useGetAnnouncementByIdAdminQuery
 } from '../../features/announcements/announcementsApiSlice';
-import RichTextEditor from '../../components/RichTextEditor';
+import TiptapEditor from '../../components/TiptapEditor';
 import { useToast } from '../../components/ToastContext';
 import { ArrowLeft, Save, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -88,48 +88,49 @@ const ManageAnnouncement = () => {
                         />
                     </div>
 
-                    {/* Status */}
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <div className="flex gap-4">
-                            <label className={`flex-1 cursor-pointer border rounded-lg p-3 flex items-center justify-center gap-2 transition-all ${status === 'draft' ? 'bg-gray-100 border-gray-300 ring-1 ring-gray-300' : 'border-gray-200 hover:bg-gray-50'}`}>
-                                <input
-                                    type="radio"
-                                    name="status"
-                                    value="draft"
-                                    checked={status === 'draft'}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className="sr-only"
-                                />
-                                <span className="font-medium text-gray-600">Save as Draft</span>
-                            </label>
-                            <label className={`flex-1 cursor-pointer border rounded-lg p-3 flex items-center justify-center gap-2 transition-all ${status === 'published' ? 'bg-emerald-50 border-emerald-300 ring-1 ring-emerald-300' : 'border-gray-200 hover:bg-gray-50'}`}>
-                                <input
-                                    type="radio"
-                                    name="status"
-                                    value="published"
-                                    checked={status === 'published'}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className="sr-only"
-                                />
-                                <span className={`font-medium ${status === 'published' ? 'text-emerald-700' : 'text-gray-600'}`}>Publish Immediately</span>
-                            </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Status */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                            <div className="flex gap-4">
+                                <label className={`flex-1 cursor-pointer border rounded-lg p-3 flex items-center justify-center gap-2 transition-all ${status === 'draft' ? 'bg-gray-100 border-gray-300 ring-1 ring-gray-300' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="draft"
+                                        checked={status === 'draft'}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                        className="sr-only"
+                                    />
+                                    <span className="font-medium text-gray-600">Draft</span>
+                                </label>
+                                <label className={`flex-1 cursor-pointer border rounded-lg p-3 flex items-center justify-center gap-2 transition-all ${status === 'published' ? 'bg-emerald-50 border-emerald-300 ring-1 ring-emerald-300' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                    <input
+                                        type="radio"
+                                        name="status"
+                                        value="published"
+                                        checked={status === 'published'}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                        className="sr-only"
+                                    />
+                                    <span className={`font-medium ${status === 'published' ? 'text-emerald-700' : 'text-gray-600'}`}>Publish</span>
+                                </label>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Priority */}
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Priority</label>
-                        <select
-                            value={priority}
-                            onChange={(e) => setPriority(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        >
-                            <option value="cold">❄️ Cold (Normal)</option>
-                            <option value="warm">⚡ Warm (Important)</option>
-                            <option value="hot">🔥 Hot (Urgent)</option>
-                        </select>
-                        <p className="text-xs text-gray-500 mt-1">Hot items appear first, then Warm, then Cold</p>
+                        {/* Priority */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Priority</label>
+                            <select
+                                value={priority}
+                                onChange={(e) => setPriority(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            >
+                                <option value="cold">❄️ Cold (Normal)</option>
+                                <option value="warm">⚡ Warm (Important)</option>
+                                <option value="hot">🔥 Hot (Urgent)</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Show in Ticker */}
@@ -150,7 +151,7 @@ const ManageAnnouncement = () => {
                     {/* Editor */}
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2">Content</label>
-                        <RichTextEditor
+                        <TiptapEditor
                             value={content}
                             onChange={setContent}
                             placeholder="Write your announcement content here..."

@@ -10,10 +10,6 @@ const announcementSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Announcement content is required']
     },
-    thumbnailUrl: {
-        type: String,
-        default: null
-    },
     status: {
         type: String,
         enum: ['draft', 'published'],
