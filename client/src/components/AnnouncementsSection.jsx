@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useGetPublicAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
+import { extractFirstImage } from '../utils/stringUtils';
 import { ArrowRight } from 'lucide-react';
 
 const AnnouncementCard = ({ announcement }) => {
+    const firstImage = extractFirstImage(announcement.content);
+
     const timeAgo = (date) => {
         const seconds = Math.floor((new Date() - new Date(date)) / 1000);
         let interval = seconds / 31536000;
@@ -21,22 +24,34 @@ const AnnouncementCard = ({ announcement }) => {
 
     return (
         <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 block p-4 h-full">
-            <div className="flex flex-col justify-between h-full">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NEWS</span>
-                        <span className="text-[10px] font-black text-slate-300">|</span>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CSC</span>
+            <div className="flex gap-4 h-full">
+                <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NEWS</span>
+                            <span className="text-[10px] font-black text-slate-300">|</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CSC</span>
+                        </div>
+
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
+                            {announcement.title}
+                        </h3>
                     </div>
 
-                    <h3 className="text-base sm:text-lg font-bold text-gray-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
-                        {announcement.title}
-                    </h3>
+                    <div className="flex items-center text-xs text-slate-400 font-medium">
+                        {timeAgo(announcement.createdAt)}
+                    </div>
                 </div>
 
-                <div className="flex items-center text-xs text-slate-400 font-medium">
-                    {timeAgo(announcement.createdAt)}
-                </div>
+                {firstImage && (
+                    <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 self-start">
+                        <img
+                            src={firstImage}
+                            alt={announcement.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                    </div>
+                )}
             </div>
         </Link>
     );
