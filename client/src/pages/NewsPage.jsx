@@ -76,8 +76,11 @@ const NewsPage = () => {
                 )}
 
                 {error && (
-                    <div className="text-center py-20 text-red-500">
-                        Failed to load news. Please try again later.
+                    <div className="text-center py-20">
+                        <div className="max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg p-6">
+                            <p className="text-red-600 font-medium mb-2">Unable to load news</p>
+                            <p className="text-red-500 text-sm">Please try refreshing the page</p>
+                        </div>
                     </div>
                 )}
 
