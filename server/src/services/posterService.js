@@ -1,16 +1,23 @@
 const posterRepository = require('../repositories/posterRepository');
 const { cloudinary } = require('../config/cloudinary');
 
-const uploadPoster = async (file, userId, title) => {
+const uploadPoster = async ({ file, userId, metadata }) => {
     if (!file) {
-        throw new Error('No file uploaded');
+        throw new Error('Image file is required');
     }
 
     const posterData = {
-        title: title || 'Untitled Poster',
+        title: metadata.title || 'Untitled Poster',
         imageUrl: file.path,
         publicId: file.filename,
-        isActive: false, // Default to inactive
+        dominantColor: metadata.dominantColor || '#1e3a8a',
+        headline: metadata.headline,
+        description: metadata.description,
+        showButton: metadata.showButton === 'true' || metadata.showButton === true,
+        buttonText: metadata.buttonText || 'Quick Apply',
+        whatsappNumber: metadata.whatsappNumber,
+        messageTemplate: metadata.messageTemplate,
+        isActive: metadata.isActive === 'true' || metadata.isActive === true,
         uploadedBy: userId
     };
 

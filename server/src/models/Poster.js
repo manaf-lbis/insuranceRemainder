@@ -14,6 +14,34 @@ const posterSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Cloudinary Public ID is required']
     },
+    dominantColor: {
+        type: String,
+        default: '#1e3a8a'
+    },
+    headline: {
+        type: String,
+        trim: true
+    },
+    description: {
+        type: String,
+        trim: true
+    },
+    showButton: {
+        type: Boolean,
+        default: true
+    },
+    buttonText: {
+        type: String,
+        default: 'Quick Apply'
+    },
+    whatsappNumber: {
+        type: String,
+        default: '9633565414'
+    },
+    messageTemplate: {
+        type: String,
+        default: 'Hello, I would like to apply for insurance.'
+    },
     isActive: {
         type: Boolean,
         default: false,

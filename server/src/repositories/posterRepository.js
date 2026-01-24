@@ -28,12 +28,17 @@ const update = async (id, data) => {
 const toggleActive = async (id) => {
     const poster = await Poster.findById(id);
     if (!poster) return null;
+
     poster.isActive = !poster.isActive;
     return await poster.save();
 };
 
 const deletePoster = async (id) => {
     return await Poster.findByIdAndDelete(id);
+};
+
+const updateMany = async (filter, data) => {
+    return await Poster.updateMany(filter, data);
 };
 
 module.exports = {
@@ -44,5 +49,6 @@ module.exports = {
     findById,
     update,
     toggleActive,
-    deletePoster
+    deletePoster,
+    updateMany
 };
