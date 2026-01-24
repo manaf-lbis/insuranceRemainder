@@ -7,35 +7,53 @@ import EditInsurance from './pages/EditInsurance'
 import InsuranceList from './pages/InsuranceList'
 import StaffList from './pages/StaffList'
 import AddStaff from './pages/AddStaff'
-import PublicInsuranceCheck from './pages/PublicInsuranceCheck'
+import CheckInsurancePage from './pages/CheckInsurancePage'
+import HomePage from './pages/HomePage'
+import ServicesPage from './pages/ServicesPage'
+import ManagePosters from './pages/ManagePosters'
+import AnnouncementList from './pages/admin/AnnouncementList'
+import ManageAnnouncement from './pages/admin/ManageAnnouncement'
+import AnnouncementDetailPage from './pages/AnnouncementDetailPage'
+import NewsPage from './pages/NewsPage'
 import Layout from './components/Layout'
+import AdminLayout from './components/AdminLayout'
 import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
 import { ToastProvider } from './components/ToastContext'
 import InstallPrompt from './components/InstallPrompt'
+import WhatsAppButton from './components/WhatsAppButton'
 
 function App() {
     return (
         <ToastProvider>
             <InstallPrompt />
+            <WhatsAppButton />
             <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<PublicInsuranceCheck />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/check-insurance" element={<CheckInsurancePage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/news" element={<NewsPage />} />
+                <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
                 <Route path="/login" element={<LoginPage />} />
 
                 {/* Protected Routes */}
                 <Route element={<PrivateRoute />}>
-                    <Route element={<Layout />}>
+                    <Route element={<AdminLayout />}>
+                        {/* Common Protected Routes (Staff & Admin) */}
                         <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/add-insurance" element={<AddInsurance />} />
                         <Route path="/edit-insurance/:id" element={<EditInsurance />} />
                         <Route path="/insurances" element={<InsuranceList />} />
-                    </Route>
 
-                    <Route element={<AdminRoute />}>
-                        <Route element={<Layout />}>
+                        {/* Admin Only Routes */}
+                        <Route element={<AdminRoute />}>
                             <Route path="/admin/staff" element={<StaffList />} />
                             <Route path="/admin/add-staff" element={<AddStaff />} />
+                            <Route path="/admin/posters" element={<ManagePosters />} />
+                            <Route path="/admin/announcements" element={<AnnouncementList />} />
+                            <Route path="/admin/announcements/new" element={<ManageAnnouncement />} />
+                            <Route path="/admin/announcements/edit/:id" element={<ManageAnnouncement />} />
                         </Route>
                     </Route>
                 </Route>

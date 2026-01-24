@@ -46,8 +46,10 @@ app.use('/api/public', require('./routes/publicRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/insurances', require('./routes/insuranceRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
-app.use('/api/reminders', require('./routes/reminderRoutes'));
+
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/posters', require('./routes/posterRoutes'));
+app.use('/api/announcements', require('./routes/announcementRoutes'));
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {

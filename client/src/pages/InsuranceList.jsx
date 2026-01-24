@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { useGetInsurancesQuery, useSendReminderMutation, useDeleteInsuranceMutation } from '../features/insurance/insuranceApiSlice'
-import { ChevronLeft, Plus, Loader, Filter, Send, X, Search, Trash2, Edit2, Calendar, CheckCircle, SlidersHorizontal, ArrowUp } from 'lucide-react'
+import { useGetInsurancesQuery, useDeleteInsuranceMutation } from '../features/insurance/insuranceApiSlice'
+import { ChevronLeft, Plus, Loader, Filter, X, Search, Trash2, Edit2, Calendar, CheckCircle, SlidersHorizontal, ArrowUp } from 'lucide-react'
 import { useToast } from '../components/ToastContext'
 import Pagination from '../components/Pagination'
 import ConfirmModal from '../components/ConfirmModal'
@@ -36,10 +36,10 @@ const InsuranceList = () => {
         setPage(1)
     }, [statusFilter, debouncedSearch, expiryFrom, expiryTo])
 
-    const [selectedInsurance, setSelectedInsurance] = useState(null)
+
     const [insuranceToDelete, setInsuranceToDelete] = useState(null)
 
-    const [sendReminder, { isLoading: isSending }] = useSendReminderMutation()
+
     const [deleteInsurance, { isLoading: isDeleting }] = useDeleteInsuranceMutation()
 
     const { user } = useSelector((state) => state.auth)
@@ -78,25 +78,13 @@ const InsuranceList = () => {
 
     const { showToast } = useToast()
 
-    const handleSendClick = (insurance) => {
-        setSelectedInsurance(insurance)
-    }
+
 
     const handleDeleteClick = (insurance) => {
         setInsuranceToDelete(insurance)
     }
 
-    const confirmSendReminder = async () => {
-        if (!selectedInsurance) return
 
-        try {
-            await sendReminder(selectedInsurance._id).unwrap()
-            showToast({ message: `Reminder sent successfully to ${selectedInsurance.customerName}`, type: 'success' })
-            setSelectedInsurance(null)
-        } catch (err) {
-            showToast({ message: `Failed to send reminder: ${err?.data?.message || err.message}`, type: 'error' })
-        }
-    }
 
     const confirmDelete = async () => {
         if (!insuranceToDelete) return
@@ -134,9 +122,7 @@ const InsuranceList = () => {
         setDateError('')
     }
 
-    const isEligibleForReminder = (daysRemaining) => {
-        return daysRemaining >= 0 && daysRemaining <= 30
-    }
+
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -254,16 +240,7 @@ const InsuranceList = () => {
                                     </span>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleSendClick(insurance); }}
-                                        disabled={!isEligibleForReminder(insurance.daysRemaining)}
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-sm ${isEligibleForReminder(insurance.daysRemaining)
-                                            ? 'bg-blue-600 text-white shadow-blue-200'
-                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                                            }`}
-                                    >
-                                        <Send size={18} />
-                                    </button>
+
 
                                     {user?.role === 'admin' && (
                                         <button
@@ -335,17 +312,7 @@ const InsuranceList = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center">
                                         <div className="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={() => handleSendClick(insurance)}
-                                                disabled={!isEligibleForReminder(insurance.daysRemaining)}
-                                                className={`p-2 rounded-lg transition-all ${isEligibleForReminder(insurance.daysRemaining)
-                                                    ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer active:scale-95'
-                                                    : 'text-gray-300 cursor-not-allowed'
-                                                    }`}
-                                                title={isEligibleForReminder(insurance.daysRemaining) ? "Send Reminder" : "Unavailable (Too early/expired)"}
-                                            >
-                                                <Send size={18} />
-                                            </button>
+
 
                                             {(user?.role === 'admin' || insurance.createdBy === user?._id || insurance.createdBy?._id === user?._id) && (
                                                 <>
@@ -625,66 +592,7 @@ const InsuranceList = () => {
                     </div>
                 </BottomSheet>
 
-                {/* Send Reminder Confirmation Modal */}
-                {selectedInsurance && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-4 animate-in fade-in duration-200">
-                        <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
-                            <div className="flex justify-between items-center mb-6">
-                                <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
-                                    <Send size={24} />
-                                </div>
-                                <button onClick={() => setSelectedInsurance(null)} className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                                    <X size={24} />
-                                </button>
-                            </div>
 
-                            <div className="mb-8">
-                                <h3 className="text-2xl font-black text-gray-900 mb-2 font-poppins">Send Reminder?</h3>
-                                <p className="text-gray-500 font-medium mb-6">You are about to send a WhatsApp reminder for this policy.</p>
-
-                                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-3">
-                                    <div>
-                                        <div className="text-[10px] uppercase font-black text-gray-400">Customer</div>
-                                        <div className="font-bold text-gray-800">{selectedInsurance.customerName}</div>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <div>
-                                            <div className="text-[10px] uppercase font-black text-gray-400">Reg No</div>
-                                            <div className="font-bold text-gray-800">{selectedInsurance.registrationNumber}</div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-[10px] uppercase font-black text-gray-400">Expires In</div>
-                                            <div className="font-black text-blue-600 underline underline-offset-4">{selectedInsurance.daysRemaining} Days</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <button
-                                    onClick={() => setSelectedInsurance(null)}
-                                    className="flex-1 py-3.5 text-gray-700 bg-gray-100 rounded-2xl font-bold hover:bg-gray-200 transition-all active:scale-95"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmSendReminder}
-                                    disabled={isSending}
-                                    className="flex-2 py-3.5 px-8 text-white bg-blue-900 rounded-2xl font-bold hover:bg-black flex items-center justify-center transition-all shadow-xl shadow-blue-900/20 active:scale-95"
-                                >
-                                    {isSending ? (
-                                        <Loader size={20} className="animate-spin" />
-                                    ) : (
-                                        <>
-                                            <Send size={20} className="mr-2" />
-                                            Confirm Send
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Delete Confirmation Modal */}
                 <ConfirmModal
