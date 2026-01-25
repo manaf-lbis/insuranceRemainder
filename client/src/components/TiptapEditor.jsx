@@ -204,8 +204,8 @@ const TiptapEditor = ({ value, onChange, placeholder = 'Start writing...' }) => 
     ];
 
     return (
-        <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all bg-white">
-            <div className="bg-gray-50 border-b border-gray-200 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10">
+        <div className="border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all bg-white">
+            <div className="bg-white/95 backdrop-blur-md border-b border-gray-200 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-[100] shadow-md rounded-t-xl">
                 {/* Text Styles */}
                 <div className="flex gap-1 pr-2 border-r border-gray-200">
                     <ToolbarButton
