@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../features/auth/authSlice';
 import {
     Menu, X, Shield, LayoutDashboard, LogOut,
-    Newspaper, Briefcase, Home, ChevronDown, User, Key
+    Newspaper, Briefcase, Info, Home, ChevronDown, User, Key
 } from 'lucide-react';
 import { useUpdateUserProfileMutation } from '../features/users/usersApiSlice';
 
@@ -22,6 +22,19 @@ const Navbar = ({ variant = 'solid' }) => {
     const [pwdModalOpen, setPwdModalOpen] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
+    const navRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (navRef.current && !navRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setUserMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -35,6 +48,7 @@ const Navbar = ({ variant = 'solid' }) => {
         { path: '/', label: 'Home', icon: Home },
         { path: '/news', label: 'Latest News', icon: Newspaper },
         { path: '/services', label: 'Our Services', icon: Briefcase },
+        { path: '/about', label: 'About Us', icon: Info },
     ];
 
     const handleLogout = () => {
@@ -60,7 +74,7 @@ const Navbar = ({ variant = 'solid' }) => {
     };
 
     return (
-        <nav className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${isSolid
+        <nav ref={navRef} className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${isSolid
             ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200 py-3 shadow-sm'
             : 'bg-transparent py-5'
             }`}>

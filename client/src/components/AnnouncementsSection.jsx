@@ -65,10 +65,27 @@ const AnnouncementCard = ({ announcement }) => {
     );
 };
 
-const AnnouncementsSection = ({ limit = 3 }) => {
+const AnnouncementsSection = ({ limit: initialLimit = 3 }) => {
     const { data: announcements, isLoading } = useGetPublicAnnouncementsQuery();
+    const [visibleCount, setVisibleCount] = React.useState(initialLimit);
 
-    const displayedAnnouncements = announcements?.slice(0, limit);
+    const processedAnnouncements = React.useMemo(() => {
+        if (!announcements) return [];
+
+        const now = new Date();
+        return [...announcements]
+            .filter(a => !a.expiresAt || new Date(a.expiresAt) > now)
+            .sort((a, b) => {
+                // Priority Sort: Hot first
+                if (a.priority === 'hot' && b.priority !== 'hot') return -1;
+                if (a.priority !== 'hot' && b.priority === 'hot') return 1;
+
+                // Then Date Sort
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+    }, [announcements]);
+
+    const displayedAnnouncements = processedAnnouncements.slice(0, visibleCount);
 
     if (isLoading) {
         return (
@@ -83,28 +100,39 @@ const AnnouncementsSection = ({ limit = 3 }) => {
         );
     }
 
-    if (!displayedAnnouncements || displayedAnnouncements.length === 0) {
+    if (!processedAnnouncements || processedAnnouncements.length === 0) {
         return null;
     }
 
     return (
         <section className="bg-slate-50/50 py-12 sm:py-16 border-t border-slate-100 relative z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-end mb-6 sm:mb-8">
+                <div className="flex justify-between items-end mb-6 sm:mb-10">
                     <div>
-                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 font-poppins">Latest News</h2>
-                        <p className="text-slate-500 mt-1 sm:mt-2 text-sm sm:text-base">Important updates from Notify CSC</p>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 font-poppins tracking-tight">Latest News</h2>
+                        <p className="text-slate-500 mt-1 text-sm sm:text-base font-medium">Verified updates & institutional announcements</p>
                     </div>
-                    <Link to="/news" className="text-blue-600 hover:text-blue-700 font-bold text-sm sm:text-base flex items-center gap-1">
-                        View All <ArrowRight size={16} />
+                    <Link to="/news" className="hidden sm:flex text-blue-600 hover:text-blue-700 font-black text-xs uppercase tracking-widest items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 transition-all">
+                        View Registry <ArrowRight size={14} />
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     {displayedAnnouncements.map((announcement) => (
                         <AnnouncementCard key={announcement._id} announcement={announcement} />
                     ))}
                 </div>
+
+                {visibleCount < processedAnnouncements.length && (
+                    <div className="mt-12 text-center">
+                        <button
+                            onClick={() => setVisibleCount(prev => prev + 3)}
+                            className="px-10 py-4 rounded-2xl bg-white border border-slate-200 text-slate-900 font-bold text-sm shadow-sm hover:shadow-md hover:bg-slate-50 transition-all active:scale-95"
+                        >
+                            Load More Updates
+                        </button>
+                    </div>
+                )}
             </div>
         </section>
     );

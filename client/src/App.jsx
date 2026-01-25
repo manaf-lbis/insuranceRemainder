@@ -15,6 +15,7 @@ import AnnouncementList from './pages/admin/AnnouncementList'
 import ManageAnnouncement from './pages/admin/ManageAnnouncement'
 import AnnouncementDetailPage from './pages/AnnouncementDetailPage'
 import NewsPage from './pages/NewsPage'
+import AboutPage from './pages/AboutPage'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import PrivateRoute from './components/PrivateRoute'
@@ -36,6 +37,7 @@ function App() {
                     <Route path="/check-insurance" element={<CheckInsurancePage />} />
                     <Route path="/services" element={<ServicesPage />} />
                     <Route path="/news" element={<NewsPage />} />
+                    <Route path="/about" element={<AboutPage />} />
                     <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
