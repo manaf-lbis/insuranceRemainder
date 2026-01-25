@@ -17,10 +17,13 @@ const AnnouncementDetailPage = () => {
     const [copied, setCopied] = React.useState(false);
 
     const handleShare = async () => {
+        // Use backend proxy URL for correct social preview generation
+        const proxyUrl = `${import.meta.env.VITE_API_URL}/announcements/share/${id}`;
+
         const shareData = {
             title: announcement?.title,
             text: `Check out this update: ${announcement?.title}`,
-            url: window.location.href,
+            url: proxyUrl,
         };
 
         if (navigator.share) {
@@ -31,7 +34,7 @@ const AnnouncementDetailPage = () => {
             }
         } else {
             // Copy to clipboard fallback
-            navigator.clipboard.writeText(window.location.href);
+            navigator.clipboard.writeText(proxyUrl);
             setCopied(true);
             showToast({ message: 'Link copied to clipboard!', type: 'success' });
             setTimeout(() => setCopied(false), 2000);
