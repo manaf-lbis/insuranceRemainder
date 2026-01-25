@@ -21,6 +21,7 @@ const ManageAnnouncement = () => {
     const [status, setStatus] = useState('draft');
     const [priority, setPriority] = useState('cold');
     const [showInTicker, setShowInTicker] = useState(false);
+    const [expiryDuration, setExpiryDuration] = useState('never');
 
     const { data: announcement, isLoading: isFetching } = useGetAnnouncementByIdAdminQuery(id, {
         skip: !isEditMode
@@ -36,13 +37,23 @@ const ManageAnnouncement = () => {
             setStatus(announcement.status);
             setPriority(announcement.priority || 'cold');
             setShowInTicker(announcement.showInTicker || false);
+            // We don't easily reverse engineer duration, but we can check if it exists
+            if (!announcement.expiresAt) setExpiryDuration('never');
         }
     }, [announcement, isEditMode]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const data = { title, content, status, priority, showInTicker };
+            let expiresAt = null;
+            if (expiryDuration !== 'never') {
+                const date = new Date();
+                const days = parseInt(expiryDuration);
+                date.setDate(date.getDate() + days);
+                expiresAt = date;
+            }
+
+            const data = { title, content, status, priority, showInTicker, expiresAt };
             if (isEditMode) {
                 await updateAnnouncement({ id, ...data }).unwrap();
                 showToast({ message: 'Announcement updated successfully', type: 'success' });
@@ -133,19 +144,38 @@ const ManageAnnouncement = () => {
                         </div>
                     </div>
 
-                    {/* Show in Ticker */}
-                    <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                        <input
-                            type="checkbox"
-                            id="showInTicker"
-                            checked={showInTicker}
-                            onChange={(e) => setShowInTicker(e.target.checked)}
-                            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                        />
-                        <label htmlFor="showInTicker" className="flex-1 cursor-pointer">
-                            <span className="font-bold text-gray-900 block">Show in Scrolling Ticker</span>
-                            <span className="text-xs text-gray-600">Display this announcement in the top scrolling news bar</span>
-                        </label>
+                    {/* Expiry Selector */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <input
+                                type="checkbox"
+                                id="showInTicker"
+                                checked={showInTicker}
+                                onChange={(e) => setShowInTicker(e.target.checked)}
+                                className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            />
+                            <label htmlFor="showInTicker" className="flex-1 cursor-pointer">
+                                <span className="font-bold text-gray-900 block">Show in Scrolling Ticker</span>
+                                <span className="text-xs text-gray-600">Display this announcement in the top scrolling news bar</span>
+                            </label>
+                        </div>
+
+                        <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-100">
+                            <div className="flex-1">
+                                <label className="block text-xs font-black text-amber-700 uppercase tracking-widest mb-1">Auto-Expiry</label>
+                                <select
+                                    value={expiryDuration}
+                                    onChange={(e) => setExpiryDuration(e.target.value)}
+                                    className="w-full bg-white/50 border border-amber-200 rounded-md py-1.5 px-2 text-sm font-bold text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                >
+                                    <option value="never">♾️ Never Expire</option>
+                                    <option value="1">⏱️ 1 Day</option>
+                                    <option value="3">⏱️ 3 Days</option>
+                                    <option value="7">⏱️ 1 Week</option>
+                                    <option value="30">⏱️ 1 Month</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Editor */}

@@ -5,9 +5,9 @@ import { ShieldCheck, Briefcase, MapPin, Info, ChevronRight } from 'lucide-react
 const QuickLinks = () => {
     const links = [
         {
-            title: "Check insurance validity",
+            title: "G2C & B2C Service Enquiry",
             icon: ShieldCheck,
-            to: "/check-insurance",
+            to: "/check-insurance", // Leaving route for now, but title is changed
             iconBg: "bg-blue-50",
             iconColor: "text-blue-600"
         },

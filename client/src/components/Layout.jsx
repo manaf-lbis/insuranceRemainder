@@ -31,7 +31,7 @@ const Layout = () => {
                                 <h3 className="text-xl font-bold bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent font-poppins">Notify CSC</h3>
                             </div>
                             <p className="text-sm text-gray-400 max-w-xs leading-relaxed">
-                                Professional insurance renewal tracking and management for CSC Administrators.
+                                Unified digital interface for Citizen Services (G2C), Business Solutions (B2C), and Digital India initiatives.
                             </p>
                         </div>
 

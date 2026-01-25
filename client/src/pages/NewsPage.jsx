@@ -66,21 +66,25 @@ const NewsCard = ({ announcement }) => {
 
 const NewsPage = () => {
     const { data: announcements, isLoading, error } = useGetPublicAnnouncementsQuery();
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 9;
+    const [visibleCount, setVisibleCount] = useState(9);
 
-    const { paginatedAnnouncements, totalPages } = useMemo(() => {
-        if (!announcements) return { paginatedAnnouncements: [], totalPages: 0 };
+    const processedAnnouncements = useMemo(() => {
+        if (!announcements) return [];
 
-        const total = Math.ceil(announcements.length / itemsPerPage);
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
+        const now = new Date();
+        return [...announcements]
+            .filter(a => !a.expiresAt || new Date(a.expiresAt) > now)
+            .sort((a, b) => {
+                // Priority Sort: Hot first
+                if (a.priority === 'hot' && b.priority !== 'hot') return -1;
+                if (a.priority !== 'hot' && b.priority === 'hot') return 1;
 
-        return {
-            paginatedAnnouncements: announcements.slice(start, end),
-            totalPages: total
-        };
-    }, [announcements, currentPage]);
+                // Then Date Sort
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+    }, [announcements]);
+
+    const displayedAnnouncements = processedAnnouncements.slice(0, visibleCount);
 
     if (isLoading) {
         return (
@@ -120,50 +124,25 @@ const NewsPage = () => {
                             <p className="text-rose-600 font-black uppercase tracking-widest text-sm mb-2">Registry Connection Failed</p>
                             <p className="text-rose-500 font-medium italic">Unable to synchronize with news database. Please check your connection.</p>
                         </div>
-                    ) : announcements?.length === 0 ? (
+                    ) : processedAnnouncements.length === 0 ? (
                         <div className="bg-slate-100 rounded-[32px] p-20 text-center border border-slate-200 border-dashed">
                             <p className="text-slate-400 font-black uppercase tracking-widest text-sm">Registry Empty</p>
                         </div>
                     ) : (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {paginatedAnnouncements.map((announcement) => (
+                                {displayedAnnouncements.map((announcement) => (
                                     <NewsCard key={announcement._id} announcement={announcement} />
                                 ))}
                             </div>
 
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="mt-16 flex items-center justify-center gap-4">
+                            {visibleCount < processedAnnouncements.length && (
+                                <div className="mt-16 text-center">
                                     <button
-                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                        disabled={currentPage === 1}
-                                        className="p-3 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white transition-all shadow-sm"
+                                        onClick={() => setVisibleCount(prev => prev + 6)}
+                                        className="px-12 py-5 rounded-[24px] bg-white border border-slate-200 text-slate-900 font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/5 hover:shadow-xl hover:bg-slate-50 transition-all active:scale-95"
                                     >
-                                        <ChevronLeft size={20} />
-                                    </button>
-
-                                    <div className="flex gap-2">
-                                        {[...Array(totalPages)].map((_, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setCurrentPage(i + 1)}
-                                                className={`w-10 h-10 rounded-2xl font-black text-xs transition-all ${currentPage === i + 1
-                                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
-                                                    }`}
-                                            >
-                                                {i + 1}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <button
-                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="p-3 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white transition-all shadow-sm"
-                                    >
-                                        <ChevronRight size={20} />
+                                        Load More From Registry
                                     </button>
                                 </div>
                             )}

@@ -121,17 +121,12 @@ const PremiumHero = () => {
                 <div className="hidden lg:flex flex-1 items-stretch h-full">
                     {/* Content (Left) */}
                     <div className="flex-1 flex flex-col justify-center px-20 xl:px-32">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl mb-8 w-fit">
-                            <ShieldCheck className="text-emerald-400" size={14} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Secure Portal</span>
-                        </div>
-
                         <h1 className="text-5xl xl:text-7xl font-black leading-[1.1] mb-6 font-poppins tracking-tight text-white drop-shadow-2xl line-clamp-2">
-                            {headline || 'Secure Your Journey Today'}
+                            {headline || 'Your Digital Hub for Citizen Services'}
                         </h1>
 
                         <p className="text-lg xl:text-xl mb-10 font-medium leading-relaxed max-w-xl text-white/80 line-clamp-2">
-                            {description || 'Get professional insurance support with our simplified application process.'}
+                            {description || 'Efficiently access Government (G2C), Business (B2C), and Digital India e-Services at your doorstep.'}
                         </p>
 
                         {showButton && (
@@ -168,22 +163,16 @@ const PremiumHero = () => {
                             className="w-full h-auto max-h-[65vh] object-contain shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] rounded-2xl"
                             alt={headline || "Hero Poster"}
                         />
-                        <div className="absolute top-8 left-8">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600/90 text-white backdrop-blur-md shadow-lg border border-white/20">
-                                <ShieldCheck size={12} />
-                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">Official</span>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Clean Messaging Stack */}
                     <div className="px-6 pb-20 text-center space-y-6">
                         <div className="space-y-4">
                             <h1 className="text-3xl md:text-5xl font-black text-white font-poppins leading-tight tracking-tight drop-shadow-xl">
-                                {headline || 'Secure Your Future Today'}
+                                {headline || 'Your Digital Hub for Citizen Services'}
                             </h1>
                             <p className="text-sm md:text-xl text-white/70 font-medium leading-relaxed max-w-md mx-auto line-clamp-3">
-                                {description || 'Access dedicated insurance support through our streamlined digital registry.'}
+                                {description || 'Efficiently access Government (G2C), Business (B2C), and Digital India e-Services at your doorstep.'}
                             </p>
                         </div>
 
