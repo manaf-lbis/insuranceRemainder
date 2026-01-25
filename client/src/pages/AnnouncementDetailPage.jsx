@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGetAnnouncementByIdQuery, useGetPublicAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
 import { Calendar, User, ArrowLeft, Loader, Share2, Copy, Check } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
 import Navbar from '../components/Navbar';
 import { extractFirstImage } from '../utils/stringUtils';
@@ -71,8 +72,24 @@ const AnnouncementDetailPage = () => {
         ADD_TAGS: ['iframe'] // Preparation for future video embeds
     });
 
+    const firstImage = extractFirstImage(announcement.content);
+    const pageTitle = `${announcement.title} | Notify CSC`;
+    const shareDescription = `Check out this update from Notify CSC: ${announcement.title}`;
+
     return (
         <article className="min-h-screen bg-white">
+            <Helmet>
+                <title>{pageTitle}</title>
+                <meta property="og:title" content={announcement.title} />
+                <meta property="og:description" content={shareDescription} />
+                {firstImage && <meta property="og:image" content={firstImage} />}
+                <meta property="og:type" content="article" />
+                <meta property="og:url" content={window.location.href} />
+                <meta name="twitter:card" content="summary_large_image" />
+                {firstImage && <meta name="twitter:image" content={firstImage} />}
+                <meta name="twitter:title" content={announcement.title} />
+                <meta name="twitter:description" content={shareDescription} />
+            </Helmet>
             <Navbar variant="solid" />
             <header className="bg-slate-50 border-b border-gray-100 py-24 md:py-32">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6">
