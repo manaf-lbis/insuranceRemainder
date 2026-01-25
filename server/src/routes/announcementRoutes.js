@@ -11,6 +11,7 @@ const {
     getTickerAnnouncements,
     getAnnouncementByIdAdmin
 } = require('../controllers/announcementController');
+const { getAnnouncementSharePreview } = require('../controllers/shareController');
 
 // Public Routes
 router.get('/', getPublicAnnouncements);
@@ -25,6 +26,9 @@ router.route('/admin/:id')
     .get(protect, admin, getAnnouncementByIdAdmin)
     .put(protect, admin, updateAnnouncement)
     .delete(protect, admin, deleteAnnouncement);
+
+// Social Media Share Proxy (Server-Side Preview)
+router.get('/share/:id', getAnnouncementSharePreview);
 
 // Public route for single announcement - MUST come after /admin routes
 router.get('/:id', getAnnouncementById);
