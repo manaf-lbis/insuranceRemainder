@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 import Navbar from '../components/Navbar';
 import { extractFirstImage } from '../utils/stringUtils';
 import { useToast } from '../components/ToastContext';
+import { AnnouncementCard } from '../components/AnnouncementsSection';
 
 const AnnouncementDetailPage = () => {
     const { id } = useParams();
@@ -40,7 +41,9 @@ const AnnouncementDetailPage = () => {
         if (!allAnnouncements || !announcement) return [];
         return allAnnouncements
             .filter(a => a._id !== announcement._id)
-            .slice(0, 3);
+        return allAnnouncements
+            .filter(a => a._id !== announcement._id)
+            .slice(0, 10);
     }, [allAnnouncements, announcement]);
 
     if (isLoading) {
@@ -128,22 +131,9 @@ const AnnouncementDetailPage = () => {
                             <h2 className="text-2xl font-black text-slate-900 font-poppins tracking-tight">More from <span className="text-blue-600">Notify CSC</span></h2>
                             <Link to="/news" className="text-sm font-bold text-blue-600 hover:underline">View Registry</Link>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {suggestions.map((s) => (
-                                <Link key={s._id} to={`/announcements/${s._id}`} className="group block h-full">
-                                    <div className="bg-slate-50 rounded-3xl p-5 h-full border border-slate-100 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all">
-                                        {extractFirstImage(s.content) ? (
-                                            <div className="aspect-video rounded-xl overflow-hidden mb-4">
-                                                <img src={extractFirstImage(s.content)} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                            </div>
-                                        ) : (
-                                            <div className="aspect-video rounded-xl bg-slate-200 flex items-center justify-center text-4xl mb-4">📢</div>
-                                        )}
-                                        <h3 className="font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
-                                            {s.title}
-                                        </h3>
-                                    </div>
-                                </Link>
+                                <AnnouncementCard key={s._id} announcement={s} />
                             ))}
                         </div>
                     </div>
