@@ -297,35 +297,45 @@ const ManagePosters = () => {
                                 </div>
                             )}
 
-                            {/* --- Mobile Simulation Frame --- */}
+                            {/* --- Mobile Preview Area (V4 Immersive) --- */}
                             {previewMode === 'mobile' && (
-                                <div className="flex flex-col items-center text-center">
-                                    {/* Mobile Poster Focus */}
-                                    <div className="w-full flex items-center justify-center mb-10 min-h-[300px]">
+                                <div className="flex flex-col pt-8">
+                                    <div className="relative w-full px-4 mb-8">
                                         {previewUrl ? (
-                                            <img src={previewUrl} className="w-[85%] h-auto max-h-[380px] object-contain shadow-2xl rounded-2xl border border-white/10" alt="" />
+                                            <img src={previewUrl} className="w-full h-auto max-h-[350px] object-contain shadow-2xl rounded-2xl border border-white/10" alt="" />
                                         ) : (
-                                            <div className="w-32 h-48 border-2 border-dashed border-white/20 rounded-2xl flex items-center justify-center opacity-20">
+                                            <div className="aspect-video border-2 border-dashed border-white/20 rounded-2xl flex items-center justify-center opacity-20">
                                                 <ImageIcon className="text-white" size={32} />
                                             </div>
                                         )}
-                                    </div>
-                                    {/* Mobile Text Focus */}
-                                    <div className="space-y-4 mb-10">
-                                        <h3 className="text-2xl font-bold text-white font-poppins leading-tight tracking-tight px-4">
-                                            {headline || 'Secure Your Journey'}
-                                        </h3>
-                                        <p className="text-[15px] text-white/70 font-medium px-8 leading-relaxed line-clamp-2">
-                                            {description || 'Simplified insurance solutions at your fingertips.'}
-                                        </p>
-                                    </div>
-                                    {showButton && (
-                                        <div className="px-8 h-[44px] rounded-full bg-white text-slate-950 font-black text-sm shadow-xl flex items-center gap-2">
-                                            <MessageCircle size={18} className="text-emerald-500" />
-                                            {buttonText}
-                                            <ArrowRight size={16} />
+                                        <div className="absolute top-4 left-8">
+                                            <div className="px-2 py-0.5 rounded bg-blue-600 text-[8px] font-black text-white uppercase tracking-widest shadow-lg">Official</div>
                                         </div>
-                                    )}
+                                    </div>
+
+                                    <div className="px-6 pb-12 text-center space-y-4">
+                                        <h3 className="text-2xl font-bold text-white font-poppins leading-tight tracking-tight">
+                                            {headline || 'Headline Preview'}
+                                        </h3>
+                                        <p className="text-sm text-white/70 font-medium leading-relaxed line-clamp-2">
+                                            {description || 'This description shows how text renders below the big poster.'}
+                                        </p>
+                                        {showButton && (
+                                            <div className="flex justify-center pt-2">
+                                                <div className="px-8 h-[48px] rounded-full bg-white text-slate-950 font-black text-xs shadow-xl flex items-center gap-2">
+                                                    <MessageCircle size={18} className="text-emerald-500" />
+                                                    {buttonText}
+                                                    <ArrowRight size={16} />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Mock Dots */}
+                                    <div className="flex justify-center gap-2 pb-6">
+                                        <div className="w-8 h-1.5 bg-white rounded-full"></div>
+                                        <div className="w-2 h-1.5 bg-white/20 rounded-full"></div>
+                                    </div>
                                 </div>
                             )}
                         </div>

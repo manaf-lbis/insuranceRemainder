@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useGetAnnouncementByIdQuery } from '../features/announcements/announcementsApiSlice';
 import { Calendar, User, ArrowLeft, Loader } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import Navbar from '../components/Navbar';
 
 const AnnouncementDetailPage = () => {
     const { id } = useParams();
@@ -27,17 +28,17 @@ const AnnouncementDetailPage = () => {
         );
     }
 
-    // Sanitize HTML content
-    const sanitizedContent = DOMPurify.sanitize(announcement.content);
+    // Sanitize HTML content while allowing styles, classes and link targets for rich text fidelity
+    const sanitizedContent = DOMPurify.sanitize(announcement.content, {
+        ADD_ATTR: ['style', 'class', 'target'],
+        ADD_TAGS: ['iframe'] // Preparation for future video embeds
+    });
 
     return (
         <article className="min-h-screen bg-white">
-            <header className="bg-slate-50 border-b border-gray-100 py-12 md:py-16">
+            <Navbar variant="solid" />
+            <header className="bg-slate-50 border-b border-gray-100 py-24 md:py-32">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6">
-                    <Link to="/" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-8 transition-colors group text-sm font-medium">
-                        <ArrowLeft size={16} className="mr-2 group-hover:-translate-x-1 transition-transform" />
-                        Back to Home
-                    </Link>
 
                     <h1 className="text-3xl md:text-5xl font-black text-gray-900 font-poppins leading-tight mb-6">
                         {announcement.title}

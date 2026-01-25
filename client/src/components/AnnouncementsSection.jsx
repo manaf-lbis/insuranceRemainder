@@ -23,35 +23,43 @@ const AnnouncementCard = ({ announcement }) => {
     };
 
     return (
-        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 block p-4 h-full">
+        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 p-5 flex flex-col h-full">
             <div className="flex gap-4 h-full">
+                {/* Text Content */}
                 <div className="flex-1 flex flex-col justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NEWS</span>
+                        <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">News</span>
                             <span className="text-[10px] font-black text-slate-300">|</span>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CSC</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">CSC</span>
                         </div>
 
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
                             {announcement.title}
                         </h3>
                     </div>
 
-                    <div className="flex items-center text-xs text-slate-400 font-medium">
+                    <div className="flex items-center text-xs text-slate-400 font-medium mt-auto">
                         {timeAgo(announcement.createdAt)}
                     </div>
                 </div>
 
-                {firstImage && (
-                    <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 self-start">
-                        <img
-                            src={firstImage}
-                            alt={announcement.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                    </div>
-                )}
+                {/* Thumbnail */}
+                <div className="flex-shrink-0">
+                    {firstImage ? (
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
+                            <img
+                                src={firstImage}
+                                alt={announcement.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 text-2xl">
+                            📢
+                        </div>
+                    )}
+                </div>
             </div>
         </Link>
     );

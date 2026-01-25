@@ -158,37 +158,46 @@ const PremiumHero = () => {
                     </div>
                 </div>
 
-                {/* --- TABLET/MOBILE VIEW (Stacked) --- */}
-                <div className="lg:hidden flex flex-col h-full py-12 px-6">
-                    {/* Poster Container (Floating Card) */}
-                    <div className="flex-1 flex items-center justify-center mb-10">
+                {/* --- TABLET/MOBILE VIEW (Maximized V4) --- */}
+                <div className="lg:hidden flex flex-col pt-12">
+
+                    {/* Immersive Poster (Maximized) */}
+                    <div className="relative w-full px-4 mb-10">
                         <img
                             src={imageUrl}
-                            className="w-[90%] md:w-auto h-auto max-h-[380px] object-contain shadow-[0_24px_48px_-8px_rgba(0,0,0,0.6)] rounded-xl border border-white/10"
+                            className="w-full h-auto max-h-[65vh] object-contain shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] rounded-2xl"
                             alt={headline || "Hero Poster"}
                         />
+                        <div className="absolute top-8 left-8">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600/90 text-white backdrop-blur-md shadow-lg border border-white/20">
+                                <ShieldCheck size={12} />
+                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">Official</span>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Content Below */}
-                    <div className="text-center space-y-4">
-                        <h1 className="text-2xl md:text-4xl font-bold text-white font-poppins leading-tight line-clamp-2">
-                            {headline || 'Secure Your Journey'}
-                        </h1>
-                        <p className="text-sm md:text-lg text-white/70 font-medium leading-relaxed max-w-lg mx-auto line-clamp-2">
-                            {description || 'Simplified insurance solutions at your fingertips.'}
-                        </p>
+                    {/* Clean Messaging Stack */}
+                    <div className="px-6 pb-20 text-center space-y-6">
+                        <div className="space-y-4">
+                            <h1 className="text-3xl md:text-5xl font-black text-white font-poppins leading-tight tracking-tight drop-shadow-xl">
+                                {headline || 'Secure Your Future Today'}
+                            </h1>
+                            <p className="text-sm md:text-xl text-white/70 font-medium leading-relaxed max-w-md mx-auto line-clamp-3">
+                                {description || 'Access dedicated insurance support through our streamlined digital registry.'}
+                            </p>
+                        </div>
 
                         {showButton && (
-                            <div className="pt-4">
+                            <div className="pt-2">
                                 <a
                                     href={waLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-8 h-[44px] rounded-full bg-white text-slate-900 font-bold text-sm shadow-xl active:scale-95 transition-all"
+                                    className="group inline-flex items-center gap-3 px-10 h-[56px] rounded-full bg-white text-slate-950 font-black text-sm shadow-2xl active:scale-95 transition-all shadow-white/10"
                                 >
-                                    <MessageCircle size={18} className="text-emerald-500" />
+                                    <MessageCircle size={20} className="text-emerald-500 fill-emerald-500/10" />
                                     {buttonText || 'Quick Apply'}
-                                    <ArrowRight size={16} />
+                                    <ArrowRight className="group-hover:translate-x-1.5 transition-transform" size={18} />
                                 </a>
                             </div>
                         )}
@@ -198,7 +207,8 @@ const PremiumHero = () => {
 
             {/* Carousel Navigation (Universal) */}
             {posters.length > 1 && (
-                <div className="absolute bottom-6 md:bottom-10 right-6 md:right-10 z-30 flex items-center gap-4">
+                <div className="absolute bottom-8 left-0 right-0 z-30 flex items-center justify-center md:justify-end md:right-10 md:left-auto gap-4">
+                    {/* Dots Container */}
                     <div className="flex gap-2">
                         {posters.map((_, idx) => (
                             <button
@@ -211,10 +221,12 @@ const PremiumHero = () => {
                                         setIsAnimating(false);
                                     }, 500);
                                 }}
-                                className={`h-1 transition-all duration-500 rounded-full ${idx === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/20'}`}
+                                className={`h-1.5 transition-all duration-500 rounded-full ${idx === currentIndex ? 'w-10 bg-white' : 'w-2 bg-white/20 hover:bg-white/40'}`}
                             />
                         ))}
                     </div>
+
+                    {/* Desktop Arrows */}
                     <div className="hidden md:flex gap-2">
                         <button onClick={handlePrev} className="p-2.5 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 transition-all">
                             <ChevronLeft size={18} />

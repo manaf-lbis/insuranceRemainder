@@ -1,6 +1,4 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Shield, Car, Truck, Bike, FileText, CheckCircle, ArrowLeft } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 const ServiceCard = ({ icon: Icon, title, description }) => (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
@@ -48,18 +46,7 @@ const ServicesPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            <header className="bg-blue-900 shadow-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2 text-white hover:text-blue-100 transition-colors">
-                        <ArrowLeft size={20} />
-                        <span className="font-bold">Back to Home</span>
-                    </Link>
-                    <span className="text-lg font-bold text-white font-poppins tracking-wide">
-                        Services
-                    </span>
-                    <div className="w-8"></div> {/* Spacer for balance */}
-                </div>
-            </header>
+            <Navbar variant="solid" />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="text-center mb-16">
