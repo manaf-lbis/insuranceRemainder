@@ -1,46 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
+import Navbar from '../components/Navbar';
 import AnnouncementsSection from '../components/AnnouncementsSection';
 import NewsTicker from '../components/NewsTicker';
 import QuickLinks from '../components/QuickLinks';
 import PremiumHero from '../components/PremiumHero';
 
-
-
 const HomePage = () => {
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-            <header className="bg-blue-900 shadow-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2.5">
-                        <div className="bg-white/10 p-1.5 rounded-lg">
-                            <ShieldCheck className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-lg font-bold text-white font-poppins tracking-wide">
-                            Notify CSC
-                        </span>
-                    </Link>
-                    <div className="flex gap-4">
-                        <Link
-                            to="/news"
-                            className="text-sm font-medium text-blue-100 hover:text-white transition-colors px-4 py-2 hover:bg-white/10 rounded-lg"
-                        >
-                            Latest News
-                        </Link>
-                        <Link
-                            to="/services"
-                            className="text-sm font-medium text-blue-100 hover:text-white transition-colors px-4 py-2 hover:bg-white/10 rounded-lg"
-                        >
-                            Our Services
-                        </Link>
-                    </div>
-                </div>
-            </header>
+            <Navbar variant="solid" />
+            <NewsTicker top="top-[64px]" />
 
-            <main className="flex-grow">
-                {/* News Ticker */}
-                <NewsTicker />
+            <main className="flex-grow md:pt-0">
 
                 {/* Premium Hero Section */}
                 <PremiumHero />

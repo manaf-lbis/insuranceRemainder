@@ -129,9 +129,10 @@ const TiptapEditor = ({ value, onChange, placeholder = 'Start writing...' }) => 
         },
     });
 
-    // Keep editor content in sync with value prop
+    // Keep editor content in sync with value prop, but only if not focused
+    // This prevents the editor from resetting the cursor while the user is typing
     React.useEffect(() => {
-        if (editor && value !== editor.getHTML()) {
+        if (editor && value !== editor.getHTML() && !editor.isFocused) {
             editor.commands.setContent(value);
         }
     }, [value, editor]);

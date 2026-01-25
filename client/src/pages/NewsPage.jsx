@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useGetPublicAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
-import { Loader } from 'lucide-react';
+import { Loader, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { extractFirstImage } from '../utils/stringUtils';
+import Navbar from '../components/Navbar';
 
 const NewsCard = ({ announcement }) => {
+    const firstImage = extractFirstImage(announcement.content);
+
     const timeAgo = (date) => {
         const seconds = Math.floor((new Date() - new Date(date)) / 1000);
         let interval = seconds / 31536000;
@@ -20,22 +24,40 @@ const NewsCard = ({ announcement }) => {
     };
 
     return (
-        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 block p-4">
-            <div className="flex flex-col justify-between h-full">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NEWS</span>
+        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 p-5 sm:p-6 block">
+            <div className="flex gap-4 sm:gap-8">
+                {/* Text Content */}
+                <div className="flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">News</span>
                         <span className="text-[10px] font-black text-slate-300">|</span>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">KERALA</span>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">CSC</span>
                     </div>
 
-                    <h3 className="text-base sm:text-lg font-bold text-gray-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
+                    <h3 className="text-base sm:text-xl font-bold text-slate-900 font-poppins line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors mb-4">
                         {announcement.title}
                     </h3>
+
+                    <div className="mt-auto flex items-center text-xs text-slate-400 font-medium">
+                        {timeAgo(announcement.createdAt)}
+                    </div>
                 </div>
 
-                <div className="flex items-center text-xs text-slate-400 font-medium">
-                    {timeAgo(announcement.createdAt)}
+                {/* Thumbnail */}
+                <div className="flex-shrink-0">
+                    {firstImage ? (
+                        <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
+                            <img
+                                src={firstImage}
+                                alt={announcement.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 text-2xl">
+                            📢
+                        </div>
+                    )}
                 </div>
             </div>
         </Link>
@@ -44,66 +66,115 @@ const NewsCard = ({ announcement }) => {
 
 const NewsPage = () => {
     const { data: announcements, isLoading, error } = useGetPublicAnnouncementsQuery();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 9;
+
+    const { paginatedAnnouncements, totalPages } = useMemo(() => {
+        if (!announcements) return { paginatedAnnouncements: [], totalPages: 0 };
+
+        const total = Math.ceil(announcements.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        return {
+            paginatedAnnouncements: announcements.slice(start, end),
+            totalPages: total
+        };
+    }, [announcements, currentPage]);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-white">
+                <Navbar variant="solid" />
+                <div className="flex justify-center items-center h-[60vh]">
+                    <div className="flex flex-col items-center gap-4">
+                        <Loader className="animate-spin text-blue-600 w-10 h-10" />
+                        <p className="text-slate-400 font-bold animate-pulse uppercase tracking-[0.2em] text-xs">Accessing News Registry...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            {/* Header */}
-            <header className="bg-blue-900 shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-2.5">
-                        <span className="text-lg font-bold text-white font-poppins tracking-wide">
-                            Notify CSC
-                        </span>
-                    </Link>
-                    <div className="flex gap-4">
-                        <Link to="/services" className="text-sm font-medium text-blue-100 hover:text-white transition-colors px-3 py-2">
-                            Our Services
-                        </Link>
+        <div className="min-h-screen bg-slate-50/50 flex flex-col">
+            <Navbar variant="solid" />
+
+            <main className="flex-grow pt-24 pb-20">
+                <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-4">
+                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Live Updates</span>
                     </div>
-                </div>
-            </header>
+                    <h1 className="text-4xl md:text-6xl font-black text-slate-900 font-poppins tracking-tighter mb-4">
+                        News & <span className="text-blue-600 italic">Announcements</span>
+                    </h1>
+                    <p className="text-slate-500 font-medium max-w-2xl leading-relaxed italic underline decoration-blue-500/10 underline-offset-8">
+                        Stay informed with the latest policy updates and important notifications from the Notify CSC portal.
+                    </p>
+                </header>
 
-            {/* Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-                <div className="mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 font-poppins mb-2">Latest News & Updates</h1>
-                    <p className="text-slate-500">Stay informed with our latest announcements and updates</p>
-                </div>
-
-                {isLoading && (
-                    <div className="flex justify-center py-20">
-                        <Loader className="animate-spin text-blue-600 w-10 h-10" />
-                    </div>
-                )}
-
-                {error && (
-                    <div className="text-center py-20">
-                        <div className="max-w-md mx-auto bg-red-50 border border-red-200 rounded-lg p-6">
-                            <p className="text-red-600 font-medium mb-2">Unable to load news</p>
-                            <p className="text-red-500 text-sm">Please try refreshing the page</p>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {error ? (
+                        <div className="bg-rose-50 border border-rose-100 rounded-[32px] p-12 text-center">
+                            <p className="text-rose-600 font-black uppercase tracking-widest text-sm mb-2">Registry Connection Failed</p>
+                            <p className="text-rose-500 font-medium italic">Unable to synchronize with news database. Please check your connection.</p>
                         </div>
-                    </div>
-                )}
+                    ) : announcements?.length === 0 ? (
+                        <div className="bg-slate-100 rounded-[32px] p-20 text-center border border-slate-200 border-dashed">
+                            <p className="text-slate-400 font-black uppercase tracking-widest text-sm">Registry Empty</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {paginatedAnnouncements.map((announcement) => (
+                                    <NewsCard key={announcement._id} announcement={announcement} />
+                                ))}
+                            </div>
 
-                {!isLoading && !error && announcements?.length === 0 && (
-                    <div className="text-center py-20 text-slate-400">
-                        No news available at the moment.
-                    </div>
-                )}
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="mt-16 flex items-center justify-center gap-4">
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                        className="p-3 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white transition-all shadow-sm"
+                                    >
+                                        <ChevronLeft size={20} />
+                                    </button>
 
-                {!isLoading && !error && announcements && announcements.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {announcements.map((announcement) => (
-                            <NewsCard key={announcement._id} announcement={announcement} />
-                        ))}
-                    </div>
-                )}
+                                    <div className="flex gap-2">
+                                        {[...Array(totalPages)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setCurrentPage(i + 1)}
+                                                className={`w-10 h-10 rounded-2xl font-black text-xs transition-all ${currentPage === i + 1
+                                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
+                                                    }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="p-3 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-white transition-all shadow-sm"
+                                    >
+                                        <ChevronRight size={20} />
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
             </main>
 
-            {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 py-6 mt-12">
+            <footer className="bg-white border-t border-slate-100 py-12 mt-auto">
                 <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Notify CSC. Serving you with trust.</p>
+                    <p className="text-slate-400 text-xs font-black uppercase tracking-widest">&copy; {new Date().getFullYear()} Notify CSC &bull; Digital Excellence</p>
                 </div>
             </footer>
         </div>
