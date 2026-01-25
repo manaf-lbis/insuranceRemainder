@@ -2,25 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useGetPublicAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
 import { extractFirstImage } from '../utils/stringUtils';
+import { timeAgo } from '../utils/dateUtils';
 import { ArrowRight } from 'lucide-react';
 
-const AnnouncementCard = ({ announcement }) => {
+export const AnnouncementCard = ({ announcement }) => {
     const firstImage = extractFirstImage(announcement.content);
 
-    const timeAgo = (date) => {
-        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-        let interval = seconds / 31536000;
-        if (interval > 1) return Math.floor(interval) + " years ago";
-        interval = seconds / 2592000;
-        if (interval > 1) return Math.floor(interval) + " months ago";
-        interval = seconds / 86400;
-        if (interval > 1) return Math.floor(interval) + " days ago";
-        interval = seconds / 3600;
-        if (interval > 1) return Math.floor(interval) + " hr ago";
-        interval = seconds / 60;
-        if (interval > 1) return Math.floor(interval) + " min ago";
-        return Math.floor(seconds) + " sec ago";
-    };
 
     return (
         <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 p-5 flex flex-col h-full">
