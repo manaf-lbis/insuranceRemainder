@@ -50,7 +50,9 @@ function App() {
             if (Notification.permission === 'granted') {
                 new Notification(payload.notification.title, {
                     body: payload.notification.body,
-                    icon: '/logo.png'
+                    icon: payload.data?.icon || '/logo192.png',
+                    badge: payload.data?.badge || '/logo192.png',
+                    tag: payload.data?.tag || 'general'
                 });
             }
         });
