@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useGetAnnouncementByIdQuery, useGetPublicAnnouncementsQuery } from '../features/announcements/announcementsApiSlice';
+import { useGetAnnouncementByIdQuery, useGetPublicAnnouncementsQuery, useIncrementAnnouncementViewsMutation } from '../features/announcements/announcementsApiSlice';
 import { Calendar, User, ArrowLeft, Loader, Share2, Copy, Check } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
@@ -8,6 +8,7 @@ import Navbar from '../components/Navbar';
 import { extractFirstImage } from '../utils/stringUtils';
 import { useToast } from '../components/ToastContext';
 import { AnnouncementCard } from '../components/AnnouncementsSection';
+import PageShimmer from '../components/PageShimmer';
 
 const AnnouncementDetailPage = () => {
     const { id } = useParams();
@@ -15,6 +16,14 @@ const AnnouncementDetailPage = () => {
     const { data: announcement, isLoading, isError } = useGetAnnouncementByIdQuery(id);
     const { data: allAnnouncements } = useGetPublicAnnouncementsQuery();
     const [copied, setCopied] = React.useState(false);
+    const [incrementViews] = useIncrementAnnouncementViewsMutation();
+
+    // Track view when article loads
+    React.useEffect(() => {
+        if (id && announcement) {
+            incrementViews(id).catch(err => console.error('Failed to track view:', err));
+        }
+    }, [id, announcement, incrementViews]);
 
     const handleShare = async () => {
         // Use backend proxy URL for correct social preview generation
@@ -44,18 +53,12 @@ const AnnouncementDetailPage = () => {
     const suggestions = React.useMemo(() => {
         if (!allAnnouncements || !announcement) return [];
         return allAnnouncements
-            .filter(a => a._id !== announcement._id)
-        return allAnnouncements
-            .filter(a => a._id !== announcement._id)
+            .filter(a => a._id !== announcement._id && !a.isBlocked)  // Exclude current and blocked
             .slice(0, 10);
     }, [allAnnouncements, announcement]);
 
     if (isLoading) {
-        return (
-            <div className="flex justify-center items-center custom-min-h-screen pt-20">
-                <Loader className="animate-spin text-blue-600 w-12 h-12" />
-            </div>
-        );
+        return <PageShimmer variant="detail" />;
     }
 
     if (isError || !announcement) {
@@ -94,11 +97,11 @@ const AnnouncementDetailPage = () => {
                 <meta name="twitter:description" content={shareDescription} />
             </Helmet>
             <Navbar variant="solid" />
-            <header className="bg-slate-50 border-b border-gray-100 py-24 md:py-32">
+            <header className="bg-slate-50 border-b border-gray-100 py-12 md:py-16">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-12">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-8">
                         <div className="flex-1">
-                            <h1 className="text-3xl md:text-5xl font-black text-gray-900 font-poppins leading-tight mb-6">
+                            <h1 className="text-2xl md:text-4xl font-black text-gray-900 font-poppins leading-tight mb-4">
                                 {announcement.title}
                             </h1>
 
@@ -109,7 +112,7 @@ const AnnouncementDetailPage = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <User size={16} className="text-blue-500" />
-                                    <span className="capitalize">{announcement.author?.username || 'Notify CSC Team'}</span>
+                                    <span className="capitalize font-bold text-slate-700">{announcement.author?.username || 'Notify CSC Team'}</span>
                                 </div>
                             </div>
                         </div>
@@ -117,17 +120,17 @@ const AnnouncementDetailPage = () => {
                         {/* Top Share Button */}
                         <button
                             onClick={handleShare}
-                            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95 group"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95 group self-start md:self-center"
                         >
                             {copied ? (
                                 <>
                                     <Check size={18} className="text-emerald-500" />
-                                    <span>Link Copied</span>
+                                    <span>Copied</span>
                                 </>
                             ) : (
                                 <>
                                     <Share2 size={18} className="text-blue-500 group-hover:rotate-12 transition-transform" />
-                                    <span>Share Update</span>
+                                    <span>Share</span>
                                 </>
                             )}
                         </button>
@@ -135,20 +138,91 @@ const AnnouncementDetailPage = () => {
                 </div>
             </header>
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
                 <div
-                    className="prose prose-lg md:prose-xl prose-slate max-w-none 
-                        prose-headings:font-poppins prose-headings:font-bold 
-                        prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                        prose-img:rounded-2xl prose-img:shadow-md border-b border-slate-100 pb-16"
+                    className="announcement-content max-w-none text-slate-700 border-b border-slate-100 pb-12"
+                    style={{
+                        fontSize: '16px',
+                        lineHeight: '1.75',
+                        letterSpacing: '0.01em'
+                    }}
                     dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                 />
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    .announcement-content {
+                        letter-spacing: 0.01em;
+                    }
+                    .announcement-content p {
+                        margin-top: 0.75em;
+                        margin-bottom: 0.75em;
+                        line-height: 1.75;
+                        letter-spacing: 0.01em;
+                    }
+                    .announcement-content p:empty {
+                        min-height: 1.75em;
+                        margin: 0.75em 0;
+                    }
+                    .announcement-content p br {
+                        display: block;
+                        content: "";
+                        margin: 0.75em 0;
+                    }
+                    .announcement-content ul {
+                        list-style-type: disc;
+                        padding-left: 1.5rem;
+                        margin-top: 1em;
+                        margin-bottom: 1em;
+                    }
+                    .announcement-content ol {
+                        list-style-type: decimal;
+                        padding-left: 1.5rem;
+                        margin-top: 1em;
+                        margin-bottom: 1em;
+                    }
+                    .announcement-content li {
+                        margin-top: 0.375em;
+                        margin-bottom: 0.375em;
+                        line-height: 1.65;
+                        letter-spacing: 0.01em;
+                    }
+                    .announcement-content a {
+                        color: #2563eb;
+                        text-decoration: underline;
+                    }
+                    .announcement-content img {
+                        border-radius: 1rem;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        max-width: 100%;
+                        height: auto;
+                        margin: 1.5em 0;
+                    }
+                    .announcement-content h1, 
+                    .announcement-content h2, 
+                    .announcement-content h3 {
+                        font-family: 'Poppins', sans-serif;
+                        font-weight: bold;
+                        margin-top: 2em;
+                        margin-bottom: 0.75em;
+                        line-height: 1.3;
+                        letter-spacing: -0.01em;
+                    }
+                    .announcement-content h1 {
+                        font-size: 2em;
+                    }
+                    .announcement-content h2 {
+                        font-size: 1.5em;
+                    }
+                    .announcement-content h3 {
+                        font-size: 1.25em;
+                    }
+                `}} />
 
                 {/* Suggestions Section */}
                 {suggestions.length > 0 && (
-                    <div className="mt-20">
-                        <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-black text-slate-900 font-poppins tracking-tight">More from <span className="text-blue-600">Notify CSC</span></h2>
+                    <div className="mt-16">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl md:text-2xl font-black text-slate-900 font-poppins tracking-tight">More from <span className="text-blue-600">Notify CSC</span></h2>
                             <Link to="/news" className="text-sm font-bold text-blue-600 hover:underline">View Registry</Link>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -159,8 +233,7 @@ const AnnouncementDetailPage = () => {
                     </div>
                 )}
             </div>
-
-            {/* Floating Share Button - Above WhatsApp */}
+            {/* Floating Share Button - Repositioned to Right Side Above WhatsApp */}
             <button
                 onClick={handleShare}
                 className="fixed bottom-24 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-xl hover:shadow-blue-500/20 transition-all duration-300 hover:scale-110 group"

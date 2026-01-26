@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useGetAllAnnouncementsQuery, useDeleteAnnouncementMutation } from '../../features/announcements/announcementsApiSlice';
-import { PlusCircle, Edit, Trash2, Loader, Eye, EyeOff } from 'lucide-react';
+import { useGetAllAnnouncementsQuery, useDeleteAnnouncementMutation, useToggleBlockAnnouncementMutation } from '../../features/announcements/announcementsApiSlice';
+import { PlusCircle, Edit, Trash2, Loader, Eye, EyeOff, ShieldOff, Shield } from 'lucide-react';
 import { useToast } from '../../components/ToastContext';
+import PageShimmer from '../../components/PageShimmer';
 
 const AnnouncementList = () => {
     const { data: announcements, isLoading, error } = useGetAllAnnouncementsQuery();
     const [deleteAnnouncement, { isLoading: isDeleting }] = useDeleteAnnouncementMutation();
+    const [toggleBlock] = useToggleBlockAnnouncementMutation();
     const { showToast } = useToast();
 
     const handleDelete = async (id) => {
@@ -19,8 +21,19 @@ const AnnouncementList = () => {
         }
     };
 
+    const handleToggleBlock = async (id, currentBlockStatus) => {
+        const action = currentBlockStatus ? 'unblock' : 'block';
+        if (!window.confirm(`Are you sure you want to ${action} this announcement?`)) return;
+        try {
+            await toggleBlock(id).unwrap();
+            showToast({ message: `Announcement ${action}ed successfully`, type: 'success' });
+        } catch (err) {
+            showToast({ message: `Failed to ${action} announcement`, type: 'error' });
+        }
+    };
+
     if (isLoading) {
-        return <div className="flex justify-center py-10"><Loader className="animate-spin text-blue-600" /></div>;
+        return <PageShimmer variant="list" />;
     }
 
     if (error) {
@@ -47,6 +60,7 @@ const AnnouncementList = () => {
                             <th className="px-6 py-4 font-semibold text-gray-600 text-sm">Title</th>
                             <th className="px-6 py-4 font-semibold text-gray-600 text-sm">Status</th>
                             <th className="px-6 py-4 font-semibold text-gray-600 text-sm">Author</th>
+                            <th className="px-6 py-4 font-semibold text-gray-600 text-sm">Views</th>
                             <th className="px-6 py-4 font-semibold text-gray-600 text-sm">Last Updated</th>
                             <th className="px-6 py-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
                         </tr>
@@ -54,7 +68,7 @@ const AnnouncementList = () => {
                     <tbody className="divide-y divide-gray-100">
                         {announcements?.length === 0 ? (
                             <tr>
-                                <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                                <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
                                     No announcements found. Create one to get started.
                                 </td>
                             </tr>
@@ -76,6 +90,12 @@ const AnnouncementList = () => {
                                     <td className="px-6 py-4 text-sm text-gray-600">
                                         {item.author?.username || 'Unknown'}
                                     </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 font-bold">
+                                            <Eye size={14} />
+                                            {item.views || 0}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         {new Date(item.updatedAt).toLocaleDateString()}
                                     </td>
@@ -88,6 +108,16 @@ const AnnouncementList = () => {
                                             >
                                                 <Edit size={16} />
                                             </Link>
+                                            <button
+                                                onClick={() => handleToggleBlock(item._id, item.isBlocked)}
+                                                className={`p-1.5 rounded transition-colors ${item.isBlocked
+                                                        ? 'text-green-600 hover:bg-green-50'
+                                                        : 'text-orange-600 hover:bg-orange-50'
+                                                    }`}
+                                                title={item.isBlocked ? 'Unblock' : 'Block'}
+                                            >
+                                                {item.isBlocked ? <Shield size={16} /> : <ShieldOff size={16} />}
+                                            </button>
                                             <button
                                                 onClick={() => handleDelete(item._id)}
                                                 disabled={isDeleting}

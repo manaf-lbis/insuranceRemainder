@@ -24,6 +24,14 @@ const getAnnouncementById = async (req, res) => {
     try {
         const announcement = await announcementService.getAnnouncementById(req.params.id);
 
+        // Check if blocked - return 410 Gone
+        if (announcement.isBlocked) {
+            return res.status(410).json({
+                message: 'This content has been removed',
+                isBlocked: true
+            });
+        }
+
         // Basic check: if not published and user is not admin, deny (simple logic for now)
         // For strictness, we could pass req.user to service, but keeping it simple:
         // Public API usually returns only published. If we want preview for admins, we need logic.
@@ -149,6 +157,36 @@ const getAnnouncementByIdAdmin = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Increment announcement views
+ * @route   POST /api/announcements/:id/view
+ * @access  Public
+ */
+const incrementAnnouncementViews = async (req, res) => {
+    try {
+        const announcement = await announcementService.incrementViews(req.params.id);
+        res.status(200).json({ views: announcement.views });
+    } catch (error) {
+        console.error('Error incrementing views:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+/**
+ * @desc    Toggle block status of announcement
+ * @route   PATCH /api/admin/announcements/:id/block
+ * @access  Admin
+ */
+const toggleBlockAnnouncement = async (req, res) => {
+    try {
+        const announcement = await announcementService.toggleBlock(req.params.id);
+        res.status(200).json(announcement);
+    } catch (error) {
+        console.error('Error toggling block status:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getPublicAnnouncements,
     getAnnouncementById,
@@ -157,5 +195,7 @@ module.exports = {
     updateAnnouncement,
     deleteAnnouncement,
     getTickerAnnouncements,
-    getAnnouncementByIdAdmin
+    getAnnouncementByIdAdmin,
+    incrementAnnouncementViews,
+    toggleBlockAnnouncement
 };

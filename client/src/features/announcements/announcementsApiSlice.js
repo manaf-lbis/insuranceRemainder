@@ -51,6 +51,19 @@ export const announcementsApiSlice = apiSlice.injectEndpoints({
                 body: formData,
             }),
         }),
+        incrementAnnouncementViews: builder.mutation({
+            query: (id) => ({
+                url: `/announcements/${id}/view`,
+                method: 'POST',
+            }),
+        }),
+        toggleBlockAnnouncement: builder.mutation({
+            query: (id) => ({
+                url: `/announcements/admin/${id}/block`,
+                method: 'PATCH',
+            }),
+            invalidatesTags: ['Announcement'],
+        }),
     }),
 });
 
@@ -64,4 +77,6 @@ export const {
     useDeleteAnnouncementMutation,
     useGetTickerAnnouncementsQuery,
     useUploadImageMutation,
+    useIncrementAnnouncementViewsMutation,
+    useToggleBlockAnnouncementMutation,
 } = announcementsApiSlice;

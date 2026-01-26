@@ -8,13 +8,27 @@ const WhatsAppButton = () => {
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     const groupUrl = 'https://chat.whatsapp.com/JsHUGQMTjoM9E4yOdUH3lN';
 
+    const containerRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
+        <div ref={containerRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
             {/* Options Menu */}
             <div
-                className={`flex flex-col gap-3 transition-all duration-300 origin-bottom-right ${
-                    isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-10 pointer-events-none'
-                }`}
+                className={`flex flex-col gap-3 transition-all duration-300 origin-bottom-right ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-10 pointer-events-none'
+                    }`}
             >
                 <a
                     href={whatsappUrl}
@@ -44,9 +58,8 @@ const WhatsAppButton = () => {
             {/* Main Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group relative ${
-                    isOpen ? 'bg-gray-700 hover:bg-gray-800 rotate-45' : ''
-                }`}
+                className={`bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group relative ${isOpen ? 'bg-gray-700 hover:bg-gray-800 rotate-45' : ''
+                    }`}
                 aria-label="Toggle chat options"
             >
                 {isOpen ? (

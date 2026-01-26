@@ -5,9 +5,13 @@ import {
     useUpdateAnnouncementMutation,
     useGetAnnouncementByIdAdminQuery
 } from '../../features/announcements/announcementsApiSlice';
+import {
+    useGetNewsCategoriesQuery,
+    useCreateNewsCategoryMutation
+} from '../../features/announcements/newsCategoriesApiSlice';
 import TiptapEditor from '../../components/TiptapEditor';
 import { useToast } from '../../components/ToastContext';
-import { ArrowLeft, Save, Loader } from 'lucide-react';
+import { ArrowLeft, Save, Loader, Plus, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ManageAnnouncement = () => {
@@ -16,19 +20,28 @@ const ManageAnnouncement = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
 
+    // Form State
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [status, setStatus] = useState('draft');
     const [priority, setPriority] = useState('cold');
     const [showInTicker, setShowInTicker] = useState(false);
     const [expiryDuration, setExpiryDuration] = useState('never');
+    const [category, setCategory] = useState('');
 
+    // Category Modal State
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+
+    // Queries & Mutations
     const { data: announcement, isLoading: isFetching } = useGetAnnouncementByIdAdminQuery(id, {
         skip: !isEditMode
     });
+    const { data: categories, isLoading: isLoadingCategories } = useGetNewsCategoriesQuery();
 
     const [createAnnouncement, { isLoading: isCreating }] = useCreateAnnouncementMutation();
     const [updateAnnouncement, { isLoading: isUpdating }] = useUpdateAnnouncementMutation();
+    const [createCategory, { isLoading: isCreatingCategory }] = useCreateNewsCategoryMutation();
 
     useEffect(() => {
         if (announcement && isEditMode) {
@@ -37,7 +50,8 @@ const ManageAnnouncement = () => {
             setStatus(announcement.status);
             setPriority(announcement.priority || 'cold');
             setShowInTicker(announcement.showInTicker || false);
-            // We don't easily reverse engineer duration, but we can check if it exists
+            setCategory(announcement.category || '');
+
             if (!announcement.expiresAt) setExpiryDuration('never');
         }
     }, [announcement, isEditMode]);
@@ -53,7 +67,7 @@ const ManageAnnouncement = () => {
                 expiresAt = date;
             }
 
-            const data = { title, content, status, priority, showInTicker, expiresAt };
+            const data = { title, content, status, priority, showInTicker, expiresAt, category: category || null };
             if (isEditMode) {
                 await updateAnnouncement({ id, ...data }).unwrap();
                 showToast({ message: 'Announcement updated successfully', type: 'success' });
@@ -67,6 +81,21 @@ const ManageAnnouncement = () => {
         }
     };
 
+    const handleCreateCategory = async (e) => {
+        e.preventDefault();
+        if (!newCategoryName.trim()) return;
+
+        try {
+            const res = await createCategory({ name: newCategoryName }).unwrap();
+            showToast({ message: 'Category created!', type: 'success' });
+            setCategory(res._id); // Auto-select new category
+            setNewCategoryName('');
+            setIsCategoryModalOpen(false);
+        } catch (err) {
+            showToast({ message: err?.data?.message || 'Failed to create category', type: 'error' });
+        }
+    };
+
     if (isEditMode && isFetching) {
         return <div className="flex justify-center py-10"><Loader className="animate-spin text-blue-600" /></div>;
     }
@@ -74,7 +103,7 @@ const ManageAnnouncement = () => {
     const isSaving = isCreating || isUpdating;
 
     return (
-        <div className="max-w-4xl mx-auto pb-20">
+        <div className="max-w-4xl mx-auto pb-20 relative">
             <div className="flex items-center gap-4 mb-6">
                 <Link to="/admin/announcements" className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors">
                     <ArrowLeft size={20} />
@@ -129,6 +158,33 @@ const ManageAnnouncement = () => {
                             </div>
                         </div>
 
+                        {/* Category */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                            <div className="flex gap-2">
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                >
+                                    <option value="">Select Category...</option>
+                                    {categories?.map((cat) => (
+                                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCategoryModalOpen(true)}
+                                    className="p-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                                    title="Add New Category"
+                                >
+                                    <Plus size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Priority */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">Priority</label>
@@ -207,6 +263,51 @@ const ManageAnnouncement = () => {
                     </button>
                 </div>
             </form>
+
+            {/* Create Category Modal */}
+            {isCategoryModalOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-fade-in-up">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                            <h3 className="font-bold text-gray-900">Add New Category</h3>
+                            <button onClick={() => setIsCategoryModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <form onSubmit={handleCreateCategory}>
+                                <div className="mb-4">
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Category Name</label>
+                                    <input
+                                        type="text"
+                                        value={newCategoryName}
+                                        onChange={(e) => setNewCategoryName(e.target.value)}
+                                        placeholder="e.g. Technology"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCategoryModalOpen(false)}
+                                        className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isCreatingCategory || !newCategoryName.trim()}
+                                        className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                                    >
+                                        {isCreatingCategory ? 'Creating...' : 'Create Category'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

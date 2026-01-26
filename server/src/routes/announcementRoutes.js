@@ -9,7 +9,9 @@ const {
     updateAnnouncement,
     deleteAnnouncement,
     getTickerAnnouncements,
-    getAnnouncementByIdAdmin
+    getAnnouncementByIdAdmin,
+    incrementAnnouncementViews,
+    toggleBlockAnnouncement
 } = require('../controllers/announcementController');
 const { getAnnouncementSharePreview } = require('../controllers/shareController');
 
@@ -27,8 +29,13 @@ router.route('/admin/:id')
     .put(protect, admin, updateAnnouncement)
     .delete(protect, admin, deleteAnnouncement);
 
+router.patch('/admin/:id/block', protect, admin, toggleBlockAnnouncement);
+
 // Social Media Share Proxy (Server-Side Preview)
 router.get('/share/:id', getAnnouncementSharePreview);
+
+// Increment views route - MUST come before /:id to avoid being caught by it
+router.post('/:id/view', incrementAnnouncementViews);
 
 // Public route for single announcement - MUST come after /admin routes
 router.get('/:id', getAnnouncementById);
