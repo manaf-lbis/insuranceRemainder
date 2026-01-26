@@ -7,40 +7,64 @@ const NotificationPermission = ({ onPermissionGranted }) => {
     const [isRequesting, setIsRequesting] = useState(false);
 
     useEffect(() => {
+        console.log('🔔 NotificationPermission component mounted');
+
         // Check if already asked or granted
         const hasAsked = localStorage.getItem('notificationAsked');
         const permission = Notification.permission;
 
+        console.log('Notification status:', { hasAsked, permission });
+
         if (!hasAsked && permission === 'default') {
-            // Show modal after 3 seconds
+            // Show banner after 3 seconds
+            console.log('⏰ Will show notification banner in 3 seconds...');
             const timer = setTimeout(() => {
+                console.log('✅ Showing notification banner now!');
                 setShow(true);
             }, 3000);
             return () => clearTimeout(timer);
+        } else {
+            console.log('❌ Not showing banner:', hasAsked ? 'Already asked' : `Permission is ${permission}`);
         }
     }, []);
 
-    const handleAllow = async () => {
+    const handleEnable = async () => {
         setIsRequesting(true);
         try {
             const permission = await Notification.requestPermission();
 
             if (permission === 'granted') {
-                // Get FCM token
-                const token = await getToken(messaging, {
-                    vapidKey: 'BNjkXQvKEaWeGhUTaj1N8-647MTaYRhGoZkZCE_L_4sCn1vLo4YNFLPNX4MnIgcjlHbCspU_9FlxKel1hvQVTlo'
-                });
+                console.log('✅ Permission granted, getting FCM token...');
 
-                if (token) {
-                    console.log('FCM Token:', token);
-                    onPermissionGranted(token);
+                // Check if messaging is available
+                if (!messaging) {
+                    console.error('Firebase messaging not initialized');
+                    return;
                 }
+
+                // Get FCM token
+                try {
+                    const token = await getToken(messaging, {
+                        vapidKey: 'BNjkXQvKEaWeGhUTaj1N8-647MTaYRhGoZkZCE_L_4sCn1vLo4YNFLPNX4MnIgcjlHbCspU_9FlxKel1hvQVTlo'
+                    });
+
+                    if (token) {
+                        console.log('✅ FCM Token received:', token);
+                        await onPermissionGranted(token);
+                    } else {
+                        console.error('No FCM token received');
+                    }
+                } catch (tokenError) {
+                    console.error('Error getting FCM token:', tokenError);
+                }
+            } else {
+                console.log('❌ Permission denied');
             }
 
             localStorage.setItem('notificationAsked', 'true');
             setShow(false);
         } catch (error) {
-            console.error('Error getting notification permission:', error);
+            console.error('Error requesting permission:', error);
         } finally {
             setIsRequesting(false);
         }
@@ -54,62 +78,28 @@ const NotificationPermission = ({ onPermissionGranted }) => {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-in zoom-in-95 duration-200">
+        <div className="fixed bottom-4 right-4 z-[9999] max-w-sm animate-in slide-in-from-bottom duration-300">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+                <div className="bg-white/20 rounded-full p-2">
+                    <Bell className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                    <p className="font-bold text-sm">Get News Updates!</p>
+                    <p className="text-xs text-blue-100">Enable notifications for latest news</p>
+                </div>
+                <button
+                    onClick={handleEnable}
+                    disabled={isRequesting}
+                    className="px-4 py-2 bg-white text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50"
+                >
+                    {isRequesting ? 'Enabling...' : 'Enable'}
+                </button>
                 <button
                     onClick={handleDismiss}
-                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
                 >
-                    <X size={20} />
+                    <X size={18} />
                 </button>
-
-                {/* Icon */}
-                <div className="flex justify-center mb-6">
-                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Bell className="w-10 h-10 text-blue-600" />
-                    </div>
-                </div>
-
-                {/* Content */}
-                <h2 className="text-2xl font-black text-gray-900 text-center mb-3 font-poppins">
-                    Stay Updated!
-                </h2>
-                <p className="text-gray-600 text-center mb-6 leading-relaxed">
-                    Get instant notifications when we publish important news and announcements. Never miss an update!
-                </p>
-
-                {/* Benefits */}
-                <div className="bg-blue-50 rounded-xl p-4 mb-6 space-y-2">
-                    <div className="flex items-start gap-2 text-sm">
-                        <span className="text-blue-600 mt-0.5">✓</span>
-                        <span className="text-gray-700">Breaking news delivered instantly</span>
-                    </div>
-                    <div className="flex items-start gap-2 text-sm">
-                        <span className="text-blue-600 mt-0.5">✓</span>
-                        <span className="text-gray-700">Important updates you can't miss</span>
-                    </div>
-                    <div className="flex items-start gap-2 text-sm">
-                        <span className="text-blue-600 mt-0.5">✓</span>
-                        <span className="text-gray-700">You can unsubscribe anytime</span>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                    <button
-                        onClick={handleDismiss}
-                        className="flex-1 px-6 py-3 text-gray-600 font-bold rounded-xl hover:bg-gray-100 transition-colors"
-                    >
-                        Not Now
-                    </button>
-                    <button
-                        onClick={handleAllow}
-                        disabled={isRequesting}
-                        className="flex-1 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isRequesting ? 'Enabling...' : 'Enable Notifications'}
-                    </button>
-                </div>
             </div>
         </div>
     );
