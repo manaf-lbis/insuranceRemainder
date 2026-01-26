@@ -1,21 +1,43 @@
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin with environment variables
-const serviceAccount = {
-    type: "service_account",
-    project_id: process.env.FIREBASE_PROJECT_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL,
-};
+// Check if Firebase credentials are configured
+const isFirebaseConfigured = process.env.FIREBASE_PROJECT_ID &&
+    process.env.FIREBASE_PRIVATE_KEY &&
+    process.env.FIREBASE_CLIENT_EMAIL;
 
-// Initialize only if not already initialized
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+let messaging = null;
+
+if (isFirebaseConfigured) {
+    // Initialize Firebase Admin with environment variables
+    const serviceAccount = {
+        type: "service_account",
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    };
+
+    // Initialize only if not already initialized
+    if (!admin.apps.length) {
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+            messaging = admin.messaging();
+            console.log('✅ Firebase Admin initialized successfully');
+        } catch (error) {
+            console.error('❌ Firebase Admin initialization failed:', error.message);
+        }
+    } else {
+        messaging = admin.messaging();
+    }
+} else {
+    console.warn('⚠️ Firebase not configured. Push notifications will be disabled.');
+    console.warn('Missing env vars:', {
+        FIREBASE_PROJECT_ID: !!process.env.FIREBASE_PROJECT_ID,
+        FIREBASE_PRIVATE_KEY: !!process.env.FIREBASE_PRIVATE_KEY,
+        FIREBASE_CLIENT_EMAIL: !!process.env.FIREBASE_CLIENT_EMAIL
     });
 }
-
-const messaging = admin.messaging();
 
 /**
  * Send notification to a single device
