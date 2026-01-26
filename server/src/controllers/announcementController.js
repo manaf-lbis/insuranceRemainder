@@ -84,6 +84,22 @@ const getAllAnnouncements = async (req, res) => {
 const createAnnouncement = async (req, res) => {
     try {
         const announcement = await announcementService.createAnnouncement(req.body, req.user._id);
+
+        // If published, send push notifications (non-blocking)
+        if (announcement.status === 'published') {
+            const notificationService = require('../services/notificationService');
+
+            // Send notifications in background (don't await)
+            notificationService.sendToAll(
+                announcement.title,
+                announcement.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...',
+                {
+                    url: `/announcements/${announcement._id}`,
+                    announcementId: announcement._id.toString()
+                }
+            ).catch(err => console.error('Failed to send notifications:', err));
+        }
+
         res.status(201).json(announcement);
     } catch (error) {
         console.error('Error creating announcement:', error);
@@ -98,10 +114,27 @@ const createAnnouncement = async (req, res) => {
  */
 const updateAnnouncement = async (req, res) => {
     try {
+        const previousAnnouncement = await announcementService.getAnnouncementById(req.params.id);
         const announcement = await announcementService.updateAnnouncement(req.params.id, req.body);
+
         if (!announcement) {
             return res.status(404).json({ message: 'Announcement not found' });
         }
+
+        // If status changed from draft to published, send notifications
+        if (previousAnnouncement.status !== 'published' && announcement.status === 'published') {
+            const notificationService = require('../services/notificationService');
+
+            notificationService.sendToAll(
+                announcement.title,
+                announcement.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...',
+                {
+                    url: `/announcements/${announcement._id}`,
+                    announcementId: announcement._id.toString()
+                }
+            ).catch(err => console.error('Failed to send notifications:', err));
+        }
+
         res.status(200).json(announcement);
     } catch (error) {
         console.error('Error updating announcement:', error);
