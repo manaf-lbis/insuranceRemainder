@@ -24,13 +24,54 @@ import { ToastProvider } from './components/ToastContext'
 import InstallPrompt from './components/InstallPrompt'
 import WhatsAppButton from './components/WhatsAppButton'
 import ErrorBoundary from './components/ErrorBoundary'
+import NotificationPermission from './components/NotificationPermission'
+import { useSubscribeToNotificationsMutation } from './features/notifications/notificationsApiSlice'
+import { messaging, onMessage } from './firebase'
 
 function App() {
+    const [subscribeToNotifications] = useSubscribeToNotificationsMutation();
+
+    // Register service worker
+    React.useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then((registration) => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch((error) => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        }
+
+        // Handle foreground messages
+        const unsubscribe = onMessage(messaging, (payload) => {
+            console.log('Foreground message:', payload);
+            // Show notification using browser API
+            if (Notification.permission === 'granted') {
+                new Notification(payload.notification.title, {
+                    body: payload.notification.body,
+                    icon: '/logo.png'
+                });
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handlePermissionGranted = async (token) => {
+        try {
+            await subscribeToNotifications(token).unwrap();
+            console.log('Subscribed to notifications');
+        } catch (error) {
+            console.error('Failed to subscribe:', error);
+        }
+    };
     return (
         <ErrorBoundary>
             <ToastProvider>
                 <InstallPrompt />
                 <WhatsAppButton />
+                <NotificationPermission onPermissionGranted={handlePermissionGranted} />
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
