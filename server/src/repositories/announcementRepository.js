@@ -7,13 +7,17 @@ const create = async (data) => {
 
 const findPublic = async (limit = 6) => {
     // Priority order: hot (3), warm (2), cold (1)
-    return await Announcement.find({ status: 'published' })
+    return await Announcement.find({
+        status: 'published',
+        isBlocked: false  // Exclude blocked announcements
+    })
         .sort({
             priority: -1,  // This won't work directly with enum, need custom sort
             createdAt: -1
         })
         .limit(limit)
         .populate('author', 'username')
+        .populate('category')
         .then(announcements => {
             // Custom sort: hot first, then warm, then cold, then by date
             const priorityOrder = { hot: 3, warm: 2, cold: 1 };
@@ -28,7 +32,8 @@ const findPublic = async (limit = 6) => {
 const findTicker = async () => {
     return await Announcement.find({
         status: 'published',
-        showInTicker: true
+        showInTicker: true,
+        isBlocked: false  // Exclude blocked announcements
     })
         .sort({ createdAt: -1 })
         .select('title')
@@ -53,6 +58,14 @@ const remove = async (id) => {
     return await Announcement.findByIdAndDelete(id);
 };
 
+const incrementViews = async (id) => {
+    return await Announcement.findByIdAndUpdate(
+        id,
+        { $inc: { views: 1 } },
+        { new: true }
+    );
+};
+
 module.exports = {
     create,
     findPublic,
@@ -60,5 +73,6 @@ module.exports = {
     findAll,
     findById,
     update,
-    remove
+    remove,
+    incrementViews
 };

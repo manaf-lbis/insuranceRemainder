@@ -40,6 +40,18 @@ const getTickerAnnouncements = async () => {
     return await announcementRepository.findTicker();
 };
 
+const incrementViews = async (id) => {
+    return await announcementRepository.incrementViews(id);
+};
+
+const toggleBlock = async (id) => {
+    const announcement = await announcementRepository.findById(id);
+    if (!announcement) {
+        throw new Error('Announcement not found');
+    }
+    return await announcementRepository.update(id, { isBlocked: !announcement.isBlocked });
+};
+
 module.exports = {
     createAnnouncement,
     updateAnnouncement,
@@ -47,5 +59,7 @@ module.exports = {
     getAllAnnouncements,
     getAnnouncementById,
     deleteAnnouncement,
-    getTickerAnnouncements
+    getTickerAnnouncements,
+    incrementViews,
+    toggleBlock
 };

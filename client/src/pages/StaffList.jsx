@@ -11,6 +11,8 @@ import ConfirmModal from '../components/ConfirmModal'
 import Pagination from '../components/Pagination'
 import { useNavigate } from 'react-router-dom'
 
+import PageShimmer from '../components/PageShimmer'
+
 const StaffList = () => {
     const navigate = useNavigate()
     const [page, setPage] = useState(1)
@@ -82,7 +84,7 @@ const StaffList = () => {
         }
     }
 
-    if (isLoading) return <div className="flex justify-center mt-10"><Loader className="animate-spin text-blue-900" size={32} /></div>
+    if (isLoading) return <PageShimmer variant="list" />
     if (error) return <div className="text-center text-red-500 mt-10">Error loading staff data</div>
 
     return (
@@ -158,8 +160,8 @@ const StaffList = () => {
                                         onClick={() => handleBlockToggle(user._id, user.isActive)}
                                         disabled={updatingId === user._id}
                                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-xs transition-all active:scale-95 ${user.isActive
-                                                ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                            ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                                            : 'bg-green-50 text-green-700 hover:bg-green-100'
                                             }`}
                                     >
                                         {updatingId === user._id ? (

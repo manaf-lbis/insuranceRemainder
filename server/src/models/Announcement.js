@@ -29,6 +29,19 @@ const announcementSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'NewsCategory',
+        required: false // Optional for backward compatibility, or set default later
+    },
+    views: {
+        type: Number,
+        default: 0
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     expiresAt: {
         type: Date
     }

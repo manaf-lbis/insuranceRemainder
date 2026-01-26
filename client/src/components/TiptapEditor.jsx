@@ -346,27 +346,52 @@ const TiptapEditor = ({ value, onChange, placeholder = 'Start writing...' }) => 
                 .ProseMirror {
                     outline: none !important;
                     min-height: 300px;
+                    letter-spacing: 0.01em;
+                }
+                .ProseMirror p {
+                    margin-top: 0.75em !important;
+                    margin-bottom: 0.75em !important;
+                    line-height: 1.75 !important;
+                    letter-spacing: 0.01em !important;
+                }
+                .ProseMirror p:empty {
+                    min-height: 1.75em !important;
+                }
+                .ProseMirror p br {
+                    display: block !important;
                 }
                 .ProseMirror ul {
                     list-style-type: disc !important;
                     padding-left: 1.5rem !important;
-                    margin-top: 0.5rem !important;
-                    margin-bottom: 0.5rem !important;
+                    margin-top: 1em !important;
+                    margin-bottom: 1em !important;
                 }
                 .ProseMirror ol {
                     list-style-type: decimal !important;
                     padding-left: 1.5rem !important;
-                    margin-top: 0.5rem !important;
-                    margin-bottom: 0.5rem !important;
+                    margin-top: 1em !important;
+                    margin-bottom: 1em !important;
                 }
                 .ProseMirror li {
-                    margin-top: 0.25rem !important;
-                    margin-bottom: 0.25rem !important;
+                    margin-top: 0.375em !important;
+                    margin-bottom: 0.375em !important;
+                    line-height: 1.65 !important;
+                    letter-spacing: 0.01em !important;
                 }
                 .ProseMirror a {
                     color: #2563eb !important;
                     text-decoration: underline !important;
                     cursor: pointer !important;
+                }
+                .ProseMirror h1,
+                .ProseMirror h2,
+                .ProseMirror h3 {
+                    font-family: 'Poppins', sans-serif !important;
+                    font-weight: bold !important;
+                    margin-top: 2em !important;
+                    margin-bottom: 0.75em !important;
+                    line-height: 1.3 !important;
+                    letter-spacing: -0.01em !important;
                 }
             `}} />
         </div>

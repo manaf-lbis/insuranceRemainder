@@ -50,6 +50,7 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/posters', require('./routes/posterRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
+app.use('/api/news-categories', require('./routes/newsCategoryRoutes')); // New Route
 app.use('/api/upload', require('./routes/uploadRoutes'));
 
 // Serve frontend in production
