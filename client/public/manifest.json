@@ -1,7 +1,7 @@
 {
-    "name": "Insurance Renewal Reminder",
-    "short_name": "Insurance App",
-    "description": "Track and manage vehicle insurance renewals",
+    "name": "Notify CSC",
+    "short_name": "Notify CSC",
+    "description": "Your Digital Hub for Citizen Services",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

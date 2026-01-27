@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGetActivePostersQuery } from '../features/posters/postersApiSlice';
-import { ArrowRight, MessageCircle, ShieldCheck, Loader, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, MessageCircle, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 
 const PremiumHero = () => {
     const { data: posters, isLoading, isError } = useGetActivePostersQuery();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [enableTransition, setEnableTransition] = useState(true);
+    const [offset, setOffset] = useState(-100); // Start at -100% (middle slide)
 
-    // Get next poster index
-    const nextIndex = posters ? (currentIndex + 1) % posters.length : 0;
-    const prevIndex = posters ? (currentIndex - 1 + posters.length) % posters.length : 0;
+    // Touch handling state
+    const touchStartX = useRef(null);
+    const touchEndX = useRef(null);
+    const minSwipeDistance = 50;
 
     // Auto-rotation
     useEffect(() => {
@@ -21,61 +22,51 @@ const PremiumHero = () => {
         }, 6000);
 
         return () => clearInterval(timer);
-    }, [posters, currentIndex]);
-
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
-    const minSwipeDistance = 50;
+    }, [posters, currentIndex, isAnimating]);
 
     const handleTouchStart = (e) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
+        touchEndX.current = null;
+        touchStartX.current = e.targetTouches[0].clientX;
     };
 
-    const handleTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const handleTouchMove = (e) => {
+        touchEndX.current = e.targetTouches[0].clientX;
+    };
 
     const handleTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
+        if (!touchStartX.current || !touchEndX.current) return;
+        const distance = touchStartX.current - touchEndX.current;
         const isLeftSwipe = distance > minSwipeDistance;
         const isRightSwipe = distance < -minSwipeDistance;
 
         if (isLeftSwipe) {
-            handleNext();
+            handleNext(); // Swipe Left -> Show Next
         } else if (isRightSwipe) {
-            handlePrev();
+            handlePrev(); // Swipe Right -> Show Prev
         }
     };
 
     const handleNext = () => {
         if (isAnimating || !posters) return;
-
-        setEnableTransition(true);
         setIsAnimating(true);
+        setOffset(-200); // Slide to Next (Right)
 
-        // After animation completes
         setTimeout(() => {
-            setEnableTransition(false); // Disable transition for instant reset
-            setCurrentIndex((prev) => (prev + 1) % posters.length);
             setIsAnimating(false);
-
-            // Re-enable transition for next animation
-            setTimeout(() => setEnableTransition(true), 50);
+            setOffset(-100); // Reset to center without animation
+            setCurrentIndex((prev) => (prev + 1) % posters.length);
         }, 500);
     };
 
     const handlePrev = () => {
         if (isAnimating || !posters) return;
-
-        setEnableTransition(true);
         setIsAnimating(true);
+        setOffset(0); // Slide to Prev (Left)
 
         setTimeout(() => {
-            setEnableTransition(false);
-            setCurrentIndex((prev) => (prev - 1 + posters.length) % posters.length);
             setIsAnimating(false);
-
-            setTimeout(() => setEnableTransition(true), 50);
+            setOffset(-100); // Reset to center without animation
+            setCurrentIndex((prev) => (prev - 1 + posters.length) % posters.length);
         }, 500);
     };
 
@@ -102,6 +93,10 @@ const PremiumHero = () => {
         );
     }
 
+    const prevIndex = (currentIndex - 1 + posters.length) % posters.length;
+    const nextIndex = (currentIndex + 1) % posters.length;
+
+    const prevPoster = posters[prevIndex];
     const currentPoster = posters[currentIndex];
     const nextPoster = posters[nextIndex];
 
@@ -119,7 +114,7 @@ const PremiumHero = () => {
         const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageTemplate || 'Hello, I would like to apply for insurance.')}`;
 
         return (
-            <>
+            <div className="w-full h-full flex-shrink-0 flex flex-col md:flex-row" style={{ width: '100%' }}>
                 {/* --- DESKTOP VIEW --- */}
                 <div className="hidden lg:flex flex-1 items-stretch h-full">
                     {/* Content (Left) */}
@@ -158,7 +153,6 @@ const PremiumHero = () => {
 
                 {/* --- TABLET/MOBILE VIEW (Maximized V4) --- */}
                 <div className="lg:hidden flex flex-col pt-12">
-
                     {/* Immersive Poster (Maximized) */}
                     <div className="relative w-full px-4 mb-10">
                         <img
@@ -195,7 +189,7 @@ const PremiumHero = () => {
                         )}
                     </div>
                 </div>
-            </>
+            </div>
         );
     };
 
@@ -211,27 +205,38 @@ const PremiumHero = () => {
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                 <img
                     src={currentPoster.imageUrl}
-                    className={`w-full h-full object-cover blur-[40px] scale-[1.2] opacity-50 transition-all duration-1000 ${isAnimating ? 'opacity-0' : 'opacity-50'}`}
+                    className={`w-full h-full object-cover blur-[40px] scale-[1.2] opacity-50 transition-all duration-1000 ${isAnimating ? 'opacity-30' : 'opacity-50'}`}
+                    style={{ transition: 'opacity 0.5s ease-in-out' }}
                     alt=""
                 />
                 <div className="absolute inset-0 bg-black/60"></div>
             </div>
 
-            {/* Content & Poster Layer - Infinite Carousel Track */}
+            {/* 
+                Infinite Carousel Track - 3 Panels
+                [Prev] [Current] [Next]
+                We start at -100% (Current)
+                Next -> Animate to -200%, then instant reset to -100% with new index
+                Prev -> Animate to 0%, then instant reset to -100% with new index
+            */}
             <div className="relative z-10 w-full h-full overflow-hidden">
                 <div
-                    className={`flex ${enableTransition ? 'transition-transform duration-500 ease-in-out' : ''} ${isAnimating ? '-translate-x-full' : 'translate-x-0'
-                        }`}
+                    className="flex h-full w-full"
+                    style={{
+                        width: '300%', // 3 slides wide
+                        transform: `translateX(${offset}%)`,
+                        transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none',
+                        marginLeft: '0' // Align start
+                    }}
                 >
-                    {/* Current Slide */}
-                    <div className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
-                        {renderSlide(currentPoster)}
-                    </div>
+                    {/* Previous Slide (-1) */}
+                    {renderSlide(posters.length > 1 ? prevPoster : currentPoster)}
 
-                    {/* Next Slide (positioned to the right, enters during animation) */}
-                    <div className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
-                        {renderSlide(nextPoster)}
-                    </div>
+                    {/* Current Slide (0) - Initially Visible */}
+                    {renderSlide(currentPoster)}
+
+                    {/* Next Slide (+1) */}
+                    {renderSlide(posters.length > 1 ? nextPoster : currentPoster)}
                 </div>
             </div>
 
@@ -245,11 +250,21 @@ const PremiumHero = () => {
                                 key={idx}
                                 onClick={() => {
                                     if (idx === currentIndex || isAnimating) return;
-                                    setIsAnimating(true);
-                                    setTimeout(() => {
-                                        setCurrentIndex(idx);
-                                        setIsAnimating(false);
-                                    }, 500);
+
+                                    // Determine shortest path direction
+                                    const diff = idx - currentIndex;
+                                    const total = posters.length;
+                                    // Handles wrap-around logic for shortest path
+                                    const isNext = (diff > 0 && diff <= total / 2) || (diff < 0 && Math.abs(diff) > total / 2);
+
+                                    if (isNext) {
+                                        handleNext();
+                                        // If jumping multiple steps, we just animate one step then set index (simplified)
+                                        setTimeout(() => setCurrentIndex(idx), 500);
+                                    } else {
+                                        handlePrev();
+                                        setTimeout(() => setCurrentIndex(idx), 500);
+                                    }
                                 }}
                                 className={`h-1.5 transition-all duration-500 rounded-full ${idx === currentIndex ? 'w-10 bg-white' : 'w-2 bg-white/20 hover:bg-white/40'}`}
                             />
