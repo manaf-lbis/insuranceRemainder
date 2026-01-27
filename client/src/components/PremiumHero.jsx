@@ -6,7 +6,7 @@ const PremiumHero = () => {
     const { data: posters, isLoading, isError } = useGetActivePostersQuery();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [offset, setOffset] = useState(-100); // Start at -100% (middle slide)
+    const [offset, setOffset] = useState(-33.333333); // Start at -33.33% (middle slide of 300% width)
 
     // Touch handling state
     const touchStartX = useRef(null);
@@ -49,11 +49,11 @@ const PremiumHero = () => {
     const handleNext = () => {
         if (isAnimating || !posters) return;
         setIsAnimating(true);
-        setOffset(-200); // Slide to Next (Right)
+        setOffset(-66.666667); // Slide to Next (Right) - 2/3 of 300%
 
         setTimeout(() => {
             setIsAnimating(false);
-            setOffset(-100); // Reset to center without animation
+            setOffset(-33.333333); // Reset to center without animation
             setCurrentIndex((prev) => (prev + 1) % posters.length);
         }, 500);
     };
@@ -61,11 +61,11 @@ const PremiumHero = () => {
     const handlePrev = () => {
         if (isAnimating || !posters) return;
         setIsAnimating(true);
-        setOffset(0); // Slide to Prev (Left)
+        setOffset(0); // Slide to Prev (Left) - 0 of 300%
 
         setTimeout(() => {
             setIsAnimating(false);
-            setOffset(-100); // Reset to center without animation
+            setOffset(-33.333333); // Reset to center without animation
             setCurrentIndex((prev) => (prev - 1 + posters.length) % posters.length);
         }, 500);
     };
@@ -114,7 +114,7 @@ const PremiumHero = () => {
         const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageTemplate || 'Hello, I would like to apply for insurance.')}`;
 
         return (
-            <div className="w-full h-full flex-shrink-0 flex flex-col md:flex-row" style={{ width: '100%' }}>
+            <div className="h-full flex-shrink-0 flex flex-col md:flex-row" style={{ width: '33.333333%' }}>
                 {/* --- DESKTOP VIEW --- */}
                 <div className="hidden lg:flex flex-1 items-stretch h-full">
                     {/* Content (Left) */}
