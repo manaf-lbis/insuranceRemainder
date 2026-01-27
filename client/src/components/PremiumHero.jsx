@@ -6,6 +6,11 @@ const PremiumHero = () => {
     const { data: posters, isLoading, isError } = useGetActivePostersQuery();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [enableTransition, setEnableTransition] = useState(true);
+
+    // Get next poster index
+    const nextIndex = posters ? (currentIndex + 1) % posters.length : 0;
+    const prevIndex = posters ? (currentIndex - 1 + posters.length) % posters.length : 0;
 
     // Auto-rotation
     useEffect(() => {
@@ -44,19 +49,33 @@ const PremiumHero = () => {
 
     const handleNext = () => {
         if (isAnimating || !posters) return;
+
+        setEnableTransition(true);
         setIsAnimating(true);
+
+        // After animation completes
         setTimeout(() => {
+            setEnableTransition(false); // Disable transition for instant reset
             setCurrentIndex((prev) => (prev + 1) % posters.length);
             setIsAnimating(false);
+
+            // Re-enable transition for next animation
+            setTimeout(() => setEnableTransition(true), 50);
         }, 500);
     };
 
     const handlePrev = () => {
         if (isAnimating || !posters) return;
+
+        setEnableTransition(true);
         setIsAnimating(true);
+
         setTimeout(() => {
+            setEnableTransition(false);
             setCurrentIndex((prev) => (prev - 1 + posters.length) % posters.length);
             setIsAnimating(false);
+
+            setTimeout(() => setEnableTransition(true), 50);
         }, 500);
     };
 
@@ -84,39 +103,23 @@ const PremiumHero = () => {
     }
 
     const currentPoster = posters[currentIndex];
-    const {
-        headline,
-        description,
-        imageUrl,
-        showButton,
-        buttonText,
-        whatsappNumber,
-        messageTemplate
-    } = currentPoster;
+    const nextPoster = posters[nextIndex];
 
-    const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageTemplate || 'Hello, I would like to apply for insurance.')}`;
+    const renderSlide = (poster) => {
+        const {
+            headline,
+            description,
+            imageUrl,
+            showButton,
+            buttonText,
+            whatsappNumber,
+            messageTemplate
+        } = poster;
 
-    return (
-        <section
-            className="relative w-full overflow-hidden bg-slate-950 h-auto md:h-[750px] min-h-[550px]"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-        >
+        const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageTemplate || 'Hello, I would like to apply for insurance.')}`;
 
-            {/* Unified Blurred Background System */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                <img
-                    src={imageUrl}
-                    className={`w-full h-full object-cover blur-[40px] scale-[1.2] opacity-50 transition-all duration-1000 ${isAnimating ? 'opacity-0' : 'opacity-50'}`}
-                    alt=""
-                />
-                <div className="absolute inset-0 bg-black/60"></div>
-            </div>
-
-            {/* Content & Poster Layer */}
-            <div className={`relative z-10 w-full h-full flex flex-col md:flex-row transition-opacity duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-
+        return (
+            <>
                 {/* --- DESKTOP VIEW --- */}
                 <div className="hidden lg:flex flex-1 items-stretch h-full">
                     {/* Content (Left) */}
@@ -192,6 +195,44 @@ const PremiumHero = () => {
                         )}
                     </div>
                 </div>
+            </>
+        );
+    };
+
+    return (
+        <section
+            className="relative w-full overflow-hidden bg-slate-950 h-auto md:h-[750px] min-h-[550px]"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+
+            {/* Unified Blurred Background System */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <img
+                    src={currentPoster.imageUrl}
+                    className={`w-full h-full object-cover blur-[40px] scale-[1.2] opacity-50 transition-all duration-1000 ${isAnimating ? 'opacity-0' : 'opacity-50'}`}
+                    alt=""
+                />
+                <div className="absolute inset-0 bg-black/60"></div>
+            </div>
+
+            {/* Content & Poster Layer - Infinite Carousel Track */}
+            <div className="relative z-10 w-full h-full overflow-hidden">
+                <div
+                    className={`flex ${enableTransition ? 'transition-transform duration-500 ease-in-out' : ''} ${isAnimating ? '-translate-x-full' : 'translate-x-0'
+                        }`}
+                >
+                    {/* Current Slide */}
+                    <div className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
+                        {renderSlide(currentPoster)}
+                    </div>
+
+                    {/* Next Slide (positioned to the right, enters during animation) */}
+                    <div className="w-full h-full flex-shrink-0 flex flex-col md:flex-row">
+                        {renderSlide(nextPoster)}
+                    </div>
+                </div>
             </div>
 
             {/* Carousel Navigation (Universal) */}
@@ -203,7 +244,7 @@ const PremiumHero = () => {
                             <button
                                 key={idx}
                                 onClick={() => {
-                                    if (idx === currentIndex) return;
+                                    if (idx === currentIndex || isAnimating) return;
                                     setIsAnimating(true);
                                     setTimeout(() => {
                                         setCurrentIndex(idx);

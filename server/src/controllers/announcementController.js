@@ -8,6 +8,7 @@ const announcementService = require('../services/announcementService');
 const getPublicAnnouncements = async (req, res) => {
     try {
         const announcements = await announcementService.getPublicAnnouncements();
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate'); // Prevent caching to ensure blocked/deleted news disappears immediately
         res.status(200).json(announcements);
     } catch (error) {
         console.error('Error fetching public announcements:', error);
@@ -165,6 +166,7 @@ const deleteAnnouncement = async (req, res) => {
 const getTickerAnnouncements = async (req, res) => {
     try {
         const announcements = await announcementService.getTickerAnnouncements();
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.status(200).json(announcements);
     } catch (error) {
         console.error('Error fetching ticker announcements:', error);

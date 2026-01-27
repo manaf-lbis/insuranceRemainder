@@ -25,8 +25,10 @@ import InstallPrompt from './components/InstallPrompt'
 import WhatsAppButton from './components/WhatsAppButton'
 import ErrorBoundary from './components/ErrorBoundary'
 import NotificationPermission from './components/NotificationPermission'
+import ContentProtection from './components/ContentProtection'
 import { useSubscribeToNotificationsMutation } from './features/notifications/notificationsApiSlice'
 import { messaging, onMessage } from './firebase'
+
 
 function App() {
     const [subscribeToNotifications] = useSubscribeToNotificationsMutation();
@@ -34,43 +36,73 @@ function App() {
     // Register service worker
     React.useEffect(() => {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .then((registration) => {
-                    console.log('Service Worker registered:', registration);
-                })
-                .catch((error) => {
-                    console.error('Service Worker registration failed:', error);
+            navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+                scope: '/'
+            }).then((registration) => {
+                // Check for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Optionally reload the page to activate new service worker
+                            // window.location.reload();
+                        }
+                    });
                 });
+            }).catch((error) => {
+                console.error('Service Worker registration failed:', error);
+            });
         }
 
         // Handle foreground messages
-        const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Foreground message:', payload);
-            // Show notification using browser API
-            if (Notification.permission === 'granted') {
-                new Notification(payload.notification.title, {
-                    body: payload.notification.body,
-                    icon: payload.data?.icon || '/logo192.png',
-                    badge: payload.data?.badge || '/logo192.png',
-                    tag: payload.data?.tag || 'general'
-                });
-            }
-        });
+        if (messaging) {
+            const unsubscribe = onMessage(messaging, (payload) => {
+                try {
+                    // Show notification using browser API
+                    if (Notification.permission === 'granted') {
+                        const title = payload.notification?.title || 'New Notification';
+                        const options = {
+                            body: payload.notification?.body || '',
+                            icon: payload.notification?.icon || '/appIcon.jpg',
+                            badge: '/appIcon.jpg',
+                            tag: payload.data?.tag || 'notification',
+                            data: payload.data || {},
+                            requireInteraction: false
+                        };
 
-        return () => unsubscribe();
+                        const notification = new Notification(title, options);
+
+                        // Handle notification click
+                        notification.onclick = (event) => {
+                            event.preventDefault();
+                            const url = payload.data?.url || '/';
+                            window.open(url, '_blank');
+                            notification.close();
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error showing foreground notification:', error);
+                }
+            });
+
+            return () => {
+                unsubscribe();
+            };
+        }
     }, []);
 
     const handlePermissionGranted = async (token) => {
         try {
             await subscribeToNotifications(token).unwrap();
-            console.log('Subscribed to notifications');
         } catch (error) {
-            console.error('Failed to subscribe:', error);
+            console.error('Failed to save token to backend:', error);
+            throw error;
         }
     };
     return (
         <ErrorBoundary>
             <ToastProvider>
+                <ContentProtection />
                 <InstallPrompt />
                 <WhatsAppButton />
                 <NotificationPermission onPermissionGranted={handlePermissionGranted} />

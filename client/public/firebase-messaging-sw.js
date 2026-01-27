@@ -14,39 +14,49 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+    firebase.initializeApp(firebaseConfig);
+} catch (error) {
+    // Silent fail
+}
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages
 const messaging = firebase.messaging();
 
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
-    console.log('Received background message:', payload);
+    try {
+        const notificationTitle = payload.notification?.title || 'New Notification';
+        const notificationOptions = {
+            body: payload.notification?.body || '',
+            icon: payload.notification?.icon || '/appIcon.jpg',
+            badge: '/appIcon.jpg',
+            tag: payload.data?.tag || 'notification',
+            requireInteraction: false,
+            data: {
+                url: payload.data?.url || payload.fcmOptions?.link || '/',
+                clickAction: payload.data?.clickAction || '/',
+                ...payload.data
+            }
+        };
 
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/logo.png',
-        badge: '/badge.png',
-        data: {
-            url: payload.data?.url || '/'
-        }
-    };
-
-    self.registration.showNotification(notificationTitle, notificationOptions);
+        return self.registration.showNotification(notificationTitle, notificationOptions);
+    } catch (error) {
+        // Silent fail
+    }
 });
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const urlToOpen = event.notification.data?.url || '/';
+    const urlToOpen = event.notification.data?.url || event.notification.data?.clickAction || '/';
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
             // Check if there's already a window open
             for (const client of clientList) {
-                if (client.url === urlToOpen && 'focus' in client) {
+                if (client.url.includes(urlToOpen) && 'focus' in client) {
                     return client.focus();
                 }
             }
@@ -54,6 +64,18 @@ self.addEventListener('notificationclick', (event) => {
             if (clients.openWindow) {
                 return clients.openWindow(urlToOpen);
             }
+        }).catch(error => {
+            // Silent fail
         })
     );
+});
+
+// Service worker activation
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+
+// Service worker installation
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
 });
