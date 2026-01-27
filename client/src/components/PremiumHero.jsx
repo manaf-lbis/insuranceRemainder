@@ -6,7 +6,8 @@ const PremiumHero = () => {
     const { data: posters, isLoading, isError } = useGetActivePostersQuery();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [offset, setOffset] = useState(-33.333333); // Start at -33.33% (middle slide of 300% width)
+    const DEFAULT_OFFSET = -100 / 3;
+    const [offset, setOffset] = useState(DEFAULT_OFFSET); // Start at -33.33%
 
     // Touch handling state
     const touchStartX = useRef(null);
@@ -49,11 +50,11 @@ const PremiumHero = () => {
     const handleNext = () => {
         if (isAnimating || !posters) return;
         setIsAnimating(true);
-        setOffset(-66.666667); // Slide to Next (Right) - 2/3 of 300%
+        setOffset(DEFAULT_OFFSET * 2); // Slide to Next (-66.66%)
 
         setTimeout(() => {
             setIsAnimating(false);
-            setOffset(-33.333333); // Reset to center without animation
+            setOffset(DEFAULT_OFFSET); // Reset to center without animation
             setCurrentIndex((prev) => (prev + 1) % posters.length);
         }, 500);
     };
@@ -61,11 +62,11 @@ const PremiumHero = () => {
     const handlePrev = () => {
         if (isAnimating || !posters) return;
         setIsAnimating(true);
-        setOffset(0); // Slide to Prev (Left) - 0 of 300%
+        setOffset(0); // Slide to Prev (0%)
 
         setTimeout(() => {
             setIsAnimating(false);
-            setOffset(-33.333333); // Reset to center without animation
+            setOffset(DEFAULT_OFFSET); // Reset to center without animation
             setCurrentIndex((prev) => (prev - 1 + posters.length) % posters.length);
         }, 500);
     };
@@ -100,7 +101,7 @@ const PremiumHero = () => {
     const currentPoster = posters[currentIndex];
     const nextPoster = posters[nextIndex];
 
-    const renderSlide = (poster) => {
+    const renderSlide = (poster, key) => {
         const {
             headline,
             description,
@@ -114,7 +115,7 @@ const PremiumHero = () => {
         const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageTemplate || 'Hello, I would like to apply for insurance.')}`;
 
         return (
-            <div className="h-full flex-shrink-0 flex flex-col md:flex-row" style={{ width: '33.333333%' }}>
+            <div key={key} className="h-full flex-shrink-0 flex flex-col md:flex-row" style={{ width: '33.333333%' }}>
                 {/* --- DESKTOP VIEW --- */}
                 <div className="hidden lg:flex flex-1 items-stretch h-full">
                     {/* Content (Left) */}
@@ -215,9 +216,9 @@ const PremiumHero = () => {
             {/* 
                 Infinite Carousel Track - 3 Panels
                 [Prev] [Current] [Next]
-                We start at -100% (Current)
-                Next -> Animate to -200%, then instant reset to -100% with new index
-                Prev -> Animate to 0%, then instant reset to -100% with new index
+                We start at -33.333% (Current)
+                Next -> Animate to -66.666%, then instant reset to -33.333% with new index
+                Prev -> Animate to 0%, then instant reset to -33.333% with new index
             */}
             <div className="relative z-10 w-full h-full overflow-hidden">
                 <div
@@ -230,13 +231,13 @@ const PremiumHero = () => {
                     }}
                 >
                     {/* Previous Slide (-1) */}
-                    {renderSlide(posters.length > 1 ? prevPoster : currentPoster)}
+                    {renderSlide(posters.length > 1 ? prevPoster : currentPoster, 'prev')}
 
                     {/* Current Slide (0) - Initially Visible */}
-                    {renderSlide(currentPoster)}
+                    {renderSlide(currentPoster, 'curr')}
 
                     {/* Next Slide (+1) */}
-                    {renderSlide(posters.length > 1 ? nextPoster : currentPoster)}
+                    {renderSlide(posters.length > 1 ? nextPoster : currentPoster, 'next')}
                 </div>
             </div>
 
