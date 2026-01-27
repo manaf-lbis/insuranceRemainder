@@ -14,7 +14,10 @@ const AnnouncementDetailPage = () => {
     const { id } = useParams();
     const { showToast } = useToast();
     const { data: announcement, isLoading, isError } = useGetAnnouncementByIdQuery(id);
-    const { data: allAnnouncements } = useGetPublicAnnouncementsQuery();
+    const { data: allAnnouncements } = useGetPublicAnnouncementsQuery(undefined, {
+        refetchOnMountOrArgChange: true, // Force refresh to ensure no stale/blocked news is shown
+        pollingInterval: 0 // Don't poll, just fetch fresh on mount
+    });
     const [copied, setCopied] = React.useState(false);
     const [incrementViews] = useIncrementAnnouncementViewsMutation();
 

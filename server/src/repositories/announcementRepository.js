@@ -9,7 +9,7 @@ const findPublic = async (limit = 6) => {
     // Priority order: hot (3), warm (2), cold (1)
     return await Announcement.find({
         status: 'published',
-        isBlocked: false  // Exclude blocked announcements
+        isBlocked: { $ne: true }  // Strictly exclude blocked announcements (handles null/undefined safe)
     })
         .sort({
             priority: -1,  // This won't work directly with enum, need custom sort
@@ -33,7 +33,7 @@ const findTicker = async () => {
     return await Announcement.find({
         status: 'published',
         showInTicker: true,
-        isBlocked: false  // Exclude blocked announcements
+        isBlocked: { $ne: true }  // Strictly exclude blocked announcements
     })
         .sort({ createdAt: -1 })
         .select('title')
