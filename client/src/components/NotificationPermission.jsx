@@ -85,14 +85,14 @@ const NotificationPermission = ({ onPermissionGranted }) => {
                 </div>
                 <div className="flex-1">
                     <p className="font-bold text-sm">Get News Updates!</p>
-                    <p className="text-xs text-blue-100">Enable notifications for latest news</p>
+                    <p className="text-xs text-blue-100">Subscribe to get instant notifications</p>
                 </div>
                 <button
                     onClick={handleEnable}
                     disabled={isRequesting}
                     className="px-4 py-2 bg-white text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50"
                 >
-                    {isRequesting ? 'Enabling...' : 'Enable'}
+                    {isRequesting ? 'Subscribing...' : 'Subscribe'}
                 </button>
                 <button
                     onClick={handleDismiss}
