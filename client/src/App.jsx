@@ -28,6 +28,7 @@ import NotificationPermission from './components/NotificationPermission'
 import ContentProtection from './components/ContentProtection'
 import { useSubscribeToNotificationsMutation } from './features/notifications/notificationsApiSlice'
 import { messaging, onMessage } from './firebase'
+import ScrollToTop from './components/ScrollToTop'
 
 
 function App() {
@@ -105,6 +106,7 @@ function App() {
                 <ContentProtection />
                 <InstallPrompt />
                 <WhatsAppButton />
+                <ScrollToTop />
                 <NotificationPermission onPermissionGranted={handlePermissionGranted} />
                 <Routes>
                     {/* Public Routes */}

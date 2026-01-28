@@ -53,7 +53,8 @@ export const AnnouncementCard = ({ announcement }) => {
 };
 
 const AnnouncementsSection = ({ limit: initialLimit = 3 }) => {
-    const { data: announcements, isLoading } = useGetPublicAnnouncementsQuery();
+    // Fetch up to 50 items to ensure we have data for "Load More"
+    const { data: announcements, isLoading } = useGetPublicAnnouncementsQuery(50);
     const [visibleCount, setVisibleCount] = React.useState(initialLimit);
 
     const processedAnnouncements = React.useMemo(() => {

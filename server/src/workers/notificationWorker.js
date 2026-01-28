@@ -1,6 +1,9 @@
 const admin = require('firebase-admin');
 const FCMToken = require('../models/FCMToken');
 
+const connectDB = require('../config/db');
+const mongoose = require('mongoose');
+
 // Initialize Firebase Admin (same config as service)
 const serviceAccount = {
     type: "service_account",
@@ -13,6 +16,11 @@ if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
     });
+}
+
+// Connect to MongoDB
+if (mongoose.connection.readyState === 0) {
+    connectDB();
 }
 
 const messaging = admin.messaging();

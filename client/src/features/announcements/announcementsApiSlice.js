@@ -3,7 +3,7 @@ import { apiSlice } from '../../features/api/apiSlice';
 export const announcementsApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getPublicAnnouncements: builder.query({
-            query: () => '/announcements',
+            query: (limit = 50) => `/announcements?limit=${limit}`,
             providesTags: ['Announcement'],
         }),
         getAnnouncementById: builder.query({
