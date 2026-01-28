@@ -218,12 +218,13 @@ const AnnouncementDetailPage = () => {
                 `}} />
 
                 {/* Quick Actions - Minimalist */}
-                <div className="my-8 py-6 border-y border-slate-100 flex flex-wrap items-center justify-center gap-4">
-                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mr-2">Quick Access:</span>
-                    <Link to="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-50 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors">
+                {/* Quick Actions - Minimalist */}
+                <div className="my-8 py-6 border-y border-slate-100 flex flex-nowrap items-center justify-center gap-3 overflow-x-auto no-scrollbar">
+                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Quick Access:</span>
+                    <Link to="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-50 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors whitespace-nowrap">
                         <span>🏠</span> Home
                     </Link>
-                    <Link to="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm hover:bg-blue-100 transition-colors">
+                    <Link to="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm hover:bg-blue-100 transition-colors whitespace-nowrap">
                         <span>🛡️</span> Check Insurance
                     </Link>
                 </div>
