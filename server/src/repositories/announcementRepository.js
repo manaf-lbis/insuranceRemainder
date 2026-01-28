@@ -5,7 +5,7 @@ const create = async (data) => {
     return await announcement.save();
 };
 
-const findPublic = async (limit = 6) => {
+const findPublic = async (limit = 50) => {
     // Priority order: hot (3), warm (2), cold (1)
     return await Announcement.find({
         status: 'published',

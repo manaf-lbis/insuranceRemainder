@@ -13,8 +13,8 @@ const updateAnnouncement = async (id, data) => {
     return await announcementRepository.update(id, data);
 };
 
-const getPublicAnnouncements = async () => {
-    return await announcementRepository.findPublic(6);
+const getPublicAnnouncements = async (limit) => {
+    return await announcementRepository.findPublic(limit);
 };
 
 const getAllAnnouncements = async (isAdmin) => {

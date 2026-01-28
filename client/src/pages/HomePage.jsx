@@ -21,7 +21,7 @@ const HomePage = () => {
                 <QuickLinks />
 
                 {/* Announcements Section (Text Only) */}
-                <AnnouncementsSection limit={4} />
+                <AnnouncementsSection limit={10} />
             </main>
 
             <footer className="bg-white border-t border-gray-200 py-8">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGetAnnouncementByIdQuery, useGetPublicAnnouncementsQuery, useIncrementAnnouncementViewsMutation } from '../features/announcements/announcementsApiSlice';
-import { Calendar, User, ArrowLeft, Loader, Share2, Copy, Check } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Loader, Share2, Copy, Check, ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
 import Navbar from '../components/Navbar';
@@ -100,44 +100,40 @@ const AnnouncementDetailPage = () => {
                 <meta name="twitter:description" content={shareDescription} />
             </Helmet>
             <Navbar variant="solid" />
-            <header className="bg-slate-50 border-b border-gray-100 py-12 md:py-16">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-8">
-                        <div className="flex-1">
-                            <h1 className="text-2xl md:text-4xl font-black text-gray-900 font-poppins leading-tight mb-4">
-                                {announcement.title}
-                            </h1>
+            <header className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-8 md:pt-16 md:pb-12 text-left relative">
+                <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-widest animate-fade-in-up">
+                    <Calendar size={12} className="text-blue-500" />
+                    <span>{new Date(announcement.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                </div>
 
-                            <div className="flex items-center gap-6 text-sm text-slate-500">
-                                <div className="flex items-center gap-2">
-                                    <Calendar size={16} className="text-emerald-500" />
-                                    <span>{new Date(announcement.createdAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <User size={16} className="text-blue-500" />
-                                    <span className="capitalize font-bold text-slate-700">{announcement.author?.username || 'Notify CSC Team'}</span>
-                                </div>
-                            </div>
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 font-poppins leading-tight mb-6 tracking-tight animate-fade-in-up md:max-w-4xl" style={{ animationDelay: '100ms' }}>
+                    {announcement.title}
+                </h1>
+
+                <div className="flex flex-wrap items-center gap-4 md:gap-6 text-slate-500 font-medium animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-[10px] md:text-xs shadow-md shadow-blue-500/20">
+                            {announcement.author?.username?.[0]?.toUpperCase() || 'N'}
                         </div>
-
-                        {/* Top Share Button */}
-                        <button
-                            onClick={handleShare}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all shadow-sm active:scale-95 group self-start md:self-center"
-                        >
-                            {copied ? (
-                                <>
-                                    <Check size={18} className="text-emerald-500" />
-                                    <span>Copied</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Share2 size={18} className="text-blue-500 group-hover:rotate-12 transition-transform" />
-                                    <span>Share</span>
-                                </>
-                            )}
-                        </button>
+                        <span className="text-slate-900 font-bold text-sm md:text-base">{announcement.author?.username || 'Notify CSC Team'}</span>
                     </div>
+                    <span className="hidden md:block w-1 h-1 rounded-full bg-slate-300"></span>
+                    <button
+                        onClick={handleShare}
+                        className="group flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors text-sm md:text-base"
+                    >
+                        {copied ? (
+                            <>
+                                <Check size={16} className="text-emerald-500" />
+                                <span className="text-emerald-600">Copied</span>
+                            </>
+                        ) : (
+                            <>
+                                <Share2 size={16} className="group-hover:-translate-y-0.5 transition-transform" />
+                                <span className="underline decoration-slate-200 group-hover:decoration-blue-200 underline-offset-4">Share</span>
+                            </>
+                        )}
+                    </button>
                 </div>
             </header>
 
@@ -221,7 +217,17 @@ const AnnouncementDetailPage = () => {
                     }
                 `}} />
 
-                {/* Suggestions Section */}
+                {/* Quick Actions - Minimalist */}
+                <div className="my-8 py-6 border-y border-slate-100 flex flex-wrap items-center justify-center gap-4">
+                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mr-2">Quick Access:</span>
+                    <Link to="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-50 text-slate-700 font-bold text-sm hover:bg-slate-100 transition-colors">
+                        <span>🏠</span> Home
+                    </Link>
+                    <Link to="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm hover:bg-blue-100 transition-colors">
+                        <span>🛡️</span> Check Insurance
+                    </Link>
+                </div>
+
                 {suggestions.length > 0 && (
                     <div className="mt-16">
                         <div className="flex items-center justify-between mb-6">

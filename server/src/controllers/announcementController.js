@@ -7,7 +7,8 @@ const announcementService = require('../services/announcementService');
  */
 const getPublicAnnouncements = async (req, res) => {
     try {
-        const announcements = await announcementService.getPublicAnnouncements();
+        const limit = parseInt(req.query.limit) || 50; // Default to 50 to return enough for "Load More"
+        const announcements = await announcementService.getPublicAnnouncements(limit);
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate'); // Prevent caching to ensure blocked/deleted news disappears immediately
         res.status(200).json(announcements);
     } catch (error) {
