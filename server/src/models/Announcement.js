@@ -34,6 +34,11 @@ const announcementSchema = new mongoose.Schema({
         ref: 'NewsCategory',
         required: false // Optional for backward compatibility, or set default later
     },
+    lastUpdatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    },
     views: {
         type: Number,
         default: 0

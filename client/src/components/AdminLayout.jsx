@@ -12,7 +12,8 @@ import {
     LogOut,
     Menu,
     X,
-    Shield
+    Shield,
+    BarChart3
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -39,8 +40,9 @@ const AdminLayout = () => {
         {
             group: 'Design & Media',
             items: [
-                { path: '/admin/posters', label: 'Hero Engine', icon: ImageIcon, roles: ['admin'] },
-                { path: '/admin/announcements', label: 'Announcements', icon: Megaphone, roles: ['admin'] },
+                { path: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['admin', 'staff'] },
+                { path: '/admin/posters', label: 'Hero Engine', icon: ImageIcon, roles: ['admin', 'staff'] },
+                { path: '/admin/announcements', label: 'Announcements', icon: Megaphone, roles: ['admin', 'staff'] },
             ]
         },
         {

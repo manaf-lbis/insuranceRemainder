@@ -64,6 +64,10 @@ export const announcementsApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Announcement'],
         }),
+        getAnnouncementStats: builder.query({
+            query: () => '/announcements/admin/stats',
+            providesTags: ['AnnouncementStats'],
+        }),
     }),
 });
 
@@ -79,4 +83,5 @@ export const {
     useUploadImageMutation,
     useIncrementAnnouncementViewsMutation,
     useToggleBlockAnnouncementMutation,
+    useGetAnnouncementStatsQuery,
 } = announcementsApiSlice;

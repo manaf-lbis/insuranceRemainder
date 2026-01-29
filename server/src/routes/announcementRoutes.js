@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, admin, staffOrAdmin } = require('../middleware/authMiddleware');
 const {
     getPublicAnnouncements,
     getAnnouncementById,
@@ -11,7 +11,8 @@ const {
     getTickerAnnouncements,
     getAnnouncementByIdAdmin,
     incrementAnnouncementViews,
-    toggleBlockAnnouncement
+    toggleBlockAnnouncement,
+    getAnnouncementStats
 } = require('../controllers/announcementController');
 const { getAnnouncementSharePreview } = require('../controllers/shareController');
 
@@ -19,17 +20,20 @@ const { getAnnouncementSharePreview } = require('../controllers/shareController'
 router.get('/', getPublicAnnouncements);
 router.get('/ticker', getTickerAnnouncements);
 
-// Admin Routes - MUST come before /:id route to avoid 'admin' being treated as an ID
+// Admin/Staff Routes - Stats (must come before /admin/:id)
+router.get('/admin/stats', protect, staffOrAdmin, getAnnouncementStats);
+
+// Admin/Staff Routes - Manage Announcements
 router.route('/admin')
-    .get(protect, admin, getAllAnnouncements)
-    .post(protect, admin, createAnnouncement);
+    .get(protect, staffOrAdmin, getAllAnnouncements)
+    .post(protect, staffOrAdmin, createAnnouncement);
 
 router.route('/admin/:id')
-    .get(protect, admin, getAnnouncementByIdAdmin)
-    .put(protect, admin, updateAnnouncement)
-    .delete(protect, admin, deleteAnnouncement);
+    .get(protect, staffOrAdmin, getAnnouncementByIdAdmin)
+    .put(protect, staffOrAdmin, updateAnnouncement)
+    .delete(protect, staffOrAdmin, deleteAnnouncement);
 
-router.patch('/admin/:id/block', protect, admin, toggleBlockAnnouncement);
+router.patch('/admin/:id/block', protect, staffOrAdmin, toggleBlockAnnouncement);
 
 // Social Media Share Proxy (Server-Side Preview)
 router.get('/share/:id', getAnnouncementSharePreview);
