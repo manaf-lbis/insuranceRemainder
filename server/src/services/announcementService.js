@@ -52,6 +52,10 @@ const toggleBlock = async (id) => {
     return await announcementRepository.update(id, { isBlocked: !announcement.isBlocked });
 };
 
+const getAnnouncementStats = async () => {
+    return await announcementRepository.getStats();
+};
+
 module.exports = {
     createAnnouncement,
     updateAnnouncement,
@@ -61,5 +65,6 @@ module.exports = {
     deleteAnnouncement,
     getTickerAnnouncements,
     incrementViews,
-    toggleBlock
+    toggleBlock,
+    getAnnouncementStats
 };

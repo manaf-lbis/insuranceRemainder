@@ -113,9 +113,14 @@ const AnnouncementDetailPage = () => {
                 <div className="flex flex-wrap items-center gap-4 md:gap-6 text-slate-500 font-medium animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                     <div className="flex items-center gap-2">
                         <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-[10px] md:text-xs shadow-md shadow-blue-500/20">
-                            {announcement.author?.username?.[0]?.toUpperCase() || 'N'}
+                            {(announcement.lastUpdatedBy?.username || announcement.author?.username || 'N')[0]?.toUpperCase()}
                         </div>
-                        <span className="text-slate-900 font-bold text-sm md:text-base">{announcement.author?.username || 'Notify CSC Team'}</span>
+                        <div className="flex flex-col">
+                            <span className="text-slate-900 font-bold text-sm md:text-base leading-none">
+                                {announcement.lastUpdatedBy ? announcement.lastUpdatedBy.username : (announcement.author?.username || 'Notify CSC Team')}
+                            </span>
+                            {announcement.lastUpdatedBy && <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Updated By</span>}
+                        </div>
                     </div>
                     <span className="hidden md:block w-1 h-1 rounded-full bg-slate-300"></span>
                     <button

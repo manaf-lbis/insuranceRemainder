@@ -17,6 +17,7 @@ const findPublic = async (limit = 50) => {
         })
         .limit(limit)
         .populate('author', 'username')
+        .populate('lastUpdatedBy', 'username')
         .populate('category')
         .then(announcements => {
             // Custom sort: hot first, then warm, then cold, then by date
@@ -47,7 +48,9 @@ const findAll = async (filter = {}, sort = { createdAt: -1 }) => {
 };
 
 const findById = async (id) => {
-    return await Announcement.findById(id).populate('author', 'username');
+    return await Announcement.findById(id)
+        .populate('author', 'username')
+        .populate('lastUpdatedBy', 'username');
 };
 
 const update = async (id, data) => {
@@ -66,6 +69,29 @@ const incrementViews = async (id) => {
     );
 };
 
+const getStats = async () => {
+    const totalAnnouncements = await Announcement.countDocuments();
+    const publishedCount = await Announcement.countDocuments({ status: 'published' });
+
+    const viewsAggregation = await Announcement.aggregate([
+        { $group: { _id: null, totalViews: { $sum: '$views' } } }
+    ]);
+    const totalViews = viewsAggregation.length > 0 ? viewsAggregation[0].totalViews : 0;
+
+    const topPerforming = await Announcement.find({ status: 'published' })
+        .sort({ views: -1 })
+        .limit(5)
+        .select('title views createdAt author')
+        .populate('author', 'username');
+
+    return {
+        totalAnnouncements,
+        publishedCount,
+        totalViews,
+        topPerforming
+    };
+};
+
 module.exports = {
     create,
     findPublic,
@@ -74,5 +100,6 @@ module.exports = {
     findById,
     update,
     remove,
-    incrementViews
+    incrementViews,
+    getStats
 };

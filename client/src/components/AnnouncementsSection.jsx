@@ -26,8 +26,16 @@ export const AnnouncementCard = ({ announcement }) => {
                         </h3>
                     </div>
 
-                    <div className="flex items-center text-xs text-slate-400 font-medium mt-auto">
-                        {timeAgo(announcement.createdAt)}
+                    <div className="flex items-center justify-between mt-auto pt-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                {(announcement.lastUpdatedBy?.username || announcement.author?.username || 'N')[0]?.toUpperCase()}
+                            </div>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                                {announcement.lastUpdatedBy ? announcement.lastUpdatedBy.username : (announcement.author?.username || 'Admin')}
+                            </span>
+                        </div>
+                        <span className="text-xs text-slate-400 font-medium">{timeAgo(announcement.createdAt)}</span>
                     </div>
                 </div>
 

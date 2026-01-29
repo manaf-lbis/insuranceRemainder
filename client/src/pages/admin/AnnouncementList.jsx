@@ -102,6 +102,15 @@ const AnnouncementList = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <Link
+                                                to={`/announcements/${item._id}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                title="View"
+                                            >
+                                                <Eye size={16} />
+                                            </Link>
+                                            <Link
                                                 to={`/admin/announcements/edit/${item._id}`}
                                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                                 title="Edit"
@@ -111,8 +120,8 @@ const AnnouncementList = () => {
                                             <button
                                                 onClick={() => handleToggleBlock(item._id, item.isBlocked)}
                                                 className={`p-1.5 rounded transition-colors ${item.isBlocked
-                                                        ? 'text-green-600 hover:bg-green-50'
-                                                        : 'text-orange-600 hover:bg-orange-50'
+                                                    ? 'text-green-600 hover:bg-green-50'
+                                                    : 'text-orange-600 hover:bg-orange-50'
                                                     }`}
                                                 title={item.isBlocked ? 'Unblock' : 'Block'}
                                             >

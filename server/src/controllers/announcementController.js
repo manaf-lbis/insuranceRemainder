@@ -40,8 +40,8 @@ const getAnnouncementById = async (req, res) => {
         // Assuming this public endpoint allows viewing any if you have ID, OR strictly published.
         // Let's enforce published for public route unless we add admin logic here.
         if (announcement.status !== 'published') {
-            // If user is admin (req.user exists), allow. Else 404.
-            if (!req.user || req.user.role !== 'admin') {
+            // If user is admin or staff (req.user exists), allow. Else 404.
+            if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'staff')) {
                 return res.status(404).json({ message: 'Announcement not found' });
             }
         }
@@ -117,7 +117,11 @@ const createAnnouncement = async (req, res) => {
 const updateAnnouncement = async (req, res) => {
     try {
         const previousAnnouncement = await announcementService.getAnnouncementById(req.params.id);
-        const announcement = await announcementService.updateAnnouncement(req.params.id, req.body);
+        const updateData = {
+            ...req.body,
+            lastUpdatedBy: req.user._id
+        };
+        const announcement = await announcementService.updateAnnouncement(req.params.id, updateData);
 
         if (!announcement) {
             return res.status(404).json({ message: 'Announcement not found' });
@@ -223,6 +227,21 @@ const toggleBlockAnnouncement = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Get announcement statistics
+ * @route   GET /api/admin/announcements/stats
+ * @access  Admin/Staff
+ */
+const getAnnouncementStats = async (req, res) => {
+    try {
+        const stats = await announcementService.getAnnouncementStats();
+        res.status(200).json(stats);
+    } catch (error) {
+        console.error('Error fetching announcement stats:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getPublicAnnouncements,
     getAnnouncementById,
@@ -233,5 +252,6 @@ module.exports = {
     getTickerAnnouncements,
     getAnnouncementByIdAdmin,
     incrementAnnouncementViews,
-    toggleBlockAnnouncement
+    toggleBlockAnnouncement,
+    getAnnouncementStats
 };

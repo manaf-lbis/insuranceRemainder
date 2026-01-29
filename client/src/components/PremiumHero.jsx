@@ -143,10 +143,10 @@ const PremiumHero = () => {
                     </div>
 
                     {/* Poster (Right) */}
-                    <div className="w-[45%] flex items-center justify-center p-12">
+                    <div className="w-[55%] flex items-center justify-center p-8">
                         <img
                             src={imageUrl}
-                            className="max-w-full max-h-full object-contain shadow-[0_40px_80px_-15px_rgba(0,0,0,0.7)] rounded-2xl"
+                            className="w-full h-full object-contain shadow-[0_40px_80px_-15px_rgba(0,0,0,0.7)] rounded-2xl"
                             alt={headline || "Hero Poster"}
                         />
                     </div>
@@ -158,7 +158,7 @@ const PremiumHero = () => {
                     <div className="relative w-full px-4 mb-10">
                         <img
                             src={imageUrl}
-                            className="w-full h-auto max-h-[65vh] object-contain shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] rounded-2xl"
+                            className="w-full h-auto object-contain shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] rounded-2xl"
                             alt={headline || "Hero Poster"}
                         />
                     </div>

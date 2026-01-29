@@ -16,6 +16,7 @@ import ManageAnnouncement from './pages/admin/ManageAnnouncement'
 import AnnouncementDetailPage from './pages/AnnouncementDetailPage'
 import NewsPage from './pages/NewsPage'
 import AboutPage from './pages/AboutPage'
+import AnalyticsDashboard from './pages/AnalyticsDashboard'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import PrivateRoute from './components/PrivateRoute'
@@ -126,15 +127,16 @@ function App() {
                             <Route path="/add-insurance" element={<AddInsurance />} />
                             <Route path="/edit-insurance/:id" element={<EditInsurance />} />
                             <Route path="/insurances" element={<InsuranceList />} />
+                            <Route path="/admin/analytics" element={<AnalyticsDashboard />} />
+                            <Route path="/admin/posters" element={<ManagePosters />} />
+                            <Route path="/admin/announcements" element={<AnnouncementList />} />
+                            <Route path="/admin/announcements/new" element={<ManageAnnouncement />} />
+                            <Route path="/admin/announcements/edit/:id" element={<ManageAnnouncement />} />
 
                             {/* Admin Only Routes */}
                             <Route element={<AdminRoute />}>
                                 <Route path="/admin/staff" element={<StaffList />} />
                                 <Route path="/admin/add-staff" element={<AddStaff />} />
-                                <Route path="/admin/posters" element={<ManagePosters />} />
-                                <Route path="/admin/announcements" element={<AnnouncementList />} />
-                                <Route path="/admin/announcements/new" element={<ManageAnnouncement />} />
-                                <Route path="/admin/announcements/edit/:id" element={<ManageAnnouncement />} />
                             </Route>
                         </Route>
                     </Route>
