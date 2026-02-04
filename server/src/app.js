@@ -91,23 +91,35 @@ app.get('/announcements/:id', async (req, res, next) => {
             }
         }
 
-        // Extract image
-        const imgRegex = /<img[^>]+src="([^">]+)"/i;
+        // Extract image with robust regex (handles single and double quotes)
+        const imgRegex = /<img[^>]+src=["']([^"']+)["']/i;
         const match = announcement.content.match(imgRegex);
         const firstImage = match ? match[1] : null;
+
+        if (!firstImage) {
+            console.log(`[Meta Inject] ID: ${req.params.id} | No image found in content.`);
+        }
 
         // Generate simple description
         const cleanDesc = announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
 
         // Proxy URL Strategy (Masking Backend)
-        // We use the Frontend URL + /p-image path (which is rewritten by Vercel to Backend)
-        // Fallback to API directly if we are unsure (but user insists on frontend url)
-
         const frontendProxyPath = '/p-image';
-        // Construct clean Frontend Image URL: https://frontend.com/p-image?url=...
+
+        // Ensure clientUrl does not end with slash
+        const baseUrl = clientUrl.replace(/\/$/, '');
+
+        // Optimize Cloudinary Image for Social Media (1200x630)
+        // This prevents "Image too large" errors on WhatsApp/Facebook
+        let finalImageUrl = firstImage;
+        if (firstImage && firstImage.includes('cloudinary.com') && firstImage.includes('/upload/')) {
+            finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto,f_auto/');
+        }
+
+        // Construct clean Frontend Image URL
         const proxyUrl = firstImage
-            ? `${clientUrl}${frontendProxyPath}?url=${encodeURIComponent(firstImage)}`
-            : `${clientUrl}/pwa-192x192.png`;
+            ? `${baseUrl}${frontendProxyPath}?url=${encodeURIComponent(finalImageUrl)}`
+            : `${baseUrl}/pwa-192x192.png`;
 
         console.log(`[Meta Inject] ID: ${req.params.id} | ProxyImg: ${proxyUrl}`);
 
@@ -119,6 +131,8 @@ app.get('/announcements/:id', async (req, res, next) => {
                 <meta property="og:title" content="${announcement.title}" />
                 <meta property="og:description" content="${cleanDesc}" />
                 <meta property="og:image" content="${proxyUrl}" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
                 <meta property="og:type" content="article" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="${announcement.title}" />
