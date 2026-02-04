@@ -71,7 +71,7 @@ app.get('/announcements/:id', async (req, res, next) => {
 
         // Fetch the frontend's index.html (Remote Fetch Strategy)
         // This decouples backend from having client build files locally
-        const clientUrl = process.env.CLIENT_URL || 'https://insurance-remainder.vercel.app';
+        const clientUrl = process.env.CLIENT_URL || 'https://notifycsc.vercel.app';
         let htmlData = '';
 
         try {
@@ -180,7 +180,7 @@ if (process.env.NODE_ENV === 'production') {
             // So this block is legacy "Monolith" thinking.
             // However, for clean fallbacks, we might want to Redirect to Client URL?
 
-            res.redirect(process.env.CLIENT_URL || 'https://insurance-remainder.vercel.app');
+            res.redirect(process.env.CLIENT_URL || 'https://notifycsc.vercel.app');
         } else {
             res.status(404).json({ message: 'API Route not found' });
         }
