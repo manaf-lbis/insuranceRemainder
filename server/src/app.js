@@ -132,9 +132,24 @@ app.get('/announcements/:id', async (req, res, next) => {
 // Serve frontend in production (catch-all for other routes)
 if (process.env.NODE_ENV === 'production') {
     // Handle SPA routing: serve index.html for any non-API route
-    app.get('*', (req, res) => {
+    app.get(/(.*)/, (req, res) => {
         if (!req.path.startsWith('/api')) {
-            res.sendFile(path.join(publicPath, 'index.html'));
+            // If we are here, it means the specific /announcements/:id handler didn't catch it
+            // OR it isn't an announcement route.
+            // We still want to serve index.html for SPA (unless we want to remote fetch for everything?)
+            // For simplicity, we fall back to local file IF available, or just Remote Fetch again if needed.
+            // But usually this block assumes we Have the files.
+            // Wait, if Render DOES NOT have files, fs.sendFile fails!
+            // So we should strictly redirect or fetch remote?
+            // Since we established Render doesn't have the build, we should perform the Remote Fetch Strategy for ALL routes?
+            // OR, just say "Not Found" for API and redirect ROOT to frontend?
+
+            // If we are strictly a backend API, we shouldn't fail on index.html missing if we don't expect to serve it.
+            // BUT user wants to serve frontend via backend? No, Backend is just API.
+            // So this block is legacy "Monolith" thinking.
+            // However, for clean fallbacks, we might want to Redirect to Client URL?
+
+            res.redirect(process.env.CLIENT_URL || 'https://insurance-remainder.vercel.app');
         } else {
             res.status(404).json({ message: 'API Route not found' });
         }
