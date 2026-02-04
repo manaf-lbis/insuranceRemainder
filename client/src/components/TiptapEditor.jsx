@@ -10,12 +10,18 @@ import { Link } from '@tiptap/extension-link';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Image } from '@tiptap/extension-image';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import {
     Bold, Italic, Underline as UnderlineIcon, List, ListOrdered,
     AlignLeft, AlignCenter, AlignRight, Link as LinkIcon,
     Undo, Redo, Highlighter, Eraser, Image as ImageIcon,
     Loader, Heading1, Heading2, Heading3, Quote, Minus,
-    Type, Palette, ChevronDown, Check
+    Type, Palette, ChevronDown, Check,
+    Table as TableIcon, Trash2, Plus, ArrowDown, ArrowRight as ArrowRightIcon,
+    Split, Minimize
 } from 'lucide-react';
 import { Extension } from '@tiptap/core';
 
@@ -121,6 +127,27 @@ const TiptapEditor = ({ value, onChange, placeholder = 'Start writing...' }) => 
             Image.configure({
                 HTMLAttributes: {
                     class: 'rounded-lg max-w-full h-auto shadow-md my-4',
+                },
+            }),
+            Table.configure({
+                resizable: true,
+                HTMLAttributes: {
+                    class: 'border-collapse table-auto w-full my-4',
+                },
+            }),
+            TableRow.configure({
+                HTMLAttributes: {
+                    class: 'border border-gray-300',
+                },
+            }),
+            TableHeader.configure({
+                HTMLAttributes: {
+                    class: 'border border-gray-300 bg-gray-50 p-2 font-bold text-left',
+                },
+            }),
+            TableCell.configure({
+                HTMLAttributes: {
+                    class: 'border border-gray-300 p-2 relative',
                 },
             }),
         ],
@@ -259,6 +286,53 @@ const TiptapEditor = ({ value, onChange, placeholder = 'Start writing...' }) => 
 
                 <Separator />
 
+                {/* Table Controls */}
+                <div className="flex gap-0.5">
+                    <ToolbarButton
+                        onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+                        title="Insert Table (3x3)"
+                    >
+                        <TableIcon size={18} />
+                    </ToolbarButton>
+
+                    {editor.isActive('table') && (
+                        <>
+                            <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add Column Before">
+                                <ArrowRightIcon size={14} className="rotate-180" />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add Column After">
+                                <ArrowRightIcon size={14} />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete Column" className="text-red-500 hover:text-red-700">
+                                <Minus size={14} className="rotate-90" />
+                            </ToolbarButton>
+
+                            <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Add Row Before">
+                                <ArrowDown size={14} className="rotate-180" />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Add Row After">
+                                <ArrowDown size={14} />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Delete Row" className="text-red-500 hover:text-red-700">
+                                <Minus size={14} />
+                            </ToolbarButton>
+
+                            <ToolbarButton onClick={() => editor.chain().focus().mergeCells().run()} title="Merge Cells">
+                                <Minimize size={14} />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => editor.chain().focus().splitCell().run()} title="Split Cell">
+                                <Split size={14} />
+                            </ToolbarButton>
+
+                            <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Delete Table" className="text-red-600 hover:bg-red-50">
+                                <Trash2 size={14} />
+                            </ToolbarButton>
+                        </>
+                    )}
+                </div>
+
+                <Separator />
+
                 {/* Alignment */}
                 <div className="flex gap-0.5">
                     <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} title="Align Left">
@@ -383,6 +457,52 @@ const TiptapEditor = ({ value, onChange, placeholder = 'Start writing...' }) => 
                     color: #9ca3af;
                     pointer-events: none;
                     height: 0;
+                }
+                /* Table Styles */
+                .announcement-editor table {
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                    width: 100%;
+                    margin: 0;
+                    overflow: hidden;
+                }
+                .announcement-editor td,
+                .announcement-editor th {
+                    min-width: 1em;
+                    border: 2px solid #ced4da;
+                    padding: 3px 5px;
+                    vertical-align: top;
+                    box-sizing: border-box;
+                    position: relative;
+                }
+                .announcement-editor th {
+                    font-weight: bold;
+                    text-align: left;
+                    background-color: #f1f3f5;
+                }
+                .announcement-editor .selectedCell:after {
+                    z-index: 2;
+                    position: absolute;
+                    content: "";
+                    left: 0; right: 0; top: 0; bottom: 0;
+                    background: rgba(200, 200, 255, 0.4);
+                    pointer-events: none;
+                }
+                .announcement-editor .column-resize-handle {
+                    position: absolute;
+                    right: -2px;
+                    top: 0;
+                    bottom: -2px;
+                    width: 4px;
+                    background-color: #adf;
+                    pointer-events: none;
+                }
+                .announcement-editor .tableWrapper {
+                    overflow-x: auto;
+                }
+                .resize-cursor {
+                    cursor: ew-resize;
+                    cursor: col-resize;
                 }
             `}} />
         </div>
