@@ -100,6 +100,17 @@ app.get('/announcements/:id', async (req, res, next) => {
             console.log(`[Meta Inject] ID: ${req.params.id} | No image found in content.`);
         }
 
+        // Dynamic API URL Strategy:
+        // 1. Try env var API_URL
+        // 2. Try hardcoded fallback (Updated to actual Render URL)
+        // 3. Fallback to current request's host (Best query-proof method for self-hosted)
+        let apiUrl = process.env.API_URL || 'https://insuranceremainder.onrender.com';
+        if (!process.env.API_URL) {
+            // We keep the hardcoded fallback as primary if API_URL is missing,
+            // OR we can trust the host. 
+            // Since user confirmed the URL, let's prioritize it as default.
+        }
+
         // Generate simple description
         const cleanDesc = announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
 
