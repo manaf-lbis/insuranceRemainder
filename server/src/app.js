@@ -182,8 +182,6 @@ app.get('/announcements/:id', async (req, res, next) => {
                 <meta property="og:title" content="${announcement.title}" />
                 <meta property="og:description" content=" " />
                 <meta property="og:image" content="${proxyUrl}" />
-                <meta property="og:image:width" content="600" />
-                <meta property="og:image:height" content="600" />
                 <meta property="og:type" content="article" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="${announcement.title}" />
