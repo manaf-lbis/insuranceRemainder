@@ -1,6 +1,10 @@
 {
     "rewrites": [
         {
+            "source": "/announcements/:id",
+            "destination": "https://api.notifycsc.com/announcements/:id"
+        },
+        {
             "source": "/((?!assets/|.*\\..*).*)",
             "destination": "/index.html"
         }

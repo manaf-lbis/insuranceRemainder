@@ -69,46 +69,59 @@ app.get('/announcements/:id', async (req, res, next) => {
 
         if (!announcement) return next(); // Fallback to normal SPA handling if not found
 
-        const filePath = path.join(publicPath, 'index.html');
+        // Fetch the frontend's index.html (Remote Fetch Strategy)
+        // This decouples backend from having client build files locally
+        const clientUrl = process.env.CLIENT_URL || 'https://insurance-remainder.vercel.app';
+        let htmlData = '';
 
-        fs.readFile(filePath, 'utf8', (err, htmlData) => {
-            if (err) {
-                console.error('Error reading index.html', err);
-                return next(); // Fallback
+        try {
+            const response = await fetch(`${clientUrl}/index.html`);
+            if (!response.ok) {
+                console.error(`Failed to fetch index.html from ${clientUrl}`);
+                return next();
             }
+            htmlData = await response.text();
+        } catch (fetchErr) {
+            console.error('Error fetching remote index.html:', fetchErr);
+            // Fallback: try local file if available (hybrid approach)
+            try {
+                htmlData = fs.readFileSync(path.join(publicPath, 'index.html'), 'utf8');
+            } catch (fsErr) {
+                return next();
+            }
+        }
 
-            // Extract image
-            const imgRegex = /<img[^>]+src="([^">]+)"/i;
-            const match = announcement.content.match(imgRegex);
-            const firstImage = match ? match[1] : null;
+        // Extract image
+        const imgRegex = /<img[^>]+src="([^">]+)"/i;
+        const match = announcement.content.match(imgRegex);
+        const firstImage = match ? match[1] : null;
 
-            // Generate simple description
-            const cleanDesc = announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
+        // Generate simple description
+        const cleanDesc = announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
 
-            // Proxy URL
-            const apiUrl = process.env.API_URL || 'https://api.notifycsc.com';
-            const proxyUrl = firstImage
-                ? `${apiUrl}/api/images/proxy?url=${encodeURIComponent(firstImage)}`
-                : 'https://insurance-remainder.vercel.app/pwa-192x192.png';
+        // Proxy URL
+        const apiUrl = process.env.API_URL || 'https://api.notifycsc.com';
+        const proxyUrl = firstImage
+            ? `${apiUrl}/api/images/proxy?url=${encodeURIComponent(firstImage)}`
+            : 'https://insurance-remainder.vercel.app/pwa-192x192.png';
 
-            // Inject Meta Tags
-            // We replace the <title> and inject OG tags before </head>
-            let modifiedHtml = htmlData
-                .replace('<title>Notify CSC</title>', `<title>${announcement.title} | Notify CSC</title>`)
-                .replace('</head>', `
-                    <meta property="og:title" content="${announcement.title}" />
-                    <meta property="og:description" content="${cleanDesc}" />
-                    <meta property="og:image" content="${proxyUrl}" />
-                    <meta property="og:type" content="article" />
-                    <meta name="twitter:card" content="summary_large_image" />
-                    <meta name="twitter:title" content="${announcement.title}" />
-                    <meta name="twitter:description" content="${cleanDesc}" />
-                    <meta name="twitter:image" content="${proxyUrl}" />
-                    </head>
-                `);
+        // Inject Meta Tags
+        // We replace the <title> and inject OG tags before </head>
+        let modifiedHtml = htmlData
+            .replace('<title>Notify CSC</title>', `<title>${announcement.title} | Notify CSC</title>`)
+            .replace('</head>', `
+                <meta property="og:title" content="${announcement.title}" />
+                <meta property="og:description" content="${cleanDesc}" />
+                <meta property="og:image" content="${proxyUrl}" />
+                <meta property="og:type" content="article" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="${announcement.title}" />
+                <meta name="twitter:description" content="${cleanDesc}" />
+                <meta name="twitter:image" content="${proxyUrl}" />
+                </head>
+            `);
 
-            res.send(modifiedHtml);
-        });
+        res.send(modifiedHtml);
 
     } catch (error) {
         console.error('Error injecting meta tags:', error);
