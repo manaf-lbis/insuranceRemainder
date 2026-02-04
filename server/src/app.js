@@ -99,11 +99,17 @@ app.get('/announcements/:id', async (req, res, next) => {
         // Generate simple description
         const cleanDesc = announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
 
-        // Proxy URL
-        const apiUrl = process.env.API_URL || 'https://api.notifycsc.com';
+        // Proxy URL Strategy (Masking Backend)
+        // We use the Frontend URL + /p-image path (which is rewritten by Vercel to Backend)
+        // Fallback to API directly if we are unsure (but user insists on frontend url)
+
+        const frontendProxyPath = '/p-image';
+        // Construct clean Frontend Image URL: https://frontend.com/p-image?url=...
         const proxyUrl = firstImage
-            ? `${apiUrl}/api/images/proxy?url=${encodeURIComponent(firstImage)}`
-            : 'https://insurance-remainder.vercel.app/pwa-192x192.png';
+            ? `${clientUrl}${frontendProxyPath}?url=${encodeURIComponent(firstImage)}`
+            : `${clientUrl}/pwa-192x192.png`;
+
+        console.log(`[Meta Inject] ID: ${req.params.id} | ProxyImg: ${proxyUrl}`);
 
         // Inject Meta Tags
         // We replace the <title> and inject OG tags before </head>

@@ -5,6 +5,10 @@
             "destination": "https://api.notifycsc.com/announcements/:id"
         },
         {
+            "source": "/p-image",
+            "destination": "https://api.notifycsc.com/api/images/proxy"
+        },
+        {
             "source": "/((?!assets/|.*\\..*).*)",
             "destination": "/index.html"
         }
