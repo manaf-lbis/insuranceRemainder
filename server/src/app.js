@@ -53,11 +53,73 @@ app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/news-categories', require('./routes/newsCategoryRoutes')); // New Route
 app.use('/api/notifications', require('./routes/notificationRoutes')); // Notification routes
 app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api/images', require('./routes/imageProxyRoutes')); // Image Proxy Route
 
-// Serve frontend in production
+
+const fs = require('fs');
+
+// Server-Side Injection for Announcement SEO & Social Sharing
+app.get('/announcements/:id', async (req, res, next) => {
+    try {
+        // Only handle this for browser/bot requests, not API calls (though path prevents API collision)
+        // logic: fetch data -> read index.html -> inject meta -> send
+
+        const announcementService = require('./services/announcementService');
+        const announcement = await announcementService.getAnnouncementById(req.params.id);
+
+        if (!announcement) return next(); // Fallback to normal SPA handling if not found
+
+        const filePath = path.join(publicPath, 'index.html');
+
+        fs.readFile(filePath, 'utf8', (err, htmlData) => {
+            if (err) {
+                console.error('Error reading index.html', err);
+                return next(); // Fallback
+            }
+
+            // Extract image
+            const imgRegex = /<img[^>]+src="([^">]+)"/i;
+            const match = announcement.content.match(imgRegex);
+            const firstImage = match ? match[1] : null;
+
+            // Generate simple description
+            const cleanDesc = announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...';
+
+            // Proxy URL
+            const apiUrl = process.env.API_URL || 'https://api.notifycsc.com';
+            const proxyUrl = firstImage
+                ? `${apiUrl}/api/images/proxy?url=${encodeURIComponent(firstImage)}`
+                : 'https://insurance-remainder.vercel.app/pwa-192x192.png';
+
+            // Inject Meta Tags
+            // We replace the <title> and inject OG tags before </head>
+            let modifiedHtml = htmlData
+                .replace('<title>Notify CSC</title>', `<title>${announcement.title} | Notify CSC</title>`)
+                .replace('</head>', `
+                    <meta property="og:title" content="${announcement.title}" />
+                    <meta property="og:description" content="${cleanDesc}" />
+                    <meta property="og:image" content="${proxyUrl}" />
+                    <meta property="og:type" content="article" />
+                    <meta name="twitter:card" content="summary_large_image" />
+                    <meta name="twitter:title" content="${announcement.title}" />
+                    <meta name="twitter:description" content="${cleanDesc}" />
+                    <meta name="twitter:image" content="${proxyUrl}" />
+                    </head>
+                `);
+
+            res.send(modifiedHtml);
+        });
+
+    } catch (error) {
+        console.error('Error injecting meta tags:', error);
+        next(); // Fallback to normal SPA serving
+    }
+});
+
+// Serve frontend in production (catch-all for other routes)
 if (process.env.NODE_ENV === 'production') {
     // Handle SPA routing: serve index.html for any non-API route
-    app.use((req, res, next) => {
+    app.get('*', (req, res) => {
         if (!req.path.startsWith('/api')) {
             res.sendFile(path.join(publicPath, 'index.html'));
         } else {

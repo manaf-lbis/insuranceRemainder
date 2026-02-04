@@ -29,13 +29,14 @@ const AnnouncementDetailPage = () => {
     }, [id, announcement, incrementViews]);
 
     const handleShare = async () => {
-        // Use backend proxy URL for correct social preview generation
-        const proxyUrl = `${import.meta.env.VITE_API_URL}/announcements/share/${id}`;
+        // Use current window URL (frontend URL) for sharing
+        // The backend will handle injecting meta tags when this URL is visited
+        const shareUrl = window.location.href;
 
         const shareData = {
             title: announcement?.title,
             text: `Check out this update: ${announcement?.title}`,
-            url: proxyUrl,
+            url: shareUrl,
         };
 
         if (navigator.share) {
@@ -46,7 +47,7 @@ const AnnouncementDetailPage = () => {
             }
         } else {
             // Copy to clipboard fallback
-            navigator.clipboard.writeText(proxyUrl);
+            navigator.clipboard.writeText(shareUrl);
             setCopied(true);
             showToast({ message: 'Link copied to clipboard!', type: 'success' });
             setTimeout(() => setCopied(false), 2000);
@@ -82,6 +83,11 @@ const AnnouncementDetailPage = () => {
     });
 
     const firstImage = extractFirstImage(announcement.content);
+    // Use backend proxy for frontend meta tags as well, for consistency
+    const proxyImageUrl = firstImage
+        ? `${import.meta.env.VITE_API_URL}/images/proxy?url=${encodeURIComponent(firstImage)}`
+        : null;
+
     const pageTitle = `${announcement.title} | Notify CSC`;
     const shareDescription = `Check out this update from Notify CSC: ${announcement.title}`;
 
@@ -91,11 +97,11 @@ const AnnouncementDetailPage = () => {
                 <title>{pageTitle}</title>
                 <meta property="og:title" content={announcement.title} />
                 <meta property="og:description" content={shareDescription} />
-                {firstImage && <meta property="og:image" content={firstImage} />}
+                {proxyImageUrl && <meta property="og:image" content={proxyImageUrl} />}
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content={window.location.href} />
                 <meta name="twitter:card" content="summary_large_image" />
-                {firstImage && <meta name="twitter:image" content={firstImage} />}
+                {proxyImageUrl && <meta name="twitter:image" content={proxyImageUrl} />}
                 <meta name="twitter:title" content={announcement.title} />
                 <meta name="twitter:description" content={shareDescription} />
             </Helmet>
@@ -106,7 +112,7 @@ const AnnouncementDetailPage = () => {
                     <span>{new Date(announcement.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                 </div>
 
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 font-poppins leading-tight mb-6 tracking-tight animate-fade-in-up md:max-w-4xl" style={{ animationDelay: '100ms' }}>
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 font-poppins leading-tight mb-6 tracking-tight animate-fade-in-up md:max-w-4xl" style={{ animationDelay: '100ms' }}>
                     {announcement.title}
                 </h1>
 

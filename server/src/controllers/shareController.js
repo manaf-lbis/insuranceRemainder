@@ -21,6 +21,13 @@ const getAnnouncementSharePreview = async (req, res) => {
         const announcement = await announcementService.getAnnouncementById(req.params.id);
         const firstImage = extractFirstImage(announcement.content);
         const targetUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/announcements/${announcement._id}` : `https://insurance-remainder.vercel.app/announcements/${announcement._id}`;
+
+        // Use backend proxy URL for the image
+        // This ensures social media crawlers see a backend URL, not the direct Cloudinary URL
+        const apiUrl = process.env.API_URL || 'https://api.notifycsc.com'; // Fallback or env
+        // Construct the proxy URL
+        const proxyUrl = firstImage ? `${apiUrl}/api/images/proxy?url=${encodeURIComponent(firstImage)}` : 'https://insurance-remainder.vercel.app/pwa-192x192.png';
+
         const title = announcement.title;
         const description = `Check out this update from Notify CSC: ${title}`;
 
@@ -41,7 +48,7 @@ const getAnnouncementSharePreview = async (req, res) => {
     <meta property="og:url" content="${targetUrl}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
-    <meta property="og:image" content="${imageUrl}">
+    <meta property="og:image" content="${proxyUrl}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
@@ -50,7 +57,7 @@ const getAnnouncementSharePreview = async (req, res) => {
     <meta name="twitter:url" content="${targetUrl}">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
-    <meta name="twitter:image" content="${imageUrl}">
+    <meta name="twitter:image" content="${proxyUrl}">
 
     <!-- Redirect for real users -->
     <script>
