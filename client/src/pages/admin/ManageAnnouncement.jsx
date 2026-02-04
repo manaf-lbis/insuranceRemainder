@@ -22,6 +22,7 @@ const ManageAnnouncement = () => {
 
     // Form State
     const [title, setTitle] = useState('');
+    const [slug, setSlug] = useState('');
     const [content, setContent] = useState('');
     const [status, setStatus] = useState('draft');
     const [priority, setPriority] = useState('cold');
@@ -46,11 +47,12 @@ const ManageAnnouncement = () => {
     useEffect(() => {
         if (announcement && isEditMode) {
             setTitle(announcement.title);
+            setSlug(announcement.slug || '');
             setContent(announcement.content);
             setStatus(announcement.status);
             setPriority(announcement.priority || 'cold');
             setShowInTicker(announcement.showInTicker || false);
-            setCategory(announcement.category || '');
+            setCategory(announcement.category?._id || announcement.category || ''); // Handle populated or ID
 
             if (!announcement.expiresAt) setExpiryDuration('never');
         }
@@ -67,7 +69,7 @@ const ManageAnnouncement = () => {
                 expiresAt = date;
             }
 
-            const data = { title, content, status, priority, showInTicker, expiresAt, category: category || null };
+            const data = { title, slug: slug || null, content, status, priority, showInTicker, expiresAt, category: category || null };
             if (isEditMode) {
                 await updateAnnouncement({ id, ...data }).unwrap();
                 showToast({ message: 'Announcement updated successfully', type: 'success' });
@@ -115,17 +117,35 @@ const ManageAnnouncement = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    {/* Title */}
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Title</label>
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required
-                            placeholder="Enter announcement title..."
-                            className="w-full px-4 py-2 text-lg font-medium border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:font-normal"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Title */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Title</label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                                placeholder="Enter announcement title..."
+                                className="w-full px-4 py-2 text-lg font-medium border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:font-normal"
+                            />
+                        </div>
+
+                        {/* Custom Slug */}
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Custom Path (URL)</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-2.5 text-gray-400 font-mono text-sm">/</span>
+                                <input
+                                    type="text"
+                                    value={slug}
+                                    onChange={(e) => setSlug(e.target.value.replace(/\s+/g, '_').toLowerCase())}
+                                    placeholder="custom_url_path"
+                                    className="w-full pl-6 px-4 py-2 text-lg font-medium border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:font-normal font-mono text-sm"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Leave empty to use automatic ID. Spaces are replaced by `_`.</p>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
