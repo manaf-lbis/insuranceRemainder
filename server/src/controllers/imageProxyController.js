@@ -49,6 +49,9 @@ const proxyImage = async (req, res) => {
             const contentType = imageResponse.headers['content-type'];
             if (contentType) res.setHeader('Content-Type', contentType);
 
+            const contentLength = imageResponse.headers['content-length'];
+            if (contentLength) res.setHeader('Content-Length', contentLength);
+
             res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
             res.setHeader('Access-Control-Allow-Origin', '*'); // Allow usage in canvas/social
 
