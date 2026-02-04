@@ -140,34 +140,40 @@ app.get('/announcements/:id', async (req, res, next) => {
         // Ensure clientUrl does not end with slash
         const baseUrl = clientUrl.replace(/\/$/, '');
 
-        // Optimize Cloudinary Image for Social Media (1200x630, JPG)
-        // WhatsApp prefers JPG over WebP/AVIF
+        // Optimize Cloudinary Image for Social Media (1200x630, JPG, Low Quality)
+        // Aggressive optimization (q_50) ensures mostly <300KB size for WhatsApp
         let finalImageUrl = firstImage;
         if (firstImage && firstImage.includes('cloudinary.com') && firstImage.includes('/upload/')) {
-            finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto,f_jpg/');
+            finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_50,f_jpg/');
         }
 
         // Construct clean Frontend Image URL
+        // Append a random version to force WhatsApp to re-crawl (Bust Cache)
+        const version = Date.now();
         const proxyUrl = firstImage
-            ? `${baseUrl}${frontendProxyPath}?url=${encodeURIComponent(finalImageUrl)}`
+            ? `${baseUrl}${frontendProxyPath}?url=${encodeURIComponent(finalImageUrl)}&v=${version}`
             : `${baseUrl}/pwa-192x192.png`;
 
         console.log(`[Meta Inject] ID: ${req.params.id} | ProxyImg: ${proxyUrl}`);
 
         // Inject Meta Tags
         // We replace the <title> and inject OG tags before </head>
+        // Inject Meta Tags
+        // User requested ONLY Thumbnail + Link (No Title, No Description)
+        // We set title/desc to a single space " " to override platform defaults
+        // without showing visible text.
         let modifiedHtml = htmlData
-            .replace('<title>Notify CSC</title>', `<title>${announcement.title} | Notify CSC</title>`)
+            .replace('<title>Notify CSC</title>', `<title>Notify CSC</title>`)
             .replace('</head>', `
-                <meta property="og:title" content="${announcement.title}" />
-                <meta property="og:description" content="${cleanDesc}" />
+                <meta property="og:title" content=" " />
+                <meta property="og:description" content=" " />
                 <meta property="og:image" content="${proxyUrl}" />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:type" content="article" />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content="${announcement.title}" />
-                <meta name="twitter:description" content="${cleanDesc}" />
+                <meta name="twitter:title" content=" " />
+                <meta name="twitter:description" content=" " />
                 <meta name="twitter:image" content="${proxyUrl}" />
                 </head>
             `);
