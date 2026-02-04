@@ -142,10 +142,22 @@ app.get('/announcements/:id', async (req, res, next) => {
 
         // Optimize Cloudinary Image for Social Media (Full Image via Padding)
         // Use c_pad + b_white to fit the WHOLE image into the 1200x630 box without cropping.
-        // This satisfies "Full Version" visibility on all platforms.
+        // We use a Regex to STRIP existing transformations (e.g. c_fill, w_300) that might be in the URL.
+        // Matches: /upload/ (optional existing params /) v(digits) /
         let finalImageUrl = firstImage;
         if (firstImage && firstImage.includes('cloudinary.com') && firstImage.includes('/upload/')) {
-            finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/');
+            // Check if there is a version segment like /v123456/
+            const versionMatch = firstImage.match(/\/upload\/(?:[^\/]+\/)?(v\d+)\//);
+            if (versionMatch) {
+                // versionMatch[1] is 'v12345'
+                // Reconstruct URL: /upload/ + OUR_PARAMS + / + v12345 + rest
+                // We basically replace the whole "middle" part with our params
+                finalImageUrl = firstImage.replace(/\/upload\/(?:[^\/]+\/)?v\d+\//, `/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/${versionMatch[1]}/`);
+            } else {
+                // Fallback for URLs without version (rare but possible) or different structure
+                // Just append after upload/
+                finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/');
+            }
         }
 
         // Construct clean Frontend Image URL
