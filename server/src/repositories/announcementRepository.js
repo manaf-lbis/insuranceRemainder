@@ -48,9 +48,23 @@ const findAll = async (filter = {}, sort = { createdAt: -1 }) => {
 };
 
 const findById = async (id) => {
-    return await Announcement.findById(id)
+    let query;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+        // If it's a valid ID, try to find by ID
+        // Note: A valid objectId could technically be a slug, so we might need a fallback?
+        // But practically, user slugs won't match 24 hex chars exactly.
+        const byId = await Announcement.findById(id)
+            .populate('author', 'username')
+            .populate('lastUpdatedBy', 'username')
+            .populate('category');
+        if (byId) return byId;
+    }
+
+    // Fallback: Try to find by Slug
+    return await Announcement.findOne({ slug: id })
         .populate('author', 'username')
-        .populate('lastUpdatedBy', 'username');
+        .populate('lastUpdatedBy', 'username')
+        .populate('category');
 };
 
 const update = async (id, data) => {

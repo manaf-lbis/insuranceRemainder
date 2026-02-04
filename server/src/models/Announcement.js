@@ -10,6 +10,13 @@ const announcementSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Announcement content is required']
     },
+    slug: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true,
+        lowercase: true
+    },
     status: {
         type: String,
         enum: ['draft', 'published'],
