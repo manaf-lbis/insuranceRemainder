@@ -140,11 +140,11 @@ app.get('/announcements/:id', async (req, res, next) => {
         // Ensure clientUrl does not end with slash
         const baseUrl = clientUrl.replace(/\/$/, '');
 
-        // Optimize Cloudinary Image for Social Media (1200x630)
-        // This prevents "Image too large" errors on WhatsApp/Facebook
+        // Optimize Cloudinary Image for Social Media (1200x630, JPG)
+        // WhatsApp prefers JPG over WebP/AVIF
         let finalImageUrl = firstImage;
         if (firstImage && firstImage.includes('cloudinary.com') && firstImage.includes('/upload/')) {
-            finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto,f_auto/');
+            finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto,f_jpg/');
         }
 
         // Construct clean Frontend Image URL
