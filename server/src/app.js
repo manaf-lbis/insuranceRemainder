@@ -142,20 +142,24 @@ app.get('/announcements/:id', async (req, res, next) => {
 
         // Optimize Cloudinary Image for Social Media (Full Image via Padding)
         // Use c_pad + b_white to fit the WHOLE image into the 1200x630 box without cropping.
-        // We use a Regex to STRIP existing transformations (e.g. c_fill, w_300) that might be in the URL.
-        // Matches: /upload/ (optional existing params /) v(digits) /
+        // GREEDY REGEX: Matches /upload/ followed by ANYTHING until /v<digits>/
         let finalImageUrl = firstImage;
         if (firstImage && firstImage.includes('cloudinary.com') && firstImage.includes('/upload/')) {
             // Check if there is a version segment like /v123456/
-            const versionMatch = firstImage.match(/\/upload\/(?:[^\/]+\/)?(v\d+)\//);
+            // We use .*? to be lazy, but we want to consume all transform segments.
+            // Actually, standard Cloudinary is /upload/TRANSFORMS/vVERSION/FILE
+            // So matching /upload/(.*)/v(\d+)/ allows us to replace $1 with our new transforms.
+
+            const versionMatch = firstImage.match(/\/upload\/(.*)\/v(\d+)\//);
+
             if (versionMatch) {
-                // versionMatch[1] is 'v12345'
-                // Reconstruct URL: /upload/ + OUR_PARAMS + / + v12345 + rest
-                // We basically replace the whole "middle" part with our params
-                finalImageUrl = firstImage.replace(/\/upload\/(?:[^\/]+\/)?v\d+\//, `/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/${versionMatch[1]}/`);
+                // versionMatch[1] is the existing transforms (e.g. 'c_fill,w_300/e_art')
+                // versionMatch[2] is '12345' (the version number)
+
+                // We replace the match with: /upload/OUR_PARAMS/vVERSION/
+                finalImageUrl = firstImage.replace(/\/upload\/.*\/v\d+\//, `/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/v${versionMatch[2]}/`);
             } else {
-                // Fallback for URLs without version (rare but possible) or different structure
-                // Just append after upload/
+                // Fallback: If no version found (unlikely), append after upload/
                 finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/');
             }
         }
