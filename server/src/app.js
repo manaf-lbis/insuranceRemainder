@@ -83,11 +83,31 @@ app.get('/announcements/:id', async (req, res, next) => {
             htmlData = await response.text();
         } catch (fetchErr) {
             console.error('Error fetching remote index.html:', fetchErr);
-            // Fallback: try local file if available (hybrid approach)
+            // Fallback: try local file if available
             try {
                 htmlData = fs.readFileSync(path.join(publicPath, 'index.html'), 'utf8');
             } catch (fsErr) {
-                return next();
+                // CRITICAL: URL Fetch Failed & Local File Missing (Render env)
+                // DO NOT Redirect (causes infinite loop with Vercel)
+                // Serve a minimal Fallback HTML with Meta Tags so scraping still works
+                console.warn('[Meta Inject] Serving Fallback HTML (Fetch Failed)');
+                htmlData = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notify CSC</title>
+    <!-- Placeholder for injection -->
+    </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Client-side Fallback: Redirect to Frontend if this is a human
+      window.location.href = "${clientUrl}/announcements/${req.params.id}";
+    </script>
+  </body>
+</html>`;
             }
         }
 
