@@ -1,17 +1,16 @@
 {
     "rewrites": [
-        "rewrites": [
-            {
-                "source": "/announcements/:id",
-                "destination": "https://insuranceremainder.onrender.com/announcements/:id"
-            },
-            {
-                "source": "/p-image",
-                "destination": "https://insuranceremainder.onrender.com/api/images/proxy"
-            },
-            {
-                "source": "/((?!assets/|.*\\..*).*)",
-                "destination": "/index.html"
-            }
-        ]
-    }
+        {
+            "source": "/announcements/:id",
+            "destination": "https://insuranceremainder.onrender.com/announcements/:id"
+        },
+        {
+            "source": "/p-image",
+            "destination": "https://insuranceremainder.onrender.com/api/images/proxy"
+        },
+        {
+            "source": "/((?!assets/|.*\\..*).*)",
+            "destination": "/index.html"
+        }
+    ]
+}
