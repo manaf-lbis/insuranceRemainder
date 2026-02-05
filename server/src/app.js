@@ -140,8 +140,9 @@ app.get('/announcements/:id', async (req, res, next) => {
         // Ensure clientUrl does not end with slash
         const baseUrl = clientUrl.replace(/\/$/, '');
 
-        // Optimize Cloudinary Image for Social Media (Full Image via Padding)
-        // Use c_pad + b_white to fit the WHOLE image into the 1200x630 box without cropping.
+        // Optimize Cloudinary Image for Social Media (Full Image WITHOUT Padding)
+        // Use c_fit to scale the image to fit within 1200x630 WITHOUT cropping or adding padding.
+        // This ensures the FULL image is visible and readable on WhatsApp/social platforms.
         // GREEDY REGEX: Matches /upload/ followed by ANYTHING until /v<digits>/
         let finalImageUrl = firstImage;
         if (firstImage && firstImage.includes('cloudinary.com') && firstImage.includes('/upload/')) {
@@ -158,10 +159,12 @@ app.get('/announcements/:id', async (req, res, next) => {
                 // versionMatch[2] is '12345' (the version number)
 
                 // We replace the match with: /upload/OUR_PARAMS/vVERSION/
-                finalImageUrl = firstImage.replace(/\/upload\/.*\/v\d+\//, `/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/v${versionMatch[2]}/`);
+                // c_fit: Fit the entire image within bounds without cropping or padding
+                // No background color - natural full-size display
+                finalImageUrl = firstImage.replace(/\/upload\/.*\/v\d+\//, `/upload/w_1200,h_630,c_fit,q_80,f_jpg/v${versionMatch[1]}/`);
             } else {
                 // Fallback: If no version found (unlikely), append after upload/
-                finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_pad,b_white,q_50,f_jpg/');
+                finalImageUrl = firstImage.replace('/upload/', '/upload/w_1200,h_630,c_fit,q_80,f_jpg/');
             }
         }
 
