@@ -150,7 +150,8 @@ app.get('/announcements/:id', async (req, res, next) => {
             // Actually, standard Cloudinary is /upload/TRANSFORMS/vVERSION/FILE
             // So matching /upload/(.*)/v(\d+)/ allows us to replace $1 with our new transforms.
 
-            const versionMatch = firstImage.match(/\/upload\/(.*)\/v(\d+)\//);
+            // FIXED REGEX: Match /upload/, optional intermediate segment (transforms), then /v(digits)/
+            const versionMatch = firstImage.match(/\/upload\/(?:.*\/)?v(\d+)\//);
 
             if (versionMatch) {
                 // versionMatch[1] is the existing transforms (e.g. 'c_fill,w_300/e_art')
@@ -182,6 +183,8 @@ app.get('/announcements/:id', async (req, res, next) => {
                 <meta property="og:title" content="${announcement.title}" />
                 <meta property="og:description" content=" " />
                 <meta property="og:image" content="${proxyUrl}" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
                 <meta property="og:type" content="article" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="${announcement.title}" />
