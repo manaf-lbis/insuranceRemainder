@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, getUsers, toggleBlockStatus, resetPassword, updateUserProfile } = require('../controllers/userController');
+const { registerUser, getUsers, toggleBlockStatus, approveUser, resetPassword, updateUserProfile, updateUser, getAdminBadges } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Middleware to check if user is admin
@@ -17,11 +17,20 @@ router.route('/')
     .post(protect, admin, registerUser)
     .get(protect, admin, getUsers);
 
+router.route('/admin-badges')
+    .get(protect, admin, getAdminBadges);
+
 router.route('/:id/block')
     .put(protect, admin, toggleBlockStatus);
 
+router.route('/:id/approve')
+    .put(protect, admin, approveUser);
+
 router.route('/:id/reset-password')
     .put(protect, admin, resetPassword);
+
+router.route('/:id')
+    .put(protect, admin, updateUser);
 
 router.route('/profile')
     .put(protect, updateUserProfile);

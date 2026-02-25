@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGetAnnouncementStatsQuery } from '../features/announcements/announcementsApiSlice';
-import { Eye, FileText, CheckCircle, TrendingUp, BarChart3, Loader } from 'lucide-react';
+import { useGetDocStatsQuery, useGetTopContributorsQuery } from '../features/vle/vleAuthApiSlice';
+import { Eye, FileText, CheckCircle, TrendingUp, BarChart3, Loader, Trophy, Users, FolderOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, subtitle }) => (
@@ -20,7 +21,12 @@ const StatCard = ({ title, value, icon: Icon, colorClass, gradientClass, subtitl
 );
 
 const AnalyticsDashboard = () => {
-    const { data: stats, isLoading, isError } = useGetAnnouncementStatsQuery();
+    const { data: stats, isLoading: isNewsLoading, isError: isNewsError } = useGetAnnouncementStatsQuery();
+    const { data: docStats, isLoading: isDocLoading, isError: isDocError } = useGetDocStatsQuery();
+    const { data: contributors = [], isLoading: isContrLoading, isError: isContrError } = useGetTopContributorsQuery();
+
+    const isLoading = isNewsLoading || isDocLoading || isContrLoading;
+    const isError = isNewsError || isDocError || isContrError;
 
     if (isLoading) {
         return (
@@ -120,9 +126,9 @@ const AnalyticsDashboard = () => {
                                     <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${index === 0 ? 'bg-amber-100 text-amber-700' :
-                                                    index === 1 ? 'bg-gray-100 text-gray-700' :
-                                                        index === 2 ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-blue-50 text-blue-600'
+                                                index === 1 ? 'bg-gray-100 text-gray-700' :
+                                                    index === 2 ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-blue-50 text-blue-600'
                                                 }`}>
                                                 {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                                             </div>
@@ -158,6 +164,91 @@ const AnalyticsDashboard = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            {/* Document Library Analytics */}
+            <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Top Contributors Leaderboard */}
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                                <Trophy size={20} />
+                            </div>
+                            <h2 className="text-xl font-black text-gray-900 font-poppins">Top Contributors</h2>
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Monthly Leaderboard</span>
+                    </div>
+                    <div className="p-6">
+                        <div className="space-y-4">
+                            {contributors.length > 0 ? (
+                                contributors.map((contr, index) => (
+                                    <div key={contr._id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:border-amber-200 transition-all group">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black ${index === 0 ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' :
+                                                index === 1 ? 'bg-slate-300 text-slate-700' :
+                                                    index === 2 ? 'bg-orange-300 text-orange-700' :
+                                                        'bg-white text-slate-400 border border-slate-200'
+                                                }`}>
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900">{contr.name}</p>
+                                                <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">{contr.shopName || 'CSC Operator'}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xl font-black text-amber-600 group-hover:scale-110 transition-transform">{contr.count}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Documents</p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-12 text-center text-slate-400 italic">No contributions yet</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Library Health / Categories */}
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                    <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-3 bg-slate-50/50">
+                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                            <FolderOpen size={20} />
+                        </div>
+                        <h2 className="text-xl font-black text-gray-900 font-poppins">Library Distribution</h2>
+                    </div>
+                    <div className="p-8 flex-1 flex flex-col justify-center">
+                        <div className="grid grid-cols-2 gap-6 pb-8 border-b border-gray-50 mb-8">
+                            <div>
+                                <p className="text-4xl font-black text-slate-900">{docStats?.totalDocs || 0}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Total Resources</p>
+                            </div>
+                            <div>
+                                <p className="text-4xl font-black text-green-600">{docStats?.approvedDocs || 0}</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Live Files</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Popular Categories</h3>
+                            {docStats?.categoryStats?.slice(0, 4).map(cat => (
+                                <div key={cat.name} className="space-y-2">
+                                    <div className="flex justify-between text-xs font-bold">
+                                        <span className="text-slate-700">{cat.name}</span>
+                                        <span className="text-slate-400">{cat.count} Files</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                                            style={{ width: `${(cat.count / (docStats.totalDocs || 1)) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 

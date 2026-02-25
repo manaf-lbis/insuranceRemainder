@@ -5,12 +5,14 @@ const protect = async (req, res, next) => {
     let token;
 
     if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
+        (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) ||
+        req.query.token
     ) {
         try {
-            // Get token from header
-            token = req.headers.authorization.split(' ')[1];
+            // Get token from header or query
+            token = req.headers.authorization
+                ? req.headers.authorization.split(' ')[1]
+                : req.query.token;
 
             // Verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
@@ -18,9 +20,10 @@ const protect = async (req, res, next) => {
             // Get user from the token
             req.user = await User.findById(decoded.id).select('-password');
 
-            if (!req.user || !req.user.isActive) {
+            if (!req.user || !req.user.isActive || req.user.isApproved === false) {
                 res.status(401);
-                throw new Error('Not authorized, account is blocked or not found');
+                const reason = !req.user ? 'User not found' : !req.user.isActive ? 'Account blocked' : 'Account pending approval';
+                throw new Error(`Not authorized, ${reason}`);
             }
 
             next();

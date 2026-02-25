@@ -30,9 +30,11 @@ app.use(helmet({
             "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             "font-src": ["'self'", "https://fonts.gstatic.com"],
             "connect-src": ["'self'", "https:", "http:"],
+            "frame-ancestors": ["'self'", "http://localhost:5173", "https://notifycsc.vercel.app"],
         },
     },
     crossOriginEmbedderPolicy: false,
+    frameguard: false, // Allow framing so that document preview works across domains
 }));
 
 app.use(morgan('dev'));
@@ -53,7 +55,10 @@ app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/news-categories', require('./routes/newsCategoryRoutes')); // New Route
 app.use('/api/notifications', require('./routes/notificationRoutes')); // Notification routes
 app.use('/api/upload', require('./routes/uploadRoutes'));
-app.use('/api/images', require('./routes/imageProxyRoutes')); // Image Proxy Route
+app.use('/api/vle-auth', require('./routes/vleAuthRoutes')); // VLE/Akshaya Auth
+app.use('/api/documents', require('./routes/documentRoutes')); // PDF Document Storage
+app.use('/api/issues', require('./routes/issueRoutes')); // Issue Reporting
+app.use('/api/categories', require('./routes/categoryRoutes')); // Document Categories
 
 
 const fs = require('fs');

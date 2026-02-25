@@ -31,6 +31,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['User'],
         }),
+        approveUser: builder.mutation({
+            query: (id) => ({
+                url: `/users/${id}/approve`,
+                method: 'PUT',
+            }),
+            invalidatesTags: ['User'],
+        }),
         resetPassword: builder.mutation({
             query: ({ id, password }) => ({
                 url: `/users/${id}/reset-password`,
@@ -45,6 +52,18 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 body: data,
             }),
         }),
+        updateUser: builder.mutation({
+            query: ({ id, ...data }) => ({
+                url: `/users/${id}`,
+                method: 'PUT',
+                body: data,
+            }),
+            invalidatesTags: ['User'],
+        }),
+        getAdminBadges: builder.query({
+            query: () => '/users/admin-badges',
+            providesTags: ['User', 'Issue'], // Re-fetch counts when a user is updated or an issue might change (though Issue tag isn't global yet)
+        }),
     }),
 })
 
@@ -52,6 +71,9 @@ export const {
     useGetUsersQuery,
     useRegisterUserMutation,
     useToggleBlockStatusMutation,
+    useApproveUserMutation,
     useResetPasswordMutation,
     useUpdateUserProfileMutation,
+    useUpdateUserMutation,
+    useGetAdminBadgesQuery,
 } = usersApiSlice

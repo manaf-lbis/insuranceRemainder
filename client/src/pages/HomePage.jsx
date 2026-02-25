@@ -27,9 +27,15 @@ const HomePage = () => {
             <footer className="bg-white border-t border-gray-200 py-8">
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <p className="text-gray-400 text-sm mb-3">&copy; {new Date().getFullYear()} Notify CSC. Serving you with trust.</p>
-                    <Link to="/login" className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
-                        Admin Login
-                    </Link>
+                    <div className="flex justify-center space-x-6">
+                        <Link to="/login" className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+                            Operator Portal
+                        </Link>
+                        <span className="text-gray-300">|</span>
+                        <Link to="/vle/signup" className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+                            Join as VLE / Akshaya
+                        </Link>
+                    </div>
                 </div>
             </footer>
         </div>

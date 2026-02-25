@@ -14,21 +14,47 @@ const loginUser = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Allow login with either username or mobile number
+        // Allow login with username, email (lowercased), or mobile number
         const user = await User.findOne({
-            $or: [{ username: username }, { mobileNumber: username }]
+            $or: [
+                { username: username },
+                { email: username?.toLowerCase() },
+                { mobileNumber: username }
+            ]
         });
 
         if (user && (await user.matchPassword(password))) {
-            if (!user.isActive) {
-                res.status(401);
-                throw new Error('Account is blocked. Contact Admin.');
+            // Check email verification for VLE/Akshaya roles
+            if (['vle', 'akshaya'].includes(user.role) && !user.isEmailVerified) {
+                return res.status(401).json({
+                    message: 'Please verify your email first.',
+                    userId: user._id,
+                    needsVerification: true,
+                    email: user.email
+                });
             }
+
+            if (['vle', 'akshaya'].includes(user.role) && !user.isApproved) {
+                return res.status(401).json({
+                    message: 'Account is pending approval. Please wait for Admin to approve your account access.',
+                    pendingApproval: true
+                });
+            }
+
+            if (!user.isActive) {
+                return res.status(401).json({ message: 'Account is blocked. Contact Admin.' });
+            }
+
+            user.lastLogin = new Date();
+            await user.save();
 
             res.json({
                 _id: user._id,
                 username: user.username,
+                name: user.name,
+                email: user.email,
                 role: user.role,
+                shopName: user.shopName,
                 token: generateToken(user._id),
             });
         } else {

@@ -8,49 +8,47 @@ import { ArrowRight } from 'lucide-react';
 export const AnnouncementCard = ({ announcement }) => {
     const firstImage = extractFirstImage(announcement.content);
 
-
     return (
-        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 p-5 flex flex-col h-full">
+        <Link to={`/announcements/${announcement._id}`} className="group bg-white rounded-3xl border border-slate-100/80 overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1 transition-all duration-500 p-4 flex flex-col h-full active:scale-[0.98]">
             <div className="flex gap-4 h-full">
                 {/* Text Content */}
-                <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">News</span>
-                            <span className="text-[10px] font-black text-slate-300">|</span>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">CSC</span>
-                        </div>
-
-                        <h3 className="text-base sm:text-lg font-bold text-slate-900 font-poppins line-clamp-3 leading-tight group-hover:text-blue-600 transition-colors mb-2">
-                            {announcement.title}
-                        </h3>
+                <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">News</span>
+                        {announcement.priority === 'hot' && (
+                            <span className="text-[10px] font-black text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full uppercase tracking-widest">Hot</span>
+                        )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-auto pt-2">
-                        <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
-                                {(announcement.lastUpdatedBy?.username || announcement.author?.username || 'N')[0]?.toUpperCase()}
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                                {announcement.lastUpdatedBy ? announcement.lastUpdatedBy.username : (announcement.author?.username || 'Admin')}
-                            </span>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 font-poppins line-clamp-2 md:line-clamp-3 leading-snug group-hover:text-blue-600 transition-colors mb-4">
+                        {announcement.title}
+                    </h3>
+
+                    <div className="flex items-center gap-2 mt-auto">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200">
+                            {(announcement.lastUpdatedBy?.username || announcement.author?.username || 'N')[0]?.toUpperCase()}
                         </div>
-                        <span className="text-xs text-slate-400 font-medium">{timeAgo(announcement.createdAt)}</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">
+                            {announcement.lastUpdatedBy ? announcement.lastUpdatedBy.username : (announcement.author?.username || 'Admin')}
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-slate-200"></span>
+                        <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap uppercase">{timeAgo(announcement.createdAt)}</span>
                     </div>
                 </div>
 
                 {/* Thumbnail */}
                 <div className="flex-shrink-0">
                     {firstImage ? (
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100/50 relative">
                             <img
                                 src={firstImage}
                                 alt={announcement.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
                     ) : (
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 text-2xl">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100/50 text-2xl grayscale group-hover:grayscale-0 transition-all">
                             📢
                         </div>
                     )}

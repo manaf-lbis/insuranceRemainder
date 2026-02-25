@@ -1,5 +1,6 @@
 const userRepository = require('../repositories/userRepository');
 const User = require('../models/User');
+const Issue = require('../models/Issue');
 
 // @desc    Register a new user (Staff)
 // @route   POST /api/users
@@ -21,7 +22,8 @@ const registerUser = async (req, res) => {
             mobileNumber,
             role: 'staff',
             createdBy: req.user._id,
-            isActive: true
+            isActive: true,
+            isApproved: true // Admin created staff are implicitly approved
         });
 
         if (user) {
@@ -46,12 +48,21 @@ const registerUser = async (req, res) => {
 // @access  Private/Admin
 const getUsers = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 10, status } = req.query;
         const skip = (page - 1) * limit;
 
+        let filter = {};
+        if (status === 'active') {
+            filter = { isActive: true, isApproved: true };
+        } else if (status === 'pending') {
+            filter = { isApproved: false, isEmailVerified: true };
+        } else if (status === 'blocked') {
+            filter = { isActive: false };
+        }
+
         const [total, users] = await Promise.all([
-            userRepository.count({}),
-            userRepository.find({}, { createdAt: -1 }, '-password', { skip, limit })
+            userRepository.count(filter),
+            userRepository.find(filter, { createdAt: -1 }, '-password', { skip, limit })
         ]);
 
         res.status(200).json({
@@ -90,6 +101,46 @@ const toggleBlockStatus = async (req, res) => {
             username: user.username,
             isActive: user.isActive,
             message: `User ${user.isActive ? 'unblocked' : 'blocked'} successfully`
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// @desc    Approve User
+// @route   PUT /api/users/:id/approve
+// @access  Private/Admin
+const approveUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        if (user.isApproved) {
+            res.status(400);
+            throw new Error('User is already approved');
+        }
+
+        user.isApproved = true;
+        // user.isActive = true; // Ensure they are active when approved
+        await user.save();
+
+        // Send welcome email after approval
+        const { sendWelcomeEmail } = require('../services/emailService');
+        try {
+            await sendWelcomeEmail(user.email, user.name, user.role);
+        } catch (emailErr) {
+            console.error('Welcome email failed (non-fatal):', emailErr.message);
+        }
+
+        res.status(200).json({
+            _id: user._id,
+            username: user.username,
+            isApproved: user.isApproved,
+            message: 'User approved successfully'
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -150,10 +201,68 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
+// @desc    Update user details (Admin only)
+// @route   PUT /api/users/:id
+// @access  Private/Admin
+const updateUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        user.name = req.body.name || user.name;
+        user.username = req.body.username || user.username;
+        user.mobileNumber = req.body.mobileNumber || user.mobileNumber;
+        user.role = req.body.role || user.role;
+        user.shopName = req.body.shopName || user.shopName;
+        user.email = req.body.email || user.email;
+
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            username: updatedUser.username,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            mobileNumber: updatedUser.mobileNumber,
+            shopName: updatedUser.shopName,
+            isActive: updatedUser.isActive
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// @desc    Get counts for admin badges (Pending Users, Pending Issues)
+// @route   GET /api/users/admin-badges
+// @access  Private/Admin
+const getAdminBadges = async (req, res) => {
+    try {
+        const [pendingUsers, pendingIssues] = await Promise.all([
+            User.countDocuments({ isApproved: false, isEmailVerified: true }),
+            Issue.countDocuments({ status: { $in: ['open', 'in_progress'] } })
+        ]);
+
+        res.json({
+            pendingUsers,
+            pendingIssues
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     getUsers,
     toggleBlockStatus,
+    approveUser,
     resetPassword,
-    updateUserProfile
+    updateUserProfile,
+    updateUser,
+    getAdminBadges
 };

@@ -6,6 +6,7 @@ import AddInsurance from './pages/AddInsurance'
 import EditInsurance from './pages/EditInsurance'
 import InsuranceList from './pages/InsuranceList'
 import StaffList from './pages/StaffList'
+import AdminDocumentsPage from './pages/AdminDocumentsPage'
 import AddStaff from './pages/AddStaff'
 import CheckInsurancePage from './pages/CheckInsurancePage'
 import HomePage from './pages/HomePage'
@@ -21,6 +22,15 @@ import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import PrivateRoute from './components/PrivateRoute'
 import AdminRoute from './components/AdminRoute'
+import VleRoute from './components/VleRoute'
+import VleSignupPage from './pages/VleSignupPage'
+import VleOtpPage from './pages/VleOtpPage'
+import VleForgotPasswordPage from './pages/VleForgotPasswordPage'
+import VleDashboardPage from './pages/VleDashboardPage'
+import VleDocumentsPage from './pages/VleDocumentsPage'
+import VleContributionsPage from './pages/VleContributionsPage'
+import VleSupportPage from './pages/VleSupportPage'
+import AdminSupportPage from './pages/AdminSupportPage'
 import { ToastProvider } from './components/ToastContext'
 import InstallPrompt from './components/InstallPrompt'
 import WhatsAppButton from './components/WhatsAppButton'
@@ -119,15 +129,30 @@ function App() {
                     <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
+                    {/* VLE / Akshaya Public Auth Routes */}
+                    <Route path="/vle/signup" element={<VleSignupPage />} />
+                    <Route path="/vle/verify-otp" element={<VleOtpPage />} />
+                    <Route path="/vle/forgot-password" element={<VleForgotPasswordPage />} />
+
+                    {/* VLE / Akshaya Protected Routes */}
+                    <Route element={<VleRoute />}>
+                        <Route path="/vle/dashboard" element={<VleDashboardPage />} />
+                        <Route path="/vle/documents" element={<VleDocumentsPage />} />
+                        <Route path="/vle/contributions" element={<VleContributionsPage />} />
+                        <Route path="/vle/support" element={<VleSupportPage />} />
+                    </Route>
+
                     {/* Protected Routes */}
                     <Route element={<PrivateRoute />}>
                         <Route element={<AdminLayout />}>
                             {/* Common Protected Routes (Staff & Admin) */}
                             <Route path="/dashboard" element={<DashboardPage />} />
+                            <Route path="/admin/analytics" element={<AnalyticsDashboard />} />
                             <Route path="/add-insurance" element={<AddInsurance />} />
                             <Route path="/edit-insurance/:id" element={<EditInsurance />} />
                             <Route path="/insurances" element={<InsuranceList />} />
-                            <Route path="/admin/analytics" element={<AnalyticsDashboard />} />
+                            <Route path="/admin/documents" element={<AdminDocumentsPage />} />
+                            <Route path="/admin/support" element={<AdminSupportPage />} />
                             <Route path="/admin/posters" element={<ManagePosters />} />
                             <Route path="/admin/announcements" element={<AnnouncementList />} />
                             <Route path="/admin/announcements/new" element={<ManageAnnouncement />} />
@@ -137,6 +162,7 @@ function App() {
                             <Route element={<AdminRoute />}>
                                 <Route path="/admin/staff" element={<StaffList />} />
                                 <Route path="/admin/add-staff" element={<AddStaff />} />
+                                <Route path="/admin/documents" element={<AdminDocumentsPage />} />
                             </Route>
                         </Route>
                     </Route>

@@ -1,0 +1,479 @@
+/* ============================================
+   VLE Dashboard & Documents Styles
+   ============================================ */
+
+.vle-dashboard {
+    padding: 32px;
+    max-width: 1000px;
+}
+
+/* Welcome Banner */
+.vle-welcome-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 32px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 36px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vle-welcome-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.vle-welcome-icon {
+    font-size: 52px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.vle-welcome-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.vle-welcome-title span {
+    color: #ffe08a;
+}
+
+.vle-welcome-subtitle {
+    opacity: 0.88;
+    font-size: 14px;
+    margin: 0 0 8px;
+    line-height: 1.6;
+}
+
+.vle-shop-tag {
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.15);
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin: 0;
+}
+
+.vle-welcome-badge {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 16px 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.vle-welcome-badge span {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.vle-welcome-badge small {
+    font-size: 11px;
+    opacity: 0.75;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Section Title */
+.vle-section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 16px;
+}
+
+.vle-page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 24px;
+}
+
+/* Action Cards Grid */
+.vle-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.vle-action-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.vle-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.vle-card-blue {
+    border-color: #667eea22;
+}
+
+.vle-card-green {
+    border-color: #38ef7d22;
+}
+
+.vle-card-purple {
+    border-color: #764ba222;
+}
+
+.vle-card-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.vle-card-text h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.vle-card-text p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.vle-card-text small {
+    font-size: 12px;
+    color: #999;
+}
+
+.vle-card-arrow {
+    margin-left: auto;
+    font-size: 20px;
+    color: #667eea;
+    font-weight: 700;
+}
+
+.vle-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.vle-status-dot.green {
+    background: #38ef7d;
+    box-shadow: 0 0 8px #38ef7d88;
+}
+
+/* Upload Card */
+.vle-upload-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 8px;
+}
+
+.vle-upload-card h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 20px;
+}
+
+.vle-upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vle-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 600px) {
+    .vle-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .vle-dashboard {
+        padding: 16px;
+    }
+
+    .vle-welcome-banner {
+        flex-direction: column;
+    }
+
+    .vle-welcome-badge {
+        display: none;
+    }
+}
+
+.vle-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vle-form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.vle-form-group input {
+    padding: 11px 14px;
+    border: 2px solid #e8e8e8;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.vle-form-group input:focus {
+    border-color: #667eea;
+}
+
+/* Drop Zone */
+.vle-drop-zone {
+    border: 2px dashed #cdd;
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: #fafcff;
+}
+
+.vle-drop-zone:hover {
+    border-color: #667eea;
+    background: #f0f3ff;
+}
+
+.vle-drop-placeholder span {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.vle-drop-placeholder p {
+    font-size: 14px;
+    color: #555;
+    margin: 0 0 4px;
+    font-weight: 600;
+}
+
+.vle-drop-placeholder small {
+    font-size: 12px;
+    color: #999;
+}
+
+.vle-file-selected {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+
+.vle-file-selected span {
+    font-size: 28px;
+}
+
+.vle-file-selected strong {
+    display: block;
+    font-size: 14px;
+    color: #1a1a2e;
+}
+
+.vle-file-selected small {
+    font-size: 12px;
+    color: #888;
+}
+
+/* Buttons */
+.vle-btn-primary {
+    padding: 13px 28px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+
+.vle-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.vle-btn-view {
+    padding: 7px 14px;
+    background: #e8f0fe;
+    color: #667eea;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.vle-btn-delete {
+    padding: 7px 10px;
+    background: #ffeaea;
+    color: #d32f2f;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Alert */
+.vle-alert {
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.vle-alert-error {
+    background: #fff0f0;
+    color: #d32f2f;
+    border-left: 4px solid #d32f2f;
+}
+
+.vle-alert-success {
+    background: #f0fff4;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+}
+
+/* Spinner */
+.vle-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Document List */
+.vle-doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vle-doc-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s;
+}
+
+.vle-doc-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09);
+}
+
+.vle-doc-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.vle-doc-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.vle-doc-info strong {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+    display: block;
+}
+
+.vle-doc-info p {
+    font-size: 13px;
+    color: #666;
+    margin: 2px 0 0;
+}
+
+.vle-doc-info small {
+    font-size: 12px;
+    color: #999;
+}
+
+.vle-doc-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* States */
+.vle-loading,
+.vle-empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    background: #fff;
+    border-radius: 12px;
+}
+
+.vle-empty-state span {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.vle-empty-state p {
+    font-size: 14px;
+    margin: 0;
+}

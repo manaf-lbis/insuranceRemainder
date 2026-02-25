@@ -158,6 +158,36 @@ const AnnouncementDetailPage = () => {
                     }}
                     dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                 />
+
+                {/* Promotional Discover Banner */}
+                <div className="mt-12 mb-16 p-8 md:p-12 bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2.5rem] relative overflow-hidden shadow-2xl shadow-slate-900/20 group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-blue-600/20 transition-all duration-700"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-600/10 rounded-full -ml-24 -mb-24 blur-3xl group-hover:bg-indigo-600/20 transition-all duration-700"></div>
+
+                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="space-y-4 text-center md:text-left">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                                <Sparkles className="h-3 w-3" />
+                                <span>Discover More</span>
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-black text-white font-poppins leading-tight">
+                                Never Miss an <br className="hidden md:block" /> <span className="text-blue-400">Insurance Expiry</span> Again.
+                            </h2>
+                            <p className="text-slate-400 font-medium max-w-md">
+                                Join thousands of smart vehicle owners who use Notify CSC for real-time tracking and automated reminders.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                            <Link to="/check-insurance" className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-600/20 transition-all active:scale-95 text-center flex items-center justify-center gap-2">
+                                Check Status Now <ArrowRight className="h-4 w-4" />
+                            </Link>
+                            <Link to="/" className="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95 text-center">
+                                Visit Home Page
+                            </Link>
+                        </div>
+                    </div>
+                </div>
                 <style dangerouslySetInnerHTML={{
                     __html: `
                     .announcement-content {

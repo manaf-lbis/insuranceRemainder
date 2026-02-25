@@ -1,30 +1,31 @@
-
 const mongoose = require('mongoose');
-const Insurance = require('./src/models/Insurance');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const path = require('path');
 
-const checkDb = async () => {
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+const User = require('./src/models/User');
+
+const checkUser = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        const collections = await mongoose.connection.db.listCollections().toArray();
-        console.log('Collections:', collections.map(c => c.name));
+        console.log('Connected to MongoDB');
 
-        for (const col of collections) {
-            const count = await mongoose.connection.db.collection(col.name).countDocuments();
-            console.log(`Collection: ${col.name} | Count: ${count}`);
+        const admin = await User.findOne({ username: 'admin' });
+        if (admin) {
+            console.log('ADMIN_FOUND');
+            console.log('ID:', admin._id.toString());
+            console.log('ACTIVE:', admin.isActive);
+            console.log('APPROVED:', admin.isApproved);
+        } else {
+            console.log('ADMIN_NOT_FOUND');
         }
-
-        const insurances = await Insurance.find();
-        console.log('Insurance records details:');
-        insurances.forEach(r => {
-            console.log(`Reg: "${r.registrationNumber}" | Mobile: "${r.mobileNumber}" | Expiry: ${r.policyExpiryDate}`);
-        });
 
         process.exit(0);
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Check failed:', error);
         process.exit(1);
     }
 };
 
-checkDb();
+checkUser();

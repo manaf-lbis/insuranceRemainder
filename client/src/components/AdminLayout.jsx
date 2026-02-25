@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logOut } from '../features/auth/authSlice';
+import { useGetAdminBadgesQuery } from '../features/users/usersApiSlice';
 import {
     LayoutDashboard,
     Users,
@@ -13,7 +14,8 @@ import {
     Menu,
     X,
     Shield,
-    BarChart3
+    BarChart3,
+    Folder
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -21,6 +23,10 @@ const AdminLayout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
+    const { data: badges } = useGetAdminBadgesQuery(undefined, {
+        pollingInterval: 30000, // Poll every 30 seconds for badges
+        skip: user?.role !== 'admin'
+    });
 
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -35,6 +41,7 @@ const AdminLayout = () => {
             items: [
                 { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'staff'] },
                 { path: '/insurances', label: 'Insurance Records', icon: FileText, roles: ['admin', 'staff'] },
+                { path: '/admin/documents', label: 'Document Library', icon: Folder, roles: ['admin'] },
             ]
         },
         {
@@ -48,7 +55,8 @@ const AdminLayout = () => {
         {
             group: 'System',
             items: [
-                { path: '/admin/staff', label: 'Staff & Roles', icon: Users, roles: ['admin'] },
+                { path: '/admin/staff', label: 'Staff & Roles', icon: Users, roles: ['admin'], badge: badges?.pendingUsers },
+                { path: '/admin/support', label: 'Issue Management', icon: Shield, roles: ['admin'], badge: badges?.pendingIssues },
             ]
         }
     ];
@@ -128,7 +136,12 @@ const AdminLayout = () => {
                                             {({ isActive }) => (
                                                 <>
                                                     <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-500'} />
-                                                    {item.label}
+                                                    <span className="flex-1">{item.label}</span>
+                                                    {item.badge > 0 && (
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${isActive ? 'bg-white text-blue-600' : 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'}`}>
+                                                            {item.badge}
+                                                        </span>
+                                                    )}
                                                 </>
                                             )}
                                         </NavLink>

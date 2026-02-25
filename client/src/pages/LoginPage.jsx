@@ -18,7 +18,11 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (user) {
-            navigate('/dashboard')
+            if (['vle', 'akshaya'].includes(user.role)) {
+                navigate('/vle/dashboard')
+            } else {
+                navigate('/dashboard')
+            }
         }
     }, [user, navigate])
 
@@ -31,16 +35,25 @@ const LoginPage = () => {
             dispatch(setCredentials({ ...userData }))
             setUsername('')
             setPassword('')
-            navigate('/dashboard')
+
+            // Redirect based on role
+            if (['vle', 'akshaya'].includes(userData.role)) {
+                navigate('/vle/dashboard')
+            } else {
+                navigate('/dashboard')
+            }
             console.log("Logged in successfully:", userData);
         } catch (err) {
             console.error('Login failed:', err)
-            if (!err.status) {
+            if (err?.data?.needsVerification) {
+                // Redirect to OTP page for operators who haven't verified email
+                navigate('/vle/verify-otp', {
+                    state: { userId: err.data.userId, email: err.data.email || username },
+                })
+            } else if (!err.status) {
                 setErrorMsg('No Server Response')
-            } else if (err.status === 400 || err.status === 401) {
-                setErrorMsg('Invalid Username or Password')
             } else {
-                setErrorMsg('Login Failed')
+                setErrorMsg(err?.data?.message || 'Invalid Username or Password')
             }
         }
     }
@@ -79,8 +92,8 @@ const LoginPage = () => {
                                 </div>
                             </div>
                         </div>
-                        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Administrator</h1>
-                        <p className="text-gray-500 text-sm mt-2 font-medium">Please sign in to your account</p>
+                        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Login Portal</h1>
+                        <p className="text-gray-500 text-sm mt-2 font-medium">Please sign in to your CSC account</p>
                     </div>
 
                     {errorMsg && (
@@ -92,7 +105,7 @@ const LoginPage = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-1">
-                            <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider ml-1">Username</label>
+                            <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider ml-1">Username / Email / Mobile</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
@@ -122,6 +135,11 @@ const LoginPage = () => {
                                     placeholder="••••••••"
                                     required
                                 />
+                                <div className="absolute right-3 top-3">
+                                    <Link to="/vle/forgot-password" size="sm" className="text-primary hover:text-blue-700 text-xs font-semibold">
+                                        Forgot?
+                                    </Link>
+                                </div>
                             </div>
                         </div>
 
@@ -145,7 +163,10 @@ const LoginPage = () => {
                     </form>
 
                     <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                        <p className="text-xs text-gray-400 font-medium tracking-wide">
+                        <p className="text-sm text-gray-600">
+                            New Operator? <Link to="/vle/signup" className="text-primary font-bold hover:underline">Create an account</Link>
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-medium tracking-wide mt-4 uppercase">
                             AUTHORIZED PERSONNEL ONLY • ALL ACTIONS LOGGED
                         </p>
                     </div>

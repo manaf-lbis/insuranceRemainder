@@ -1,0 +1,44 @@
+﻿
+> client@0.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 80 modules transformed.
+node.exe : [31mx[39m Build failed 
+in 1.60s
+At C:\Program 
+Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: ([31mx[39m Build fai  
+  led in 1.60s:String) [], Remote   
+ Exception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+[31merror during build:
+[31mCould not resolve 
+"./VleAuth.css" from "src/pages/VleF
+orgotPasswordPage.jsx"[31m
+file: [36mD:/My Projects/Insurance 
+remainder/client/src/pages/VleForgot
+PasswordPage.jsx[31m
+    at getRollupError (file:///D:/My
+%20Projects/Insurance%20remainder/cl
+ient/node_modules/rollup/dist/es/sha
+red/parseAst.js:401:41)
+    at error (file:///D:/My%20Projec
+ts/Insurance%20remainder/client/node
+_modules/rollup/dist/es/shared/parse
+Ast.js:397:42)
+    at ModuleLoader.handleInvalidRes
+olvedId (file:///D:/My%20Projects/In
+surance%20remainder/client/node_modu
+les/rollup/dist/es/shared/node-entry
+.js:21710:24)
+    at file:///D:/My%20Projects/Insu
+rance%20remainder/client/node_module
+s/rollup/dist/es/shared/node-entry.j
+s:21670:26[39m
