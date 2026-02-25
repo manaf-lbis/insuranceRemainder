@@ -147,6 +147,33 @@ const approveUser = async (req, res) => {
     }
 };
 
+// @desc    Reject User (Delete unapproved account)
+// @route   DELETE /api/users/:id/reject
+// @access  Private/Admin
+const rejectUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
+
+        if (user.isApproved) {
+            res.status(400);
+            throw new Error('Cannot reject an already approved user. Use Block/Ban instead.');
+        }
+
+        await User.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({
+            message: 'User registration rejected and account deleted successfully'
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 // @desc    Reset Password
 // @route   PUT /api/users/:id/reset-password
 // @access  Private/Admin
@@ -264,5 +291,6 @@ module.exports = {
     resetPassword,
     updateUserProfile,
     updateUser,
-    getAdminBadges
+    getAdminBadges,
+    rejectUser
 };

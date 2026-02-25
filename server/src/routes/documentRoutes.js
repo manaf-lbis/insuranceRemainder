@@ -21,13 +21,13 @@ const pdfStorage = new CloudinaryStorage({
     cloudinary,
     params: {
         folder: 'insurance-app/documents',
-        resource_type: 'auto',
+        resource_type: 'auto', // 'auto' allows PDF as image or raw
         public_id: (req, file) => {
-            const originalName = file.originalname;
+            const originalName = file.originalname || 'document';
             const nameWithoutExt = originalName.split('.').slice(0, -1).join('.').replace(/[^a-zA-Z0-9]/g, '_');
             return `${nameWithoutExt}_${Date.now()}`;
         },
-        allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'],
+        // We handle format validation in multer's fileFilter below
     },
 });
 

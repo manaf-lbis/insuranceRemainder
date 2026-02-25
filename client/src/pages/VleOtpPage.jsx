@@ -45,7 +45,7 @@ const VleOtpPage = () => {
         if (otpCode.length !== 6) return setError('Please enter the 6-digit OTP')
         try {
             await verifyOtp({ userId, otp: otpCode }).unwrap()
-            navigate('/login', { state: { verified: true } })
+            navigate('/login', { state: { verified: true }, replace: true })
         } catch (err) {
             setError(err?.data?.message || 'Invalid OTP. Please try again.')
         }

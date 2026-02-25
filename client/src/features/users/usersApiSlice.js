@@ -38,6 +38,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['User'],
         }),
+        rejectUser: builder.mutation({
+            query: (id) => ({
+                url: `/users/${id}/reject`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['User'],
+        }),
         resetPassword: builder.mutation({
             query: ({ id, password }) => ({
                 url: `/users/${id}/reset-password`,
@@ -72,6 +79,7 @@ export const {
     useRegisterUserMutation,
     useToggleBlockStatusMutation,
     useApproveUserMutation,
+    useRejectUserMutation,
     useResetPasswordMutation,
     useUpdateUserProfileMutation,
     useUpdateUserMutation,

@@ -9,12 +9,22 @@ const LoginPage = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [errorMsg, setErrorMsg] = useState('')
+    const [infoMsg, setInfoMsg] = useState('')
+    const location = useLocation()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const { user } = useSelector((state) => state.auth)
     const [login, { isLoading }] = useLoginMutation()
+
+    useEffect(() => {
+        if (location.state?.verified) {
+            setInfoMsg('Email verified successfully! Your account is now pending Admin approval. We will notify you once you are cleared to login.')
+            // Clear location state to prevent message from persisting on refresh
+            window.history.replaceState({}, document.title)
+        }
+    }, [location])
 
     useEffect(() => {
         if (user) {
@@ -29,6 +39,7 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setErrorMsg('')
+        setInfoMsg('')
 
         try {
             const userData = await login({ username, password }).unwrap()
@@ -50,6 +61,8 @@ const LoginPage = () => {
                 navigate('/vle/verify-otp', {
                     state: { userId: err.data.userId, email: err.data.email || username },
                 })
+            } else if (err?.data?.pendingApproval) {
+                setInfoMsg(err?.data?.message || 'Your account is pending admin approval.')
             } else if (!err.status) {
                 setErrorMsg('No Server Response')
             } else {
@@ -97,9 +110,16 @@ const LoginPage = () => {
                     </div>
 
                     {errorMsg && (
-                        <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-start animate-in fade-in slide-in-from-top-2">
-                            <span className="font-semibold mr-2 mt-0.5">!</span>
-                            {errorMsg}
+                        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm flex items-start animate-in fade-in slide-in-from-top-2 shadow-sm">
+                            <span className="font-bold mr-2 mt-0.5">!</span>
+                            <div className="flex-1 font-medium">{errorMsg}</div>
+                        </div>
+                    )}
+
+                    {infoMsg && (
+                        <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700 rounded-r-xl text-sm flex items-start animate-in fade-in slide-in-from-top-2 shadow-sm">
+                            <ShieldCheck className="h-5 w-5 mr-3 text-blue-500 flex-shrink-0" />
+                            <div className="flex-1 font-medium">{infoMsg}</div>
                         </div>
                     )}
 

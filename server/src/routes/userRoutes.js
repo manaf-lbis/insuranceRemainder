@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, getUsers, toggleBlockStatus, approveUser, resetPassword, updateUserProfile, updateUser, getAdminBadges } = require('../controllers/userController');
+const { registerUser, getUsers, toggleBlockStatus, approveUser, rejectUser, resetPassword, updateUserProfile, updateUser, getAdminBadges } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Middleware to check if user is admin
@@ -25,6 +25,9 @@ router.route('/:id/block')
 
 router.route('/:id/approve')
     .put(protect, admin, approveUser);
+
+router.route('/:id/reject')
+    .delete(protect, admin, rejectUser);
 
 router.route('/:id/reset-password')
     .put(protect, admin, resetPassword);

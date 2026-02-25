@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const { errorHandler } = require('./middleware/errorMiddleware');
+const { authLimiter, apiLimiter } = require('./middleware/rateLimitMiddleware');
 
 const app = express();
 
@@ -44,8 +45,8 @@ const publicPath = path.join(__dirname, '../../client/dist');
 app.use(express.static(publicPath));
 
 // Routes
-app.use('/api/public', require('./routes/publicRoutes'));
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/public', apiLimiter, require('./routes/publicRoutes'));
+app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
 app.use('/api/insurances', require('./routes/insuranceRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
@@ -55,7 +56,7 @@ app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/news-categories', require('./routes/newsCategoryRoutes')); // New Route
 app.use('/api/notifications', require('./routes/notificationRoutes')); // Notification routes
 app.use('/api/upload', require('./routes/uploadRoutes'));
-app.use('/api/vle-auth', require('./routes/vleAuthRoutes')); // VLE/Akshaya Auth
+app.use('/api/vle-auth', authLimiter, require('./routes/vleAuthRoutes')); // VLE/Akshaya Auth
 app.use('/api/documents', require('./routes/documentRoutes')); // PDF Document Storage
 app.use('/api/issues', require('./routes/issueRoutes')); // Issue Reporting
 app.use('/api/categories', require('./routes/categoryRoutes')); // Document Categories

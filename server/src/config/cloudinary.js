@@ -8,6 +8,13 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Diagnostic logging for Cloudinary (without exposing secret)
+console.log('--- Cloudinary Config Check ---');
+console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? 'LOADED' : 'MISSING');
+console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'LOADED' : 'MISSING');
+console.log('API Secret:', process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_API_SECRET !== 'REPLACE_WITH_YOUR_CLOUDINARY_SECRET' ? 'LOADED' : 'MISSING/PLACEHOLDER');
+console.log('-------------------------------');
+
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {

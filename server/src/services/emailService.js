@@ -6,7 +6,7 @@ const client = new BrevoClient({
 });
 
 const SENDER = {
-  name: process.env.EMAIL_SENDER_NAME || 'AutoFit',
+  name: process.env.EMAIL_SENDER_NAME || 'NOTIFYCSC',
   email: process.env.EMAIL_USER || 'code.brocamp@gmail.com',
 };
 
@@ -16,23 +16,24 @@ const SENDER = {
 const sendOtpEmail = async (toEmail, toName, otp, type = 'signup') => {
   const isSignup = type === 'signup';
   const subject = isSignup
-    ? 'Verify Your Email - OTP'
-    : 'Password Reset OTP';
+    ? 'Verify Your Email - NOTIFYCSC'
+    : 'Password Reset OTP - NOTIFYCSC';
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow:hidden;">
-      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 32px; text-align: center;">
+      <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 32px; text-align: center;">
         <h1 style="color: #fff; margin: 0; font-size: 24px;">${isSignup ? '📧 Email Verification' : '🔑 Password Reset'}</h1>
+        <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-weight: bold; letter-spacing: 1px;">NOTIFYCSC</p>
       </div>
       <div style="padding: 32px;">
         <p style="color: #333; font-size: 16px;">Hello <strong>${toName}</strong>,</p>
-        <p style="color: #555;">${isSignup ? 'Thank you for registering. Use the OTP below to verify your email:' : 'Use the OTP below to reset your password:'}</p>
-        <div style="background: #fff; border: 2px dashed #667eea; border-radius: 8px; text-align: center; padding: 24px; margin: 24px 0;">
-          <p style="font-size: 40px; font-weight: bold; letter-spacing: 8px; color: #667eea; margin: 0;">${otp}</p>
+        <p style="color: #555;">${isSignup ? 'Welcome to NOTIFYCSC! Use the OTP below to verify your email:' : 'Use the OTP below to reset your password:'}</p>
+        <div style="background: #fff; border: 2px dashed #1e3a8a; border-radius: 8px; text-align: center; padding: 24px; margin: 24px 0;">
+          <p style="font-size: 40px; font-weight: bold; letter-spacing: 8px; color: #1e3a8a; margin: 0;">${otp}</p>
         </div>
         <p style="color: #888; font-size: 13px;">⚠️ This OTP is valid for <strong>10 minutes</strong>. Do not share it with anyone.</p>
       </div>
       <div style="background: #f0f0f0; padding: 16px; text-align: center;">
-        <p style="color: #aaa; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SENDER.name}. All rights reserved.</p>
+        <p style="color: #aaa; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} NOTIFYCSC. All rights reserved.</p>
       </div>
     </div>`;
 
@@ -52,7 +53,7 @@ const sendWelcomeEmail = async (toEmail, toName, role) => {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #f9f9f9; border-radius: 12px; overflow:hidden;">
       <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 32px; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">🎉 Welcome to ${SENDER.name}!</h1>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">🎉 Welcome to NOTIFYCSC!</h1>
       </div>
       <div style="padding: 32px;">
         <p style="color: #333; font-size: 16px;">Hello <strong>${toName}</strong>,</p>
@@ -66,14 +67,14 @@ const sendWelcomeEmail = async (toEmail, toName, role) => {
         </div>
       </div>
       <div style="background: #f0f0f0; padding: 16px; text-align: center;">
-        <p style="color: #aaa; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SENDER.name}. All rights reserved.</p>
+        <p style="color: #aaa; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} NOTIFYCSC. All rights reserved.</p>
       </div>
     </div>`;
 
   return client.transactionalEmails.sendTransacEmail({
     to: [{ email: toEmail, name: toName }],
     sender: SENDER,
-    subject: `Welcome to ${SENDER.name}, ${toName}! 🎉`,
+    subject: `Welcome to NOTIFYCSC, ${toName}! 🎉`,
     htmlContent: htmlContent,
   });
 };

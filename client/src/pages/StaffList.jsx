@@ -4,10 +4,11 @@ import {
     useGetUsersQuery,
     useToggleBlockStatusMutation,
     useApproveUserMutation,
+    useRejectUserMutation,
     useResetPasswordMutation,
     useUpdateUserMutation,
 } from '../features/users/usersApiSlice'
-import { Plus, UserX, UserCheck, Shield, Key, Loader, Mail, Phone, ChevronLeft, Edit, Store, User as UserIcon } from 'lucide-react'
+import { Plus, UserX, UserCheck, Shield, Key, Loader, Mail, Phone, ChevronLeft, Edit, Store, User as UserIcon, Ban, CheckCircle, XCircle, Trash2 } from 'lucide-react'
 import { useToast } from '../components/ToastContext'
 import ConfirmModal from '../components/ConfirmModal'
 import Pagination from '../components/Pagination'
@@ -26,6 +27,7 @@ const StaffList = () => {
     })
     const [toggleBlockStatus] = useToggleBlockStatusMutation()
     const [approveUser] = useApproveUserMutation()
+    const [rejectUser] = useRejectUserMutation()
     const [resetPassword] = useResetPasswordMutation()
     const [updateUser] = useUpdateUserMutation()
     const { showToast } = useToast()
@@ -86,9 +88,23 @@ const StaffList = () => {
         setUpdatingId(id)
         try {
             await approveUser(id).unwrap()
-            showToast({ message: 'User approved successfully', type: 'success' })
+            showToast({ message: 'User approved successfully and welcome email sent', type: 'success' })
         } catch (err) {
             showToast({ message: 'Failed to approve user: ' + (err.data?.message || err.message), type: 'error' })
+        } finally {
+            setUpdatingId(null)
+        }
+    }
+
+    const handleReject = async (id) => {
+        if (!window.confirm('Are you sure you want to reject and PERMANENTLY delete this registration request?')) return;
+
+        setUpdatingId(id)
+        try {
+            await rejectUser(id).unwrap()
+            showToast({ message: 'User registration rejected and deleted', type: 'success' })
+        } catch (err) {
+            showToast({ message: 'Failed to reject user: ' + (err.data?.message || err.message), type: 'error' })
         } finally {
             setUpdatingId(null)
         }
@@ -266,19 +282,28 @@ const StaffList = () => {
                                             <Loader className="animate-spin" size={16} />
                                         ) : (
                                             <>
-                                                {user.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
-                                                {user.isActive ? 'BLOCK' : 'UNBLOCK'}
+                                                {user.isActive ? <Ban size={16} /> : <CheckCircle size={16} />}
+                                                {user.isActive ? 'BAN' : 'UNBAN'}
                                             </>
                                         )}
                                     </button>
                                     {!user.isApproved && user.isEmailVerified && (
-                                        <button
-                                            onClick={() => handleApprove(user._id)}
-                                            disabled={updatingId === user._id}
-                                            className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white rounded-xl font-black text-xs hover:bg-green-700 transition-all active:scale-95 shadow-lg shadow-green-600/20 mt-2"
-                                        >
-                                            {updatingId === user._id ? <Loader className="animate-spin" size={16} /> : <><UserCheck size={16} /> APPROVE USER</>}
-                                        </button>
+                                        <div className="w-full flex gap-2 mt-2">
+                                            <button
+                                                onClick={() => handleApprove(user._id)}
+                                                disabled={updatingId === user._id}
+                                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white rounded-xl font-black text-xs hover:bg-green-700 transition-all active:scale-95 shadow-lg shadow-green-600/20"
+                                            >
+                                                {updatingId === user._id ? <Loader className="animate-spin" size={16} /> : <><CheckCircle size={16} /> APPROVE</>}
+                                            </button>
+                                            <button
+                                                onClick={() => handleReject(user._id)}
+                                                disabled={updatingId === user._id}
+                                                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-600 text-white rounded-xl font-black text-xs hover:bg-red-700 transition-all active:scale-95 shadow-lg shadow-red-600/20"
+                                            >
+                                                {updatingId === user._id ? <Loader className="animate-spin" size={16} /> : <><XCircle size={16} /> REJECT</>}
+                                            </button>
+                                        </div>
                                     )}
                                 </>
                             )}
@@ -358,25 +383,35 @@ const StaffList = () => {
                                                 <Key size={18} />
                                             </button>
                                             {!user.isApproved && user.isEmailVerified && (
-                                                <button
-                                                    onClick={() => handleApprove(user._id)}
-                                                    disabled={updatingId === user._id}
-                                                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                                                    title="Approve User"
-                                                >
-                                                    {updatingId === user._id ? <Loader className="animate-spin" size={18} /> : <UserCheck size={18} />}
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={() => handleApprove(user._id)}
+                                                        disabled={updatingId === user._id}
+                                                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                        title="Approve User"
+                                                    >
+                                                        {updatingId === user._id ? <Loader className="animate-spin" size={18} /> : <CheckCircle size={18} />}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(user._id)}
+                                                        disabled={updatingId === user._id}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Reject User"
+                                                    >
+                                                        {updatingId === user._id ? <Loader className="animate-spin" size={18} /> : <XCircle size={18} />}
+                                                    </button>
+                                                </>
                                             )}
                                             <button
                                                 onClick={() => handleBlockToggle(user._id, user.isActive)}
                                                 disabled={updatingId === user._id || !user.isApproved}
                                                 className={`p-2 rounded-lg transition-all ${!user.isApproved ? 'text-gray-300 cursor-not-allowed' : user.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}
-                                                title={user.isActive ? 'Block User' : 'Unblock User'}
+                                                title={user.isActive ? 'Ban User' : 'Unban User'}
                                             >
                                                 {updatingId === user._id ? (
                                                     <Loader className="animate-spin" size={18} />
                                                 ) : (
-                                                    user.isActive ? <UserX size={18} /> : <UserCheck size={18} />
+                                                    user.isActive ? <Ban size={18} /> : <CheckCircle size={18} />
                                                 )}
                                             </button>
                                         </div>

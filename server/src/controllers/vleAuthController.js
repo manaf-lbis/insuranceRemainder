@@ -89,7 +89,7 @@ const signup = async (req, res) => {
         await sendOtpEmail(email, name, otp, 'signup');
 
         res.status(201).json({
-            message: 'Registration successful! Please verify your email with the OTP sent.',
+            message: 'Registration successful! Please verify your email with the OTP sent. Once verified, your account will be pending Admin approval for full access.',
             userId: user._id,
             email: user.email,
         });
