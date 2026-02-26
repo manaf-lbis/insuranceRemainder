@@ -1,3 +1,4 @@
+// Final deployment check - Feb 26, 2026
 // Load env vars FIRST before any other imports
 require('dotenv').config();
 
