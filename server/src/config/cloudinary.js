@@ -8,11 +8,19 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Diagnostic logging for Cloudinary (without exposing secret)
+// Diagnostic logging for Cloudinary (without exposing full secrets)
 console.log('--- Cloudinary Config Check ---');
-console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? 'LOADED' : 'MISSING');
-console.log('API Key:', process.env.CLOUDINARY_API_KEY ? 'LOADED' : 'MISSING');
-console.log('API Secret:', process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_API_SECRET !== 'REPLACE_WITH_YOUR_CLOUDINARY_SECRET' ? 'LOADED' : 'MISSING/PLACEHOLDER');
+const cld_name = process.env.CLOUDINARY_CLOUD_NAME;
+const cld_key = process.env.CLOUDINARY_API_KEY;
+const cld_secret = process.env.CLOUDINARY_API_SECRET;
+
+console.log('Cloud Name:', cld_name ? `LOADED (${cld_name.substring(0, 3)}...)` : 'MISSING');
+console.log('API Key:', cld_key ? `LOADED (${cld_key.substring(0, 3)}...)` : 'MISSING');
+console.log('API Secret:', (cld_secret && cld_secret !== 'REPLACE_WITH_YOUR_CLOUDINARY_SECRET') ? `LOADED (${cld_secret.substring(0, 3)}...)` : 'MISSING/PLACEHOLDER');
+
+if (!cld_name || !cld_key || !cld_secret) {
+    console.error('CRITICAL: Cloudinary configuration is incomplete. Uploads will fail.');
+}
 console.log('-------------------------------');
 
 const storage = new CloudinaryStorage({
