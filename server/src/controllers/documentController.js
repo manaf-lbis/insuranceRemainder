@@ -324,41 +324,65 @@ const viewDocument = async (req, res) => {
             resourceType = doc.fileType && doc.fileType.includes('pdf') ? 'raw' : 'image';
         }
 
-        console.log(`Viewing document: ID=${doc._id}, PublicID=${doc.filePublicId}, Type=${resourceType}`);
+        // Verify configuration right before use
+        const config = cloudinary.config();
+        if (!config.api_key) {
+            console.error('CRITICAL: Cloudinary API Key missing in viewDocument. Applying fallback config...');
+            cloudinary.config({
+                cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+                api_key: process.env.CLOUDINARY_API_KEY,
+                api_secret: process.env.CLOUDINARY_API_SECRET,
+                secure: true
+            });
+        }
+
+        console.log(`[View] ID=${doc._id} | ID=${doc.filePublicId} | Type=${resourceType} | KeyMatch=${!!config.api_key}`);
 
         const signedUrl = cloudinary.url(doc.filePublicId, {
             resource_type: resourceType,
             type: 'upload',
             secure: true,
             sign_url: true,
+            // Use the stored file extension if it's there
         });
 
-        https.get(signedUrl, (proxyRes) => {
-            // Check if Cloudinary returned an error
-            if (proxyRes.statusCode !== 200) {
-                console.error(`Cloudinary error ${proxyRes.statusCode} for signed URL: ${signedUrl}`);
-                console.error('Cloudinary headers:', proxyRes.headers['x-cld-error'] || 'No x-cld-error header');
-                res.status(proxyRes.statusCode).json({
-                    message: 'Error fetching document from storage',
-                    error: proxyRes.headers['x-cld-error']
-                });
-                return;
-            }
+        const fetchFromCloudinary = (url, isRetry = false) => {
+            https.get(url, (proxyRes) => {
+                if (proxyRes.statusCode === 404 && !isRetry) {
+                    const fallbackType = resourceType === 'raw' ? 'image' : 'raw';
+                    console.log(`[View] 404 encountered. Retrying with fallback resource_type: ${fallbackType}`);
+                    const retryUrl = cloudinary.url(doc.filePublicId, {
+                        resource_type: fallbackType,
+                        type: 'upload',
+                        secure: true,
+                        sign_url: true,
+                    });
+                    return fetchFromCloudinary(retryUrl, true);
+                }
 
-            // Forward headers
-            res.set('Content-Type', doc.fileType || 'application/pdf');
+                if (proxyRes.statusCode !== 200) {
+                    console.error(`[View] Cloudinary error ${proxyRes.statusCode} for URL: ${url}`);
+                    res.status(proxyRes.statusCode).json({
+                        message: 'Error fetching document from storage',
+                        error: proxyRes.headers['x-cld-error'] || 'Not Found'
+                    });
+                    return;
+                }
 
-            if (req.query.download === 'true') {
-                res.set('Content-Disposition', `attachment; filename="${doc.fileName || 'document.pdf'}"`);
-            } else {
-                res.set('Content-Disposition', 'inline');
-            }
+                res.set('Content-Type', doc.fileType || 'application/pdf');
+                if (req.query.download === 'true') {
+                    res.set('Content-Disposition', `attachment; filename="${doc.fileName || 'document.pdf'}"`);
+                } else {
+                    res.set('Content-Disposition', 'inline');
+                }
+                proxyRes.pipe(res);
+            }).on('error', (err) => {
+                console.error('[View] Streaming error:', err);
+                res.status(500).json({ message: 'Error streaming document' });
+            });
+        };
 
-            proxyRes.pipe(res);
-        }).on('error', (err) => {
-            console.error('Streaming error:', err);
-            res.status(500).json({ message: 'Error streaming document' });
-        });
+        fetchFromCloudinary(signedUrl);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
