@@ -24,8 +24,13 @@ const pdfStorage = new CloudinaryStorage({
         resource_type: 'raw', // Using 'raw' is more reliable for PDFs and Word docs
         public_id: (req, file) => {
             const originalName = file.originalname || 'document';
-            const nameWithoutExt = originalName.split('.').slice(0, -1).join('.').replace(/[^a-zA-Z0-9]/g, '_');
-            return `${nameWithoutExt}_${Date.now()}`;
+            const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+            const nameWithoutExt = originalName.includes('.')
+                ? originalName.split('.').slice(0, -1).join('.').replace(/[^a-zA-Z0-9]/g, '_')
+                : originalName.replace(/[^a-zA-Z0-9]/g, '_');
+
+            // For 'raw' resources, including the extension in the public_id is best practice
+            return `${nameWithoutExt}_${Date.now()}${extension ? '.' + extension : ''}`;
         },
     },
 });

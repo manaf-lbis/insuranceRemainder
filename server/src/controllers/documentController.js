@@ -31,7 +31,8 @@ const uploadDocument = async (req, res) => {
             fileName: req.file.originalname,
             fileSize: req.file.size,
             fileType: req.file.mimetype,
-            fileResourceType: req.file.resource_type || 'image',
+            // Capture specific resource_type from Cloudinary
+            fileResourceType: req.file.resource_type || (req.file.mimetype && req.file.mimetype.includes('pdf') ? 'raw' : 'image'),
             uploadedBy: req.user._id,
             status: 'pending', // Always start as pending
             termsAccepted: termsAccepted === 'true' || termsAccepted === true,
@@ -317,10 +318,16 @@ const viewDocument = async (req, res) => {
             }
         }
 
-        // Generate a signed URL to bypass "deny or ACL failure" (Cloudinary Delivery Blocks)
-        // Explicitly setting type: 'upload' and forced secure: true
+        // Select resource type: priority to stored type, then guess by mimetype
+        let resourceType = doc.fileResourceType;
+        if (!resourceType) {
+            resourceType = doc.fileType && doc.fileType.includes('pdf') ? 'raw' : 'image';
+        }
+
+        console.log(`Viewing document: ID=${doc._id}, PublicID=${doc.filePublicId}, Type=${resourceType}`);
+
         const signedUrl = cloudinary.url(doc.filePublicId, {
-            resource_type: doc.fileResourceType || 'image',
+            resource_type: resourceType,
             type: 'upload',
             secure: true,
             sign_url: true,
