@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGetAnnouncementByIdQuery, useGetPublicAnnouncementsQuery, useIncrementAnnouncementViewsMutation } from '../features/announcements/announcementsApiSlice';
-import { Calendar, User, ArrowLeft, Loader, Share2, Copy, Check, ArrowRight } from 'lucide-react';
+import { Calendar, User, ArrowLeft, Loader, Share2, Copy, Check, ArrowRight, Sparkles } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import DOMPurify from 'dompurify';
 import Navbar from '../components/Navbar';
